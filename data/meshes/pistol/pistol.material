@@ -1,0 +1,5 @@
+<Materials>
+<Material name="sphere" AlbedoMap="data/Textures/pistol/Cerberus_A.dds" NormalMap="data/Textures/pistol/Cerberus_N.dds" SpecularRMCMap="data/Textures/pistol/Cerberus_RMAC.dds" ShaderName="PBRDebug" TechniqueName="Default" TwoSided="False" TextureGamma="1.8">
+   <Pass name="color"/>
+</Material>
+</Materials>

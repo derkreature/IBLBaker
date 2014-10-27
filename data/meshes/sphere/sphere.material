@@ -1,0 +1,5 @@
+<Materials>
+<Material name="sphere" AlbedoMap="data/Textures/environment/PaperMill_E_3k.dds" NormalMap="" SpecularRMCMap="" ShaderName="EnvironmentSphereSpherical" TechniqueName="Default" TwoSided="True" TextureGamma="1.0">
+   <Pass name="color"/>
+</Material>
+</Materials>

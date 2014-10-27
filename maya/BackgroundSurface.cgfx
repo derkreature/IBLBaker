@@ -1,0 +1,133 @@
+//------------------------------------------------------------------------------------//
+//                                                                                    //
+//    ._____________.____   __________         __                                     //
+//    |   \______   \    |  \______   \_____  |  | __ ___________                     //
+//    |   ||    |  _/    |   |    |  _/\__  \ |  |/ // __ \_  __ \                    //
+//    |   ||    |   \    |___|    |   \ / __ \|    <\  ___/|  | \/                    //
+//    |___||______  /_______ \______  /(____  /__|_ \\___  >__|                       //
+//                \/        \/      \/      \/     \/    \/                           //
+//                                                                                    //
+//    IBLBaker is provided under the MIT License(MIT)                                 //
+//    IBLBaker uses portions of other open source software.                           //
+//    Please review the LICENSE file for further details.                             //
+//                                                                                    //
+//    Copyright(c) 2014 Matt Davidson                                                 //
+//                                                                                    //
+//    Permission is hereby granted, free of charge, to any person obtaining a copy    //
+//    of this software and associated documentation files(the "Software"), to deal    //
+//    in the Software without restriction, including without limitation the rights    //
+//    to use, copy, modify, merge, publish, distribute, sublicense, and / or sell     //
+//    copies of the Software, and to permit persons to whom the Software is           //
+//    furnished to do so, subject to the following conditions :                       //
+//                                                                                    //
+//    1. Redistributions of source code must retain the above copyright notice,       //
+//    this list of conditions and the following disclaimer.                           //
+//    2. Redistributions in binary form must reproduce the above copyright notice,    //
+//    this list of conditions and the following disclaimer in the                     //
+//    documentation and / or other materials provided with the distribution.          //
+//    3. Neither the name of the copyright holder nor the names of its                //
+//    contributors may be used to endorse or promote products derived                 //
+//    from this software without specific prior written permission.                   //
+//                                                                                    //
+//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR      //
+//    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,        //
+//    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE      //
+//    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER          //
+//    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,   //
+//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN       //
+//    THE SOFTWARE.                                                                   //
+//                                                                                    //
+//------------------------------------------------------------------------------------//
+
+string description = "Environment Background";
+
+float4x4 WorldViewProjectionMatrix : WorldViewProjection
+<
+    string UIWidget = "none";
+>;
+
+float4x4 ViewMatrix : View
+<
+    string UIWidget = "none";
+>;
+
+float4x4 WorldMatrix : World
+<
+    string UIWidget = "none";
+>;
+
+float4x4 WorldInverseMatrix : WorldInverse
+<
+    string UIWidget = "none";
+>;
+
+float4x4 WorldViewMatrix : WorldView
+<
+    string UIWidget = "none";
+>;
+
+float4x4 ViewInverseMatrix : ViewInverse
+<
+    string UIWidget = "none";
+>;
+
+float4x4 WorldViewInverseMatrix : WorldViewInverse
+<
+    string UIWidget = "none";
+>;
+
+texture EnvironmentLightTexture : 
+Environment < string ResourceType = "Cube"; >;
+samplerCUBE EnvironmentLightSampler = sampler_state 
+{
+    Texture = <EnvironmentLightTexture>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
+};
+
+struct VertexInput 
+{
+    float4 position	: POSITION;
+    float3 normal     : NORMAL;
+    float4 texcoord0  : TEXCOORD0;
+};
+
+struct VertexOutput {
+    float4 position    : POSITION;
+    float3 normal      : TEXCOORD4;
+};
+
+VertexOutput environmentVS(VertexInput input) 
+{
+    VertexOutput output;
+    output.position  =  mul(WorldViewProjectionMatrix, float4(input.position.xyz, 1.0));
+    output.normal    = normalize(mul(float3x3(WorldMatrix), input.normal));
+    return output;
+}
+
+float4 RGBMDecode ( float4 rgbm ) 
+{
+  return 5.0 * rgbm.rgba * rgbm.a;
+}
+
+float4 environmentFS(VertexOutput input) : COLOR
+{
+    float4 colorOut;
+    colorOut   =  RGBMDecode(textureCubeLod(EnvironmentLightSampler, float3(input.normal.xyz), 0.0));
+    colorOut.a = 1.0;
+    return colorOut;
+}
+
+technique Background 
+{
+    pass p0 
+    {
+        DepthTestEnable = true;
+        DepthMask       = true;
+        CullFaceEnable  = false;
+        VertexShader    = compile vp40 environmentVS();
+        PixelShader     = compile fp40 environmentFS();
+    }
+}

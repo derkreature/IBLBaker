@@ -1,0 +1,232 @@
+//------------------------------------------------------------------------------------//
+//                                                                                    //
+//    ._____________.____   __________         __                                     //
+//    |   \______   \    |  \______   \_____  |  | __ ___________                     //
+//    |   ||    |  _/    |   |    |  _/\__  \ |  |/ // __ \_  __ \                    //
+//    |   ||    |   \    |___|    |   \ / __ \|    <\  ___/|  | \/                    //
+//    |___||______  /_______ \______  /(____  /__|_ \\___  >__|                       //
+//                \/        \/      \/      \/     \/    \/                           //
+//                                                                                    //
+//    IBLBaker is provided under the MIT License(MIT)                                 //
+//    IBLBaker uses portions of other open source software.                           //
+//    Please review the LICENSE file for further details.                             //
+//                                                                                    //
+//    Copyright(c) 2014 Matt Davidson                                                 //
+//                                                                                    //
+//    Permission is hereby granted, free of charge, to any person obtaining a copy    //
+//    of this software and associated documentation files(the "Software"), to deal    //
+//    in the Software without restriction, including without limitation the rights    //
+//    to use, copy, modify, merge, publish, distribute, sublicense, and / or sell     //
+//    copies of the Software, and to permit persons to whom the Software is           //
+//    furnished to do so, subject to the following conditions :                       //
+//                                                                                    //
+//    1. Redistributions of source code must retain the above copyright notice,       //
+//    this list of conditions and the following disclaimer.                           //
+//    2. Redistributions in binary form must reproduce the above copyright notice,    //
+//    this list of conditions and the following disclaimer in the                     //
+//    documentation and / or other materials provided with the distribution.          //
+//    3. Neither the name of the copyright holder nor the names of its                //
+//    contributors may be used to endorse or promote products derived                 //
+//    from this software without specific prior written permission.                   //
+//                                                                                    //
+//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR      //
+//    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,        //
+//    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE      //
+//    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER          //
+//    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,   //
+//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN       //
+//    THE SOFTWARE.                                                                   //
+//                                                                                    //
+//------------------------------------------------------------------------------------//
+
+string description = "IBL Shader";
+
+float4x4 WorldViewProjectionMatrix : WorldViewProjection
+<
+    string UIWidget = "none";
+>;
+
+float4x4 ViewMatrix : View
+<
+    string UIWidget = "none";
+>;
+float4x4 WorldMatrix : World
+<
+    string UIWidget = "none";
+>;
+float4x4 WorldInverseMatrix : WorldInverse
+<
+    string UIWidget = "none";
+>;
+float4x4 WorldViewMatrix : WorldView
+<
+    string UIWidget = "none";
+>;
+float4x4 ViewInverseMatrix : ViewInverse
+<
+    string UIWidget = "none";
+>;
+float4x4 WorldViewInverseMatrix : WorldViewInverse
+<
+    string UIWidget = "none";
+>;
+
+texture Albedo < string ResourceType = "2D"; >;
+sampler2D AlbedoSampler = sampler_state 
+{
+    Texture = <Albedo>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    MipFilter = Linear;
+};
+
+texture Normal < string ResourceType = "2D"; >;
+sampler2D NormalSampler = sampler_state 
+{
+    Texture = <Normal>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    MipFilter = Linear;
+};
+
+texture Mask < string ResourceType = "2D"; >;
+sampler2D MaskSampler = sampler_state 
+{
+    Texture = <Mask>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    MipFilter = Linear;
+};
+
+texture Brdf < string ResourceType = "2D"; >;
+sampler2D BrdfSampler = sampler_state 
+{
+    Texture = <Brdf>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    MipFilter = Linear;
+};
+
+texture DiffuseLight : Environment < string ResourceType = "Cube"; >;
+samplerCUBE DiffuseLightingSampler = sampler_state 
+{
+    Texture = <DiffuseLight>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    MipFilter = Linear;
+};
+
+texture SpecularLight : Environment < string ResourceType = "Cube"; >;
+samplerCUBE SpecularLightingSampler = sampler_state 
+{
+    Texture = <SpecularLight>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    MipFilter = Linear;
+};
+
+struct VertexInput
+{
+    float4 position	: POSITION;
+    float3 normal     : NORMAL;
+    float4 texcoord0  : TEXCOORD0;
+    float4 texcoord1  : TEXCOORD1;
+    float3 tangent    : TEXCOORD6;//TANGENT;
+    float3 binormal   : TEXCOORD7;//BINORMAL;
+};
+
+struct VertexOutput {
+    float4 position    : POSITION;
+    float2 texcoord0   : TEXCOORD0;
+    float3 eye         : TEXCOORD2;
+    float3 normal      : TEXCOORD4;
+    float3 tangent     : TEXCOORD6;
+    float3 binormal    : TEXCOORD7;
+};
+
+
+VertexOutput IblSurfaceVS(VertexInput input) {
+
+    VertexOutput output;
+    output.position  =  mul(WorldViewProjectionMatrix, float4(input.position.xyz, 1.0));
+    output.texcoord0 = input.texcoord0;
+    output.eye       = normalize(mul(WorldMatrix, input.position) - mul(ViewInverseMatrix, float4(0,0,0,1))).xyz;
+    output.normal    = normalize(mul(mat3(WorldMatrix), input.normal));
+    output.binormal  = normalize(mul(mat3(WorldMatrix), input.binormal));
+    output.tangent   = normalize(mul(mat3(WorldMatrix), input.tangent));
+    return output;
+}
+
+float3 toGamma( float3 linear) 
+{ 
+    return pow(linear.rgb, 1.0f / 2.2);
+}
+
+float4 toLinear( float4 gamma)
+{
+    return pow(gamma, 2.2f);
+}
+
+float4 RGBMDecode ( float4 rgbm ) 
+{
+  return 5.0 * rgbm.rgba * rgbm.a;
+}
+
+float4 IblSurfaceFS(VertexOutput input) : COLOR
+{
+    float4 output;
+
+    // Albedo term.
+    float4 albedo = toLinear(tex2D(AlbedoSampler, input.texcoord0));
+
+    // Specular material terms.
+    float4 maskMap   = tex2D(MaskSampler, input.texcoord0);
+    float  roughness = 1.0 - maskMap.r;
+    float  metal     = maskMap.g;
+    float  bakedAO   = maskMap.b;
+
+    // Compute normal.
+    float3 normal     = input.normal.xyz;
+    float3 normalMap  = tex2D(NormalSampler, input.texcoord0).xyz * float3(2,2,2)-float3(1,1,1);    
+    normal            = normalize(normalMap.x*input.tangent + normalMap.y*input.binormal + normalMap.z*input.normal);
+
+    // Normal dependent terms.
+    float  NoV = -dot (input.eye.xyz, normal.xyz);
+    float3 reflection = normalize(reflect(input.eye.xyz, normal.xyz));
+
+    // Diffuse.
+    float4 diffuseEnvironment  = toLinear(RGBMDecode(textureCubeLod(DiffuseLightingSampler, normal, 0.0f)));    
+    float4 diffuse     = albedo * (1.0 - metal) * diffuseEnvironment; 
+
+    // Specular.
+    // Alter roughnessMipCount depending on the output resolution of the baker.
+    const float roughnessMipCount = 9.0f; 
+    float2 brdf                   = texture2DLod(BrdfSampler, float2(NoV, roughness), 0.0f).xy;
+    float4 specularEnvironment    = toLinear(RGBMDecode(textureCubeLod(SpecularLightingSampler, reflection, roughness * roughnessMipCount)));
+    const float4 dielectricColor  = float4(0.04f, 0.04f, 0.04f, 1.0f);
+
+    // Hack version to decrease fresnel the more metal a meterial is.
+    float4 specular = lerp(dielectricColor, albedo, metal) * brdf.x + (brdf.y*(clamp(1.0-metal, 0.04f, 1.0f)));
+    // Non hack version.
+    // specular                   = lerp(dielectricColor, albedo, metal) * brdf.x + brdf.y;
+
+    specular                      = specularEnvironment * specular;
+
+    // Final.
+    output = float4((diffuse.rgb+specular.rgb) * bakedAO, 1);
+    output = float4(toGamma(output.rgb), 1.0);
+    return output;
+}
+
+technique IBLSurface 
+{
+    pass zero
+    {
+        DepthTestEnable = true;
+        DepthMask       = true;
+        CullFaceEnable  = false;
+
+        VertexShader    = compile vp40 IblSurfaceVS();
+        PixelShader     = compile fp40 IblSurfaceFS();
+    }
+}

@@ -1,0 +1,182 @@
+                                                                                  
+    ._____________.____   __________         __                                    
+    |   \______   \    |  \______   \_____  |  | __ ___________                     
+    |   ||    |  _/    |   |    |  _/\__  \ |  |/ // __ \_  __ \                    
+    |   ||    |   \    |___|    |   \ / __ \|    <\  ___/|  | \/                    
+    |___||______  /_______ \______  /(____  /__|_ \\___  >__|                       
+                \/        \/      \/      \/     \/    \/                                                         
+
+IBLBaker is provided under the MIT License(MIT)
+IBLBaker uses portions of other open source software.
+Please review the LICENSE file for further details.
+
+Copyright(c) 2014 Matt Davidson
+
+Permission is hereby granted, free of charge, to any person obtaining a copy   
+of this software and associated documentation files(the "Software"), to deal   
+in the Software without restriction, including without limitation the rights   
+to use, copy, modify, merge, publish, distribute, sublicense, and / or sell    
+copies of the Software, and to permit persons to whom the Software is          
+furnished to do so, subject to the following conditions :
+
+1. Redistributions of source code must retain the above copyright notice, 
+   this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, 
+   this list of conditions and the following disclaimer in the 
+   documentation and/or other materials provided with the distribution.
+3. Neither the name of the copyright holder nor the names of its 
+   contributors may be used to endorse or promote products derived 
+   from this software without specific prior written permission.
+                                                                               
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE     
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN      
+THE SOFTWARE.
+
+A Special thanks is given to Munkyfun (www.munkyfun.com) who sponsored 
+much of the work in preparing this release for open source.
+
+------------------------------------------------------------------------------
+The IBLBaker uses portions of:
+------------------------------------------------------------------------------
+OGRE Engine under the MIT license.
+http://www.ogre3d.org/
+This was mainly for codec support after Microsoft dropped support for D3DX and 
+decided that saving cubemaps with mips was something that their replacement
+code didn't need to support.
+
+Copyright (c) 2000-2012 Torus Knot Software Ltd
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+The Uncharted2Tonemap operator from:
+http://filmicgames.com/archives/75
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+DXUT widgets from Microsoft DirectX SDK ported to use the IBLBaker abstraction.
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Modified version of EffectsD3D11 framework shipped in June 2010 DirectX SDK
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+AngelCode font manager:
+Portions of the AngelCode Font manager:
+   AngelCode Tool Box Library
+   Copyright (c) 2007-2008 Andreas Jonsson
+  
+   This software is provided 'as-is', without any express or implied 
+   warranty. In no event will the authors be held liable for any 
+   damages arising from the use of this software.
+
+   Permission is granted to anyone to use this software for any 
+   purpose, including commercial applications, and to alter it and 
+   redistribute it freely, subject to the following restrictions:
+
+   1. The origin of this software must not be misrepresented; you 
+      must not claim that you wrote the original software. If you use
+      this software in a product, an acknowledgment in the product 
+      documentation would be appreciated but is not required.
+
+   2. Altered source versions must be plainly marked as such, and 
+      must not be misrepresented as being the original software.
+
+   3. This notice may not be removed or altered from any source 
+      distribution.
+
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+AMDCubeMapGen cubemap seam fixer was templated and integrated into the project:
+https://code.google.com/p/cubemapgen/
+under the New BSD License.
+Copyright (c) 2005, ATI Research, Inc.
+All rights reserved.
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, 
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, 
+OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Cupcake icon from: http://www.flaticon.com/free-icon/cupcake-sugar_12348
+<div>Icon made by 
+     <a href="http://www.freepik.com" alt="Freepik.com" title="Freepik.com">Freepik</a> from 
+     <a href="http://www.flaticon.com/free-icon/cupcake-sugar_12348" 
+      title="Flaticon">www.flaticon.com</a></div>
+The author of this icon will be grateful if you use the following legal attribution
+"Icon made by Freepik from Flaticon.com"
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+HDR Probes by HDRLabs
+IBLs form HDRLabs are used under the Creative Commons Attribution-Noncommercial-Share Alike 3.0 License.
+http://www.hdrlabs.com/sibl/index.html
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Thank you to Andrew Maximov for the use of his pistol asset:
+http://artisaverb.info/
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+The IBLBaker is dependent on:
+
+AntTweakBar 
+under the zlib/libpng license:
+http://anttweakbar.sourceforge.net/doc/
+
+FreeImage under the freeimage public license:
+http://freeimage.sourceforge.net/
+http://freeimage.sourceforge.net/freeimage-license.txt
+
+OIS
+under the zlib/libpng license:
+http://sourceforge.net/projects/wgois/
+
+Pugixml
+under the MIT license:
+http://pugixml.org/
+
+MurmerHash under the MIT license.
+https://code.google.com/p/smhasher/
+
+AssetImp under the BSD license:
+http://assimp.sourceforge.net/
+
+------------------------------------------------------------------------------
+
+
+
+

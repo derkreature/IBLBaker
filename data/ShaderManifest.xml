@@ -1,0 +1,12 @@
+<Shaders>
+<Shader ShaderName="PBRDebug" ShaderPath="IblPBRDebug.fx" />
+<Shader ShaderName="EnvironmentSphere" ShaderPath="IblEnvironmentSphere.fx" />
+<Shader ShaderName="SinglePassDualProjection" ShaderPath="IblSinglePassDualProjection.fx" />
+
+<Shader ShaderName="SinglePassEnvironment" ShaderPath="IblSinglePassEnvironment.fx" />
+
+<Shader ShaderName="SinglePassSphericalEnvironment" ShaderPath="IblSinglePassSphericalEnvironment.fx" />
+
+<Shader ShaderName="EnvironmentSphereSpherical" ShaderPath="IblEnvironmentSphereSpherical.fx" />
+
+</Shaders>
