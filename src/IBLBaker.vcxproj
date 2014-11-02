@@ -20,7 +20,6 @@
     <ClCompile Include="application\IblWindow.cpp" />
     <ClCompile Include="codecs\IblCodec.cpp" />
     <ClCompile Include="codecs\IblColorValue.cpp" />
-    <ClCompile Include="codecs\IblColourValue.cpp" />
     <ClCompile Include="codecs\IblDataStream.cpp" />
     <ClCompile Include="codecs\IblDDSCodec.cpp" />
     <ClCompile Include="codecs\IblFreeImageCodec.cpp" />
@@ -162,7 +161,6 @@
     <ClInclude Include="codecs\IblBitwise.h" />
     <ClInclude Include="codecs\IblCodec.h" />
     <ClInclude Include="codecs\IblColorValue.h" />
-    <ClInclude Include="codecs\IblColourValue.h" />
     <ClInclude Include="codecs\IblDataStream.h" />
     <ClInclude Include="codecs\IblDDSCodec.h" />
     <ClInclude Include="codecs\IblFreeImageCodec.h" />

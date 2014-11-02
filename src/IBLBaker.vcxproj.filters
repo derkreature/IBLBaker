@@ -111,9 +111,6 @@
     <ClCompile Include="codecs\IblColorValue.cpp">
       <Filter>codecs</Filter>
     </ClCompile>
-    <ClCompile Include="codecs\IblColourValue.cpp">
-      <Filter>codecs</Filter>
-    </ClCompile>
     <ClCompile Include="codecs\IblDataStream.cpp">
       <Filter>codecs</Filter>
     </ClCompile>
@@ -536,9 +533,6 @@
       <Filter>codecs</Filter>
     </ClInclude>
     <ClInclude Include="codecs\IblColorValue.h">
-      <Filter>codecs</Filter>
-    </ClInclude>
-    <ClInclude Include="codecs\IblColourValue.h">
       <Filter>codecs</Filter>
     </ClInclude>
     <ClInclude Include="codecs\IblDataStream.h">
