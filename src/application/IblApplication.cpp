@@ -59,6 +59,7 @@
 #include <IblIBLProbe.h>
 #include <IblTitles.h>
 #include <IblImageWidget.h>
+#include <IblBrdf.h>
 #include <strstream>
 
 namespace Ibl
@@ -633,6 +634,8 @@ Application::saveImages(const std::string& filePathName, bool gameOnly)
             std::string diffuseMDRPath = pathName + fileNameBase + "DiffuseMDR.dds";
             std::string envMDRPath = pathName + fileNameBase + "EnvMDR.dds";
 
+            std::string brdfLUTPath = pathName + fileNameBase + "Brdf.dds";
+
             LOG("Saving RGBM MDR diffuse to " << diffuseMDRPath);
             probe->diffuseCubeMapMDR()->save(diffuseMDRPath, true /* fix seams */, false /* split to RGB MMM */);
             LOG("Saving RGBM MDR specular to " << specularMDRPath);
@@ -640,6 +643,9 @@ Application::saveImages(const std::string& filePathName, bool gameOnly)
             LOG("Saving RGBM MDR environment to " << envMDRPath);
             probe->environmentCubeMapMDR()->save(envMDRPath, true /* fix seams */, false /* split to RGB MMM */);
 
+
+            // Save the brdf too.
+            _scene->activeBrdf()->brdfLut()->save(brdfLUTPath, false, false);
 
 
 // This operation on a 2k floating point cubemap with a full mip chain blows

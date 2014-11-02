@@ -140,11 +140,15 @@ Buttons
 
 "Load Environment" Button
 New maps can be set by click on the "Import Environment" button.
-Valid input environments are .hdr, .exr, and .dds.
+Valid input environments are .dds by default.
 It is probably better that they are setup as RGBA16F or RGBA32F.
 Maps can be Lat / Long / equirectangular and cubemap layouts.
+
+While only the DDS codec is enabled by default, it is possible to enable the FreeImage code by adding a project define "IBL_USE_FREE_IMAGE = 1". You will have to provide your own build of FreeImage. The reference codec is in src/codecs/IBLFreeImage.cpp/IBLFreeImage.h
+
 LDR inputs will also work, however, will not light well.
 Additional sample environment maps are available in IBLBaker/data/sampleMaps/
+
 
 Environments can be saved by clicking on the "Save Environment" button.
 You must specify a .dds filename to export to. A number of files will be saved using the specified .dds filename. I recommend installing the nvidia photoshop dds plugin to view the mips of the saved cube maps.
@@ -339,10 +343,10 @@ How does the tool work (a more detailed overview)?
 
 
 What would you like my input on?
+--------------
 So, this is left over documentation from the review release of the baker.
 I am still very, very interested in finding out where/if my math is incorrect.
 Please contact me through github (https://github.com/derkreature/). if you have any ideas or opinions.
---------------
 1.) The math that is used in computing the IBL Probe.
      These files are:
 
