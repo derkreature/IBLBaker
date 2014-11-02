@@ -42,6 +42,12 @@ A Special thanks must be given to Munkyfun (www.munkyfun.com) who sponsored
 much of the work in preparing this work for an open source release.
 Thank you so very much guys!
 
+Contact
+--------------
+Feel free to contact me with questions, corrections or ideas.
+https://github.com/derkreature/
+http://www.derkreature.com/
+
 Codebase notes:
 --------------
 This codebase is based on an old version of my personal research framework. It was developed more as an exercise to learn new techniques, so parts of it are fundamentally flawed.
@@ -87,16 +93,12 @@ Building
 --------------
     1.) Install Visual Studio 2013 Express for Windows Desktop.
          The project builds fine under express if you don't have Visual Studio 2013 installed.
+            
+    2.) Open \\IblBaker\src\IblBaker.sln in Visual Studio 2013.
     
-    2.) All dependencies have been pre-built.
-         They can be found in:
-         \\IblBaker\src\dependencies.
-        
-    3.) Open \\IblBaker\src\IblBaker.sln in Visual Studio 2013.
+    3.) Select a configuration, build and run.
     
-    4.) Select a configuration, build and run.
-    
-    5.) (Very optional) If you plan on setting high sample counts (4096 or greater) with large maps (1024 or greater) it may be useful to alter your TDR delay to a larger value than 2 seconds (depending on the number of samples and the size of the maps that you would like to test with). This is at your discretion. I take no responsibility for the consequences.
+    4.) (Very optional) If you plan on setting high sample counts (4096 or greater) with large maps (1024 or greater) it may be useful to alter your TDR delay to a larger value than 2 seconds (depending on the number of samples and the size of the maps that you would like to test with). This is at your discretion. I take no responsibility for the consequences.
     
         KeyPath   : HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\GraphicsDrivers
         KeyValue  : TdrDelay
@@ -152,16 +154,6 @@ The compute button forces invalidation of the IBLProbe and causes the probe to b
 
 "Cancel" Button
 The cancel button forces the IBLProbe to be marked valid and no further computation will take place until either a dependency to the probe is altered or "Compute" is clicked on.
-
-"Load Asset" Button / Test models
-The default test asset (the pistol) can be replaced.
-Additionally, you can specify the default model location in the application config file by specifying the path to the asset to the "DefaultAsset" attribute.
-It is recommended that you use fbx files for your test model.
-The asset must have all textures used by the model available in the same directory that the fbx file exists.
-The asset should have albedo, normal and specular maps setup.
-The specular map should be in the format of R/M/AO/Cavity:
-where Red = Roughness, Green = Metal, Blue = AO, A = Cavity.
-If you work using a glossiness pipeline you can should change the attribute "SpecularWorkflow" to SpecularWorkflow="GlossMetal" in the application config file.
 
 Tweak Parameters
 --------------
@@ -347,6 +339,9 @@ How does the tool work (a more detailed overview)?
 
 
 What would you like my input on?
+So, this is left over documentation from the review release of the baker.
+I am still very, very interested in finding out where/if my math is incorrect.
+Please contact me through github (https://github.com/derkreature/). if you have any ideas or opinions.
 --------------
 1.) The math that is used in computing the IBL Probe.
      These files are:
