@@ -190,30 +190,32 @@ Window::updateBounds()
 {
     RECT crect;
     GetClientRect(_window, &crect);
-    
+
     if (crect.left < 0 && crect.right < 0 &&
         crect.top < 0 && crect.bottom < 0)
     {
         return;
     }
 
-    _clientRect = 
-        Ibl::Region2i (Ibl::Vector2i (crect.left, crect.top),
-                    Ibl::Vector2i (crect.right, crect.bottom));
+    _clientRect =
+        Ibl::Region2i(Ibl::Vector2i(crect.left, crect.top),
+        Ibl::Vector2i(crect.right, crect.bottom));
 
     Ibl::Region2i windowBounds =
-        Ibl::Region2i (Ibl::Vector2i (crect.left, crect.top),
-                       Ibl::Vector2i (crect.right, crect.bottom));
+        Ibl::Region2i(Ibl::Vector2i(crect.left, crect.top),
+        Ibl::Vector2i(crect.right, crect.bottom));
 
     _width = _windowBounds.size().x;
     _height = _windowBounds.size().y;
 
     if (_windowBounds.size() != windowBounds.size() &&
-        _windowBounds.size().x > 0 && _windowBounds.size().y > 0)
+        _windowBounds.size().x > 0 && _windowBounds.size().y > 0 &&
+        windowBounds.size().x > 0 && windowBounds.size().y > 0)
     {
-        _windowBounds = windowBounds;
         handleSizeChanged();
     }
+
+    _windowBounds = windowBounds;
 }
 
 const WindowHandle

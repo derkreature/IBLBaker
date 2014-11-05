@@ -45,8 +45,15 @@
 #include <IblPlatform.h>
 #include <IblStreamedMesh.h>
 
+#if IBL_USE_ASS_IMP_AND_FREEIMAGE
+// Assimp includes
+#include <Importer.hpp>
+#include <scene.h>
+#include <postprocess.h>
+struct aiMesh;
+#else
 #include <tiny_obj_loader.h>
-
+#endif
 
 namespace Ibl
 {
@@ -76,7 +83,11 @@ class IndexedMesh : public Ibl::StreamedMesh
     uint32_t*                  indices() const;
     uint32_t                   indexCount() const;
 
+#if IBL_USE_ASS_IMP_AND_FREEIMAGE
+    bool                       load(const aiMesh* mesh);
+#else
     bool                       load(const tinyobj::shape_t* shape);
+#endif
 
   protected:
     const IIndexBuffer*        indexBuffer() const;

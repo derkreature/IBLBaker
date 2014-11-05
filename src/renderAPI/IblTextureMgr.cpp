@@ -59,7 +59,7 @@ TextureMgr::TextureMgr(const Ibl::Application* application,
                        Ibl::IDevice* device) :  
     _deviceInterface(device)
 {
-#if IBL_USE_FREE_IMAGE
+#if IBL_USE_ASS_IMP_AND_FREEIMAGE
     FreeImageCodec::startup();
 #endif
     DDSCodec::startup();
@@ -85,7 +85,7 @@ TextureMgr::~TextureMgr()
     }
 
 
-#if IBL_USE_FREE_IMAGE
+#if IBL_USE_ASS_IMP_AND_FREEIMAGE
     FreeImageCodec::shutdown();
 #endif
     DDSCodec::shutdown();

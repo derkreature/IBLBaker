@@ -69,7 +69,7 @@ THE SOFTWARE.
 #ifndef INCLUDED_BB_FREE_IMAGE
 #define INCLUDED_BB_FREE_IMAGE
 
-#if IBL_USE_FREE_IMAGE
+#if IBL_USE_ASS_IMP_AND_FREEIMAGE
 #include <IblImageCodec.h>
 
 // Forward-declaration to avoid external dependency on FreeImage

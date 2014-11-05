@@ -373,7 +373,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>DIRECTINPUT_VERSION=0x0800;_SCL_SECURE_NO_WARNINGS=1;_CRT_SECURE_NO_WARNINGS=1;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IBL_USE_ASS_IMP_AND_FREEIMAGE=0;IBL_USE_FREE_IMAGE=1;DIRECTINPUT_VERSION=0x0800;_SCL_SECURE_NO_WARNINGS=1;_CRT_SECURE_NO_WARNINGS=1;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>dependencies\tinyobjloader;dependencies\assimp\include\assimp;../dependencies\assimp\include\assimp;../dependencies;../../dependencies;dependencies\MurmerHash;../../dependencies\MurmerHash;../dependencies\MurmerHash;../dependencies\pugixml\src;dependencies\pugixml\src;dependencies\ois\includes;rendererD3D11\errorD3D11;dependencies\FreeImage\inc;dependencies\AntTweakBar\include;../IBLBaker;../;../RenderAPI;RenderAPI;../Codecs;../math;math;../application;application;input;../input;Codecs/;RendererD3D11;../RendererD3D11;RendererD3D11/;rendererD3D11\effectsD3D11;rendererD3D11\effectsD3D11\inc;rendererD3D11\effectsD3D11\binary;../nodes;nodes;../ui;ui</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -393,7 +393,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>DIRECTINPUT_VERSION=0x0800;_SCL_SECURE_NO_WARNINGS=1;_CRT_SECURE_NO_WARNINGS=1;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IBL_USE_ASS_IMP_AND_FREEIMAGE=0;DIRECTINPUT_VERSION=0x0800;_SCL_SECURE_NO_WARNINGS=1;_CRT_SECURE_NO_WARNINGS=1;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>dependencies\tinyobjloader;dependencies\assimp\include\assimp;../dependencies\murmerhash;;dependencies\murmerhash;../dependencies\murmerhash;dependencies\murmerhash;../dependencies\pugixml\src;dependencies\pugixml\src;dependencies\ois\includes;rendererD3D11\errorD3D11;dependencies\FreeImage\inc;dependencies\AntTweakBar\include;../IBLBaker;../;../RenderAPI;RenderAPI;../Codecs;../math;math;../application;application;input;../input;Codecs/;RendererD3D11;../RendererD3D11;RendererD3D11/;rendererD3D11\effectsD3D11;rendererD3D11\effectsD3D11\inc;rendererD3D11\effectsD3D11\binary;../nodes;nodes;../ui;ui</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>

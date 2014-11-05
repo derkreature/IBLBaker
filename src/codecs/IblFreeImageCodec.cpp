@@ -71,10 +71,17 @@ THE SOFTWARE.
 #include <IblStringUtilities.h>
 #include <IblLog.h>
 
-#if IBL_USE_FREE_IMAGE
+#if IBL_USE_ASS_IMP_AND_FREEIMAGE
+
+#if _DEBUG
+#pragma comment(lib, "dependencies/FreeImage/lib64/FreeImaged.lib")
+#else
+#pragma comment(lib, "dependencies/FreeImage/lib64/FreeImage.lib")
+#endif
+
 
 #define FREEIMAGE_LIB 
-#include <FreeImage.h>
+#include "../dependencies/FreeImage/inc/FreeImage.h"
 
 // freeimage 3.9.1~3.11.0 interoperability fix
 #ifndef FREEIMAGE_COLORORDER

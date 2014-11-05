@@ -38,40 +38,7 @@
 //    THE SOFTWARE.                                                                   //
 //                                                                                    //
 //------------------------------------------------------------------------------------//
-// Contains source for loading OBJ from:
-// https://github.com/OrangeLabsUK/2c/blob/master/Dev/External/ObjLoader3/ObjLoader.cpp
-/*===================================================================================================
-**
-**	Author	:	Robert Bateman
-**	E-Mail	:	rbateman@bournemouth.ac.uk
-**	Brief	:	This Sourcefile is part of a series explaining how to load and render Alias Wavefront
-**				Files somewhat efficently. If you are simkply after a reliable Obj Loader, then I would
-**				Recommend version8; or possibly version9 and the supplied loader for extreme efficency.
-**
-**	Note	:	This Source Code is provided as is. No responsibility is accepted by myself for any
-**				damage to hardware or software caused as a result of using this code. You are free to
-**				make any alterations you see fit to this code for your own purposes, and distribute
-**				that code either as part of a source code or binary executable package. All I ask is
-**				for a little credit somewhere for my work!
-** 
-**				Any source improvements or bug fixes should be e-mailed to myself so I can update the
-**				code for the greater good of the community at large. Credit will be given to the 
-**				relevant people as always....
-**				
-**
-**				Copyright (c) Robert Bateman, www.robthebloke.org, 2004
-**
-**				
-**				National Centre for Computer Animation,
-**				Bournemouth University,
-**				Talbot Campus,
-**				Bournemouth,
-**				BH3 72F,
-**				United Kingdom
-**				ncca.bournemouth.ac.uk
-**	
-**
-===================================================================================================*/
+
 
 #include <IblIndexedMesh.h>
 #include <IblIDevice.h>
@@ -82,6 +49,12 @@
 #include <IblLog.h>
 #include <IblVertexDeclarationMgr.h>
 
+#if IBL_USE_ASS_IMP_AND_FREEIMAGE
+// Assimp includes
+#include <Importer.hpp>
+#include <scene.h>
+#include <postprocess.h>
+#endif
 
 namespace Ibl
 {
@@ -109,7 +82,113 @@ IndexedMesh::~IndexedMesh()
     }
 }
 
+#if IBL_USE_ASS_IMP_AND_FREEIMAGE
+bool
+IndexedMesh::load(const aiMesh* inputMesh)
+{
+    size_t inputIndexCount = inputMesh->mNumFaces * 3;
+    size_t inputVertexCount = inputMesh->mNumVertices;
 
+    Vector3f* verticesPtr = new Vector3f[inputVertexCount];
+    Vector3f* normalsPtr = new Vector3f[inputVertexCount];
+    Vector2f* uvsPtr = new Vector2f[inputVertexCount];
+    uint32_t* indiciesPtr = new uint32_t[inputIndexCount];
+
+    // Copy the vertex buffer
+    {
+        Vector3f* vertexPtr = verticesPtr;
+        Vector3f* normalPtr = normalsPtr;
+        Vector2f* uvPtr = uvsPtr;
+
+        memset(&vertexPtr[0], 0, sizeof(float)* 3 * inputVertexCount);
+        memset(&normalPtr[0], 0, sizeof(float)* 3 * inputVertexCount);
+        memset(&uvPtr[0], 0, sizeof(float)* 2 * inputVertexCount);
+
+        if (inputMesh->HasPositions())
+        {
+            memcpy(&vertexPtr[0], inputMesh->mVertices, sizeof(float)* 3 * inputVertexCount);
+        }
+        if (inputMesh->HasNormals())
+        {
+            memcpy(&normalPtr[0], inputMesh->mNormals, sizeof(float)* 3 * inputVertexCount);
+        }
+        if (inputMesh->HasTextureCoords(0))
+        {
+            for (uint32_t uvId = 0; uvId < inputVertexCount; uvId++)
+            {
+                uvPtr[uvId].x = inputMesh->mTextureCoords[0][uvId].x;
+                uvPtr[uvId].y = inputMesh->mTextureCoords[0][uvId].y;
+            }
+        }
+    }
+
+    // Copy the index buffer
+    size_t triangleCount = inputMesh->mNumFaces;
+    for (size_t triangleId = 0; triangleId < triangleCount; triangleId++)
+    {
+        for (size_t indexId = 0; indexId < 3; indexId++)
+        {
+            indiciesPtr[(triangleId * 3) + indexId] = inputMesh->mFaces[triangleId].mIndices[indexId];
+        }
+    }
+
+    // Create mesh representation.
+    uint32_t newPrimitiveCount = inputMesh->mNumFaces;
+
+    // Initialize topology information
+    setIndices(indiciesPtr,
+        (uint32_t)(inputIndexCount),
+        newPrimitiveCount);
+
+    setVertexCount((uint32_t)(inputVertexCount));
+
+    setPrimitiveType(Ibl::TriangleList);
+
+    uint32_t offset = 0;
+    // Setup Elements
+    std::vector<Ibl::VertexElement> vertexElements;
+    vertexElements.push_back(Ibl::VertexElement(0, 0, Ibl::FLOAT3, Ibl::METHOD_DEFAULT, Ibl::POSITION, 0));
+    vertexElements.push_back(Ibl::VertexElement(0, 12, Ibl::FLOAT3, Ibl::METHOD_DEFAULT, Ibl::NORMAL, 0));
+    vertexElements.push_back(Ibl::VertexElement(0, 24, Ibl::FLOAT2, Ibl::METHOD_DEFAULT, Ibl::TEXCOORD, 0));
+    vertexElements.push_back(Ibl::VertexElement(0xFF, 0, Ibl::UNUSED, 0, 0, 0));
+
+    Ibl::VertexDeclarationParameters resource = Ibl::VertexDeclarationParameters(vertexElements);
+
+    if (Ibl::IVertexDeclaration* vertexDeclaration =
+        Ibl::VertexDeclarationMgr::vertexDeclarationMgr()->createVertexDeclaration(&resource))
+    {
+        setVertexDeclaration(vertexDeclaration);
+
+        Ibl::VertexStream* vertexStream =
+            new Ibl::VertexStream(Ibl::POSITION, 0, 3,
+            vertexCount(), (float*)verticesPtr);
+        Ibl::VertexStream* normalStream =
+            new Ibl::VertexStream(Ibl::NORMAL, 0, 3,
+            vertexCount(), (float*)normalsPtr);
+        Ibl::VertexStream* texCoordStream =
+            new Ibl::VertexStream(Ibl::TEXCOORD, 0, 2,
+            vertexCount(), (float*)uvsPtr);
+        addStream(vertexStream);
+        addStream(normalStream);
+        addStream(texCoordStream);
+    }
+
+    // Nuke pointers
+    delete[] verticesPtr;
+    delete[] normalsPtr;
+    delete[] uvsPtr;
+    delete[] indiciesPtr;
+
+    if (create())
+    {
+        if (cache())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+#else 
 bool
 IndexedMesh::load(const tinyobj::shape_t* shape)
 {
@@ -221,6 +300,7 @@ IndexedMesh::load(const tinyobj::shape_t* shape)
 
     return result;
 }
+#endif
 
 
 uint32_t

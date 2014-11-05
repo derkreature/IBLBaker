@@ -49,7 +49,20 @@
 #include <IblCamera.h>
 #include <IblBrdf.h>
 
+#if IBL_USE_ASS_IMP_AND_FREEIMAGE
+// Assimp
+#include <Importer.hpp>
+#include <scene.h>
+#include <postprocess.h>
+#if _DEBUG
+#pragma comment(lib, "dependencies/AssImp/lib64/assimpd.lib")
+#else
+#pragma comment(lib, "dependencies/AssImp/lib64/assimp.lib")
+#endif
+#else
 #include <tiny_obj_loader.h>
+#endif
+
 
 namespace Ibl
 {
@@ -305,6 +318,126 @@ Scene::activeBrdf() const
     return _brdfCache[_activeBrdfProperty->get()];
 }
 
+
+#if IBL_USE_ASS_IMP_AND_FREEIMAGE
+
+Entity*
+Scene::load(const std::string& meshFilePathName,
+const std::string& userMaterialPathName)
+{
+    Assimp::Importer importer;
+    uint32_t flags = aiProcess_CalcTangentSpace |
+        aiProcess_Triangulate |
+        aiProcess_PreTransformVertices |
+        aiProcess_FlipUVs;
+    const aiScene* scene = importer.ReadFile(meshFilePathName, flags);
+
+    if (scene == nullptr)
+    {
+        LOG("Failed to load scene " << meshFilePathName);
+        return nullptr;
+    }
+
+    if (scene->mNumMeshes == 0)
+    {
+        LOG("Failed to load any meshes " << meshFilePathName);
+        return nullptr;
+    }
+
+    bool implicitlyGenerateMaterials = false;
+    if (scene->mNumMaterials == 0)
+    {
+        implicitlyGenerateMaterials = true;
+    }
+
+    Ibl::Entity* entity = new Ibl::Entity(_device);
+    entity->setName(meshFilePathName);
+
+    for (size_t meshId = 0; meshId < scene->mNumMeshes; meshId++)
+    {
+        Ibl::IndexedMesh* mesh = new Ibl::IndexedMesh(_device);
+        mesh->setName(scene->mMeshes[meshId]->mName.C_Str());
+        mesh->load(scene->mMeshes[meshId]);
+        Material * material = new Material(_device);
+
+        if (userMaterialPathName.length() > 0)
+        {
+            if (!material->load(userMaterialPathName))
+            {
+                delete material;
+                throw (std::runtime_error("Can't load user material " +
+                    userMaterialPathName));
+            }
+        }
+        else if (implicitlyGenerateMaterials)
+        {
+            // TODO: Setup default based on passed in material.
+        }
+        else
+        {
+            size_t materialId = scene->mMeshes[meshId]->mMaterialIndex;
+            const aiMaterial& mat = *scene->mMaterials[materialId];
+
+            // Setup material. This is a little braindead, but it
+            // is good enough for the purposes of this demo.
+            material->textureGammaProperty()->set(2.2f);
+            material->setShaderName("PBRDebug");
+            material->setTechniqueName("Default");
+            material->addPass("color");
+
+            //
+            // Load textures
+            //
+            std::string assetPath = trimPathName(meshFilePathName);
+            LOG("asset path " << assetPath)
+                aiString textureFilePath;
+            if (mat.GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePath) == aiReturn_SUCCESS)
+            {
+                std::string mapFilePathName = assetPath + trimFileName(std::string(textureFilePath.C_Str()));
+                material->setAlbedoMap(mapFilePathName);
+            }
+            else
+            {
+                LOG("Could not find albedo map for " << meshFilePathName);
+            }
+
+            if (mat.GetTexture(aiTextureType_NORMALS, 0, &textureFilePath) == aiReturn_SUCCESS ||
+                mat.GetTexture(aiTextureType_HEIGHT, 0, &textureFilePath) == aiReturn_SUCCESS)
+            {
+                std::string mapFilePathName = assetPath + trimFileName(std::string(textureFilePath.C_Str()));
+                material->setNormalMap(mapFilePathName);
+            }
+            else
+            {
+                LOG("Could not find normal map for " << meshFilePathName);
+            }
+
+            if (mat.GetTexture(aiTextureType_SPECULAR, 0, &textureFilePath) == aiReturn_SUCCESS)
+            {
+                std::string mapFilePathName = assetPath + trimFileName(std::string(textureFilePath.C_Str()));
+                material->setSpecularRMCMap(mapFilePathName);
+            }
+            else
+            {
+                LOG("Could not find specular map for " << meshFilePathName);
+            }
+        }
+
+        mesh->setMaterial(material);
+        entity->addMesh(mesh);
+        addMesh(mesh);
+        _materials.insert(material);
+    }
+
+    // Resolve shaders
+    _device->shaderMgr()->resolveShaders(entity);
+    // Setup the material.
+    _entities.insert(entity);
+
+    return entity;
+}
+
+#else
 Entity*
 Scene::load(const std::string& meshFilePathName, 
             const std::string& userMaterialPathName)
@@ -415,6 +548,7 @@ Scene::load(const std::string& meshFilePathName,
     
     return entity;
 }
+#endif
 
 void
 Scene::destroy(Entity* entity)
@@ -448,6 +582,57 @@ Scene::destroy(Entity* entity)
     }
 }
 
+#if IBL_USE_ASS_IMP_AND_FREEIMAGE
+
+Entity*
+Scene::load(Ibl::IDevice* device,
+const std::string& meshFilePathName)
+{
+    Assimp::Importer importer;
+    uint32_t flags = aiProcess_CalcTangentSpace |
+        aiProcess_Triangulate |
+        aiProcess_PreTransformVertices |
+        aiProcess_FlipUVs;
+    //aiProcess_FlipWindingOrder ;
+    const aiScene* scene = importer.ReadFile(meshFilePathName, flags);
+
+    if (scene == nullptr)
+    {
+        LOG("Failed to load scene " << meshFilePathName);
+        return nullptr;
+    }
+
+    if (scene->mNumMeshes == 0)
+    {
+        LOG("Failed to load any meshes " << meshFilePathName);
+        return nullptr;
+    }
+
+    bool implicitlyGenerateMaterials = false;
+    if (scene->mNumMaterials == 0)
+    {
+        implicitlyGenerateMaterials = true;
+    }
+
+    Ibl::Entity* entity = new Ibl::Entity(device);
+    entity->setName(meshFilePathName);
+
+    for (size_t meshId = 0; meshId < scene->mNumMeshes; meshId++)
+    {
+        Ibl::IndexedMesh* mesh = new Ibl::IndexedMesh(device);
+        mesh->setName(scene->mMeshes[meshId]->mName.C_Str());
+        mesh->load(scene->mMeshes[meshId]);
+        Material * material = new Material(device);
+
+        material->twoSidedProperty()->set(true);
+        mesh->setMaterial(material);
+        entity->addMesh(mesh);
+    }
+
+    return entity;
+}
+
+#else
 Entity*
 Scene::load(Ibl::IDevice* device,
             const std::string& meshFilePathName)
@@ -476,6 +661,7 @@ Scene::load(Ibl::IDevice* device,
 
     return entity;
 }
+#endif
 
 void
 Scene::update()
