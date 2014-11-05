@@ -379,6 +379,12 @@ Application::loadParameters()
                 LOG("Could not locate a preference for specular workflow, using RoughnessMetal.")
             }
 
+            if (_windowWidth <= 0 || _windowHeight <= 0)
+            {
+                _windowWidth = 1280;
+                _windowHeight = 720;
+            }
+
             return true;
         }
     }
@@ -392,6 +398,17 @@ Application::saveParameters() const
     doc.reset(new pugi::xml_document());
     if (doc)
     {
+
+        // Quick sanitize for close while minimized.
+        int32_t width = window()->width();
+        int32_t height = window()->height();
+
+        if (width <= 0 || height <= 0)
+        {
+            width = 1280;
+            height = 720;
+        }
+
         pugi::xml_node configNode = doc->append_child(pugi::node_element);
         configNode.set_name("Config");
 
