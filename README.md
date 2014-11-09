@@ -512,3 +512,11 @@ TinyObj (Replaced AssImp):
 (Syoyo Fujita) (Some minor changes in the local build).
 (Domo Syoyo san).
 https://github.com/syoyo/tinyobjloader
+
+Simon Green
+-----------
+I still have some ComPtr wrappers that I added back in 2002 that came from Simon Green's BuggyDemo :p.
+http://www.sjbrown.co.uk/2002/08/01/the-buggy-demo/
+
+ 
+
