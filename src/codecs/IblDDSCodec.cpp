@@ -414,29 +414,29 @@ typedef struct
             switch(imgData->format)
             {
             case PF_FLOAT16_R:
-                ddsHeader.pixelFormat.flags |= DDPF_FOURCC;
+                ddsHeader.pixelFormat.flags = DDPF_FOURCC;
                 ddsHeader.pixelFormat.fourCC = D3DFMT_R16F;
                 break;
             case PF_FLOAT16_GR:
-                ddsHeader.pixelFormat.flags |= DDPF_FOURCC;
+                ddsHeader.pixelFormat.flags = DDPF_FOURCC;
                 ddsHeader.pixelFormat.fourCC = D3DFMT_G16R16F;
                 break;
             case PF_FLOAT16_RGBA:
-                ddsHeader.pixelFormat.flags |= DDPF_FOURCC;
+                ddsHeader.pixelFormat.flags = DDPF_FOURCC;
                 ddsHeader.pixelFormat.fourCC = D3DFMT_A16B16G16R16F;
                 break;
             case PF_FLOAT16_RGB:
-
+                throw std::runtime_error("Unsupported format R16G16B16, and annoying D3D11 change.");
              case PF_FLOAT32_R:
-                ddsHeader.pixelFormat.flags |= DDPF_FOURCC;
+                ddsHeader.pixelFormat.flags = DDPF_FOURCC;
                 ddsHeader.pixelFormat.fourCC = D3DFMT_R32F;
                 break;
             case PF_FLOAT32_GR:
-                ddsHeader.pixelFormat.flags |= DDPF_FOURCC;
+                ddsHeader.pixelFormat.flags = DDPF_FOURCC;
                 ddsHeader.pixelFormat.fourCC = D3DFMT_G32R32F;
                 break;
             case PF_FLOAT32_RGBA:
-                ddsHeader.pixelFormat.flags |= DDPF_FOURCC;
+                ddsHeader.pixelFormat.flags = DDPF_FOURCC;
                 ddsHeader.pixelFormat.fourCC = D3DFMT_A32B32G32R32F;
                 break;
             case PF_FLOAT32_RGB:
