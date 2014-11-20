@@ -144,7 +144,8 @@ Valid input environments are .dds by default.
 It is probably better that they are setup as RGBA16F or RGBA32F.
 Maps can be Lat / Long / equirectangular and cubemap layouts.
 
-While only the DDS codec is enabled by default, it is possible to enable the FreeImage code by adding a project define "IBL_USE_FREE_IMAGE = 1". You will have to provide your own build of FreeImage. The reference codec is in src/codecs/IBLFreeImage.cpp/IBLFreeImage.h
+While only the DDS codec is enabled by default, it is possible to enable the FreeImage code by adding a project define "#if IBL_USE_ASS_IMP_AND_FREEIMAGE = 1". You will have to provide your own builds of FreeImage and AssImp. The reference codec based on Ogre is in src/codecs/IBLFreeImage.cpp/IBLFreeImage.h.
+Prior warning if you are building static libraries, both AssImp and FreeImage depend on Zlib.
 
 LDR inputs will also work, however, will not light well.
 Additional sample environment maps are available in IBLBaker/data/sampleMaps/
