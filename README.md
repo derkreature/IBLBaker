@@ -48,6 +48,23 @@ Feel free to contact me with questions, corrections or ideas.
 https://github.com/derkreature/
 http://www.derkreature.com/
 
+What does it do?
+--------------
+The IBLBaker is a small tool for baking diffuse irradiance and specular pre-convolved environment cubemaps evaluated over roughness over mips computed using a user specified brdf.
+The baker uses importance sampling to evaluate the environment maps and visualize the results using the separable method proposed by Epic Games at Siggraph 2013.
+
+The tool allows the user to save the computed environment maps and the BRDF Lut to disk for use in other pipelines.
+
+I have provided example cgfx shaders for maya viewport 2.0 in the /maya directory with 2 example scenes in .ma format.
+
+Please review the example maya workflow video at:
+https://vimeo.com/110805546
+
+If you are impatient and wish to see the full purpose of this lighting model, please review:
+https://vimeo.com/100285383
+https://vimeo.com/96235208
+
+
 Codebase notes:
 --------------
 This codebase is based on an old version of my personal research framework. It was developed more as an exercise to learn new techniques, so parts of it are fundamentally flawed.
@@ -55,13 +72,6 @@ One particular area is the use of abstract base types for render API abstraction
 Mainly, I don't want anyone to ever think that this is a good idea.
 
 If a class has an "I" in front of it, or D3D11 at the end, please hold your nose and ignore for the moment :).
-
-What does it do?
---------------
-The IBLBaker is a small tool for baking diffuse irradiance and specular pre-convolved environment cubemaps evaluated over roughness over mips computed using a user specified brdf.
-The baker uses importance sampling to evaluate the environment maps and visualize the results using the separable method proposed by Epic Games at Siggraph 2013.
-
-The tool allows the user to save the computed environment maps and the BRDF Lut to disk for use in other pipelines.
 
 Suggested prior reading:
 --------------
