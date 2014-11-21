@@ -71,10 +71,11 @@ TwEnumVal IblSourceResolutionEnum[] =
 	{ 256, "256" },
     { 512, "512" },
     { 1024, "1024" },
-    { 2048, "2048" }
+    { 2048, "2048" },
+	{ 4096, "4096" }
 };
 
-static const EnumTweakType IblSourceResolutionType(&IblSourceResolutionEnum[0], 8, "SourceResolution");
+static const EnumTweakType IblSourceResolutionType(&IblSourceResolutionEnum[0], 10, "SourceResolution");
 
 IBLProbe::IBLProbe(Ibl::IDevice * device) : 
     Ibl::TransformNode(device),
