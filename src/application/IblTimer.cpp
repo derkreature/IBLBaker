@@ -89,8 +89,7 @@ Timer::preciseSleep(double seconds)
 
     // Set affinity to the first core
     intptr_t oldMask = SetThreadAffinityMask(thread, _timerMask);
-
-    Sleep(milliseconds);
+	WaitForSingleObject(_timeEvent, milliseconds);
     SetThreadAffinityMask(thread, oldMask);
 }
 
