@@ -74,7 +74,8 @@ enum ShaderParameter
     WorldView,
     WorldViewInverse,
     ViewInverse,
-    ShadowBlur,
+	CubeViews,
+	ShadowBlur,
     LightViewProjectionTexScale,/* 0 ... n */
     LightViewProjectionTexScaleSansWorld, /* 0 ... n */
     FresnelModulation,

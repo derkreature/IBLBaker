@@ -55,7 +55,7 @@ Texture2D diffuseMap : DIFFUSEMAP;
 float cameraZNear : CAMERAZNEAR;
 float cameraZFar : CAMERAZFAR;
 float textureGamma : TEXTUREGAMMA = 2.2;
-float4x4 g_mViewCM[6] : ENVIRONMENTVIEWS; 
+float4x4 g_mViewCM[6] : CUBEVIEWS;
 
 SamplerState anisotropicSampler
 {

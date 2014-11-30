@@ -54,7 +54,7 @@ float4 IBLCorrection : IBLCORRECTION;
 TextureCube ConvolutionSrc : CONVOLUTIONSRC;
 TextureCube LastResult : LASTRESULT;
 
-float4x4 ConvolutionViews[6] : ENVIRONMENTVIEWS; 
+float4x4 ConvolutionViews[6] : CUBEVIEWS; 
 
 float ConvolutionSamplesOffset = 0;
 float ConvolutionSampleCount = 0;

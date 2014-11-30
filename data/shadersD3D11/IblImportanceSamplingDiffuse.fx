@@ -52,7 +52,7 @@ float3 vEye : EYELOCATION;
 
 TextureCube ConvolutionSrc : CONVOLUTIONSRC;
 TextureCube LastResult : LASTRESULT;
-float4x4 ConvolutionViews[6] : ENVIRONMENTVIEWS; 
+float4x4 ConvolutionViews[6] : CUBEVIEWS;
 float MaxLod : IBLSOURCEMIPCOUNT;
 float4 IBLCorrection : IBLCORRECTION;
 float ConvolutionSamplesOffset = 0;

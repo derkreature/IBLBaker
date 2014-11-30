@@ -119,34 +119,6 @@ IBLRenderPass::cache()
 {
     if (!_cached)
     {
-        float lookAt = 1.5f;
-        // Setup views for paraboloid to environment transform.
-        Ibl::Vector3f lookDirection = Ibl::Vector3f( lookAt, 0, 0.0f );
-        Ibl::Vector3f upDirection = Ibl::Vector3f( 0.0f, 1.0f, 0.0f );
-        Ibl::Vector3f eyeLocation = Ibl::Vector3f( 0.0f, 0.0f, 0.0f );
-        Ibl::viewMatrixLH (eyeLocation, lookDirection, upDirection, &_cubeViews[0]);
-
-        lookDirection = Ibl::Vector3f( -lookAt, 0.0f, 0.0f );
-        upDirection = Ibl::Vector3f( 0.0f, 1.0f, 0.0f );
-        Ibl::viewMatrixLH (eyeLocation, lookDirection, upDirection, &_cubeViews[1]);
-
-        lookDirection = Ibl::Vector3f( 0.0f, lookAt, 0.0f );
-        upDirection = Ibl::Vector3f( 0.0f, 0.0f, -1.0f );
-        Ibl::viewMatrixLH (eyeLocation, lookDirection, upDirection, &_cubeViews[2]);
-
-        lookDirection = Ibl::Vector3f( 0.0f, -lookAt, 0.0f );
-        upDirection = Ibl::Vector3f( 0.0f, 0.0f, 1.0f );
-        Ibl::viewMatrixLH (eyeLocation, lookDirection, upDirection, &_cubeViews[3]);
-
-        lookDirection = Ibl::Vector3f( 0.0f, 0, lookAt );
-        upDirection = Ibl::Vector3f( 0.0f, 1.0f, 0.0f );
-        Ibl::viewMatrixLH (eyeLocation, lookDirection, upDirection, &_cubeViews[4]);
-
-        lookDirection = Ibl::Vector3f( 0.0f, 0, -lookAt );
-        upDirection = Ibl::Vector3f( 0.0f, 1.0f, 0.0f );
-        Ibl::viewMatrixLH (eyeLocation, lookDirection, upDirection, &_cubeViews[5]);
-
-
         // TODO: Load sphere projection resource.
         if (!loadMesh())
         {
@@ -183,8 +155,10 @@ IBLRenderPass::refineDiffuse(Ibl::Scene* scene,
                              const Ibl::IBLProbe* probe)
 {
     // TODO: Optimize.
-    float projNear = 0.5;
-    float projFar = 1000.0f;
+	Ibl::Camera* camera = scene->camera();
+
+	float projNear = camera->zNear();
+	float projFar = camera->zFar();
     Ibl::Matrix44f proj;
     Ibl::projectionPerspectiveMatrixLH (Ibl::BB_PI * 0.5f,
                                        1.0, 
@@ -192,12 +166,10 @@ IBLRenderPass::refineDiffuse(Ibl::Scene* scene,
                                        projFar,
                                        &proj);
 
-    // Setup view matrix
-    _environmentTransformCache->set(probe->basis(), proj, probe->basis(),  probe->center(), projNear, projFar, -1);
-
-    // Setup camera cache.
-    Ibl::Camera * camera = scene->camera();
-    camera->setCameraTransformCache(_environmentTransformCache);
+	Ibl::Vector3f origin(0, 0, 0);
+	// Setup view matrix
+	_environmentTransformCache->set(probe->basis(), proj, probe->basis(), origin, projNear, projFar, -1);
+	camera->setCameraTransformCache(_environmentTransformCache);
 
     // Setup our source.
     size_t mipLevels = probe->diffuseCubeMap()->resource()->mipLevels();
@@ -243,7 +215,6 @@ IBLRenderPass::refineDiffuse(Ibl::Scene* scene,
         importanceSamplingShaderDiffuse->getParameterByName("ConvolutionSamplesOffset", convolutionSamplesOffsetDiffuseVariable);
         importanceSamplingShaderDiffuse->getParameterByName("ConvolutionSampleCount", convolutionSampleCountDiffuseVariable);
         importanceSamplingShaderDiffuse->getParameterByName("ConvolutionMaxSamples", convolutionMaxSamplesDiffuseVariable);
-        importanceSamplingShaderDiffuse->getParameterByName("ConvolutionViews", convolutionViewsDiffuseVariable);
 
         // Set parameters
         convolutionSrcDiffuseVariable->setTexture(sourceTexture);
@@ -251,9 +222,7 @@ IBLRenderPass::refineDiffuse(Ibl::Scene* scene,
         
         convolutionMipDiffuseVariable->set ((const float*)&currentMip, sizeof (float));
         convolutionRoughnessDiffuseVariable->set((const float*)&roughness, sizeof (float));
-        convolutionSamplesOffsetDiffuseVariable->set((const float*)&samplesOffset, sizeof (float));
-        convolutionViewsDiffuseVariable->setMatrixArray ((const float*)&_cubeViews[0], 6);
-        
+        convolutionSamplesOffsetDiffuseVariable->set((const float*)&samplesOffset, sizeof (float));        
         convolutionSampleCountDiffuseVariable->set(&samplesPerFrame , sizeof(float));
         convolutionMaxSamplesDiffuseVariable->set(&sampleCount, sizeof(float));
 
@@ -265,9 +234,10 @@ void
 IBLRenderPass::refineSpecular(Ibl::Scene* scene,
                               const Ibl::IBLProbe* probe)
 {
-    // TODO: Optimize.
-    float projNear = 0.5;
-    float projFar = 1000.0f;
+	Ibl::Camera* camera = scene->camera();
+
+    float projNear = camera->zNear();
+    float projFar = camera->zFar();
     Ibl::Matrix44f proj;
     Ibl::projectionPerspectiveMatrixLH (Ibl::BB_PI * 0.5f,
                                                         1.0, 
@@ -275,11 +245,9 @@ IBLRenderPass::refineSpecular(Ibl::Scene* scene,
                                                         projFar,
                                                         &proj);
 
+	Ibl::Vector3f origin(0, 0, 0);
     // Setup view matrix
-    _environmentTransformCache->set(probe->basis(), proj, probe->basis(),  probe->center(), projNear, projFar, -1);
-
-    // Setup camera cache.
-    Ibl::Camera * camera = scene->camera();
+	_environmentTransformCache->set(probe->basis(), proj, probe->basis(), origin, projNear, projFar, -1);
     camera->setCameraTransformCache(_environmentTransformCache);
 
     // Setup our source.
@@ -315,7 +283,6 @@ IBLRenderPass::refineSpecular(Ibl::Scene* scene,
         const Ibl::GpuVariable*      convolutionMipSpecularVariable = nullptr;
         const Ibl::GpuVariable*      convolutionRoughnessSpecularVariable = nullptr;
         const Ibl::GpuVariable*      convolutionSamplesOffsetSpecularVariable = nullptr;
-        const Ibl::GpuVariable*      convolutionViewsSpecularVariable = nullptr;
         const Ibl::GpuVariable*      convolutionSampleCountSpecularVariable = nullptr;
         const Ibl::GpuVariable*      convolutionMaxSamplesSpecularVariable = nullptr;
         const Ibl::GpuVariable*      convolutionSrcLastResultSpecularVariable = nullptr;
@@ -328,14 +295,12 @@ IBLRenderPass::refineSpecular(Ibl::Scene* scene,
         importanceSamplingShaderSpecular->getParameterByName("ConvolutionSamplesOffset", convolutionSamplesOffsetSpecularVariable);
         importanceSamplingShaderSpecular->getParameterByName("ConvolutionSampleCount", convolutionSampleCountSpecularVariable);
         importanceSamplingShaderSpecular->getParameterByName("ConvolutionMaxSamples", convolutionMaxSamplesSpecularVariable);
-        importanceSamplingShaderSpecular->getParameterByName("ConvolutionViews", convolutionViewsSpecularVariable);
 
         // Set parameters
         convolutionSrcSpecularVariable->setTexture(sourceTexture);
         convolutionSrcLastResultSpecularVariable->setTexture(probe->lastSpecularCubeMap());
         convolutionMipSpecularVariable->set ((const float*)&currentMip, sizeof (float));
         convolutionRoughnessSpecularVariable->set((const float*)&roughness, sizeof (float));
-        convolutionViewsSpecularVariable->setMatrixArray ((const float*)&_cubeViews[0], 6);
         convolutionSamplesOffsetSpecularVariable->set((const float*)&samplesOffset, sizeof (float));
         convolutionSampleCountSpecularVariable->set(&samplesPerFrame , sizeof(float));
         convolutionMaxSamplesSpecularVariable->set(&sampleCount, sizeof(float));
@@ -351,7 +316,7 @@ IBLRenderPass::refineSpecular(Ibl::Scene* scene,
 void
 IBLRenderPass::render (Ibl::Scene* scene)
 {
-    const Ibl::Camera* camera           = scene->camera();
+    Ibl::Camera* camera           = scene->camera();
 
     _deviceInterface->enableDepthWrite();
     _deviceInterface->enableZTest();
@@ -407,9 +372,10 @@ IBLRenderPass::render (Ibl::Scene* scene)
             _deviceInterface->setCullMode (Ibl::CullNone);
 
              {
-    
-                float projNear = 0.5;
-                float projFar = 1000.0f;
+				// The ibl probe could also have a znear and zfar.
+				// In this example it is more expedient just to use the camera znear - zfar.
+				float projNear = camera->zNear();
+				float projFar = camera->zFar();
                 Ibl::Matrix44f proj;
                 Ibl::projectionPerspectiveMatrixLH (Ibl::BB_PI * 0.5f,
                                                     1.0, 
@@ -417,11 +383,11 @@ IBLRenderPass::render (Ibl::Scene* scene)
                                                     projFar,
                                                     &proj);
     
-                // Setup view matrix
+                // Setup view matrix for the environment source render.
                 _environmentTransformCache->set(probe->basis(), proj, probe->basis(), probe->center(), projNear, projFar, -1);
     
                 // Setup camera cache.
-                scene->camera()->setCameraTransformCache(_environmentTransformCache);
+                camera->setCameraTransformCache(_environmentTransformCache);
     
                 // Set framebuffer to cubemap.
                 // Render to environment top level mip (highest resolution).
@@ -449,12 +415,7 @@ IBLRenderPass::render (Ibl::Scene* scene)
                         const Ibl::Material* material = mesh->material();
                         const Ibl::IShader* shader = material->shader();
                         const Ibl::GpuTechnique* technique = material->technique();
-                        const Ibl::GpuVariable * viewsVariable = nullptr;
     
-                        if (mesh->material()->shader()->getParameterByName("g_mViewCM", viewsVariable))
-                        {
-                            viewsVariable->setMatrixArray ((const float*)&_cubeViews[0], 6);
-                        }
                         RenderRequest renderRequest (technique, scene, scene->camera(), mesh);
                         shader->renderMesh(renderRequest);
                     }
@@ -486,8 +447,8 @@ IBLRenderPass::render (Ibl::Scene* scene)
             _deviceInterface->disableStencilTest();
             _deviceInterface->setCullMode (Ibl::CullNone);
     
-            float projNear = 0.5;
-            float projFar = 1000.0f;
+            float projNear = camera->zNear();
+            float projFar = camera->zFar();
             Ibl::Matrix44f proj;
             Ibl::projectionPerspectiveMatrixLH (Ibl::BB_PI * 0.5f,
                                                 1.0, 
@@ -578,11 +539,6 @@ IBLRenderPass::colorConvert(bool applyMDR,
         _colorConversionLDRExposureVariable->set((const float*)&_colorConversionLDRExposure, sizeof(float));
         _colorConversionMDRScaleVariable->set((const float*)&_colorConversionMDRScale, sizeof(float));
 
-        const Ibl::GpuVariable * viewsVariable = nullptr;
-        if (_colorConversionShader->getParameterByName("g_mViewCM", viewsVariable))
-        {
-            viewsVariable->setMatrixArray((const float*)&_cubeViews[0], 6);
-        }
         // Render the paraboloid out.
         _colorConversionShader->renderMesh(Ibl::RenderRequest(_colorConversionTechnique, scene, scene->camera(), _sphereMesh));
         mipSize.x /= 2;

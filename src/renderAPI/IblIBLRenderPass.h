@@ -92,9 +92,6 @@ class IBLRenderPass : public Ibl::RenderPass
     Ibl::CameraTransformCachePtr _environmentTransformCache;
     Ibl::IBLConvolutions*        _convolve;
 
-
-    Ibl::Matrix44f               _cubeViews[6];
-
     // Procedural Splat Geometry
     Ibl::Entity*                _sphereEntity;
     Ibl::Mesh*                  _sphereMesh; 

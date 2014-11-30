@@ -48,6 +48,7 @@
 #include <IblGpuVariable.h>
 #include <IblCamera.h>
 #include <IblMesh.h>
+#include <IblMatrixAlgo.h>
 #include <IblIEffect.h>
 #include <IblPostEffect.h>
 #include <IblVector2.h>
@@ -793,6 +794,61 @@ class IBLDiffuseProbeMapValue :  public ShaderParameterValue
     }
 };
 
+class CubeViewsValue : public ShaderParameterValue
+{
+public:
+	CubeViewsValue(const GpuVariable* variable, Ibl::IEffect*effect) :
+		ShaderParameterValue(variable, effect)
+	{
+		setParameterScope(PerTechnique);
+		setParameterType(CubeViews);
+	}
+
+	virtual void setParam(const Ibl::RenderRequest& request) const
+	{
+		// Setup views. In a real world example you would cache these on the IBL probe
+		// or against some camera or transform.
+		static Ibl::Matrix44f cubeViews[6];
+		float lookAt = 1.5f;
+
+		// Setup views for paraboloid to environment transform.
+		Ibl::Vector3f eyeLocation = request.camera->cameraTransformCache()->cameraLocation();
+
+		Ibl::Vector3f lookDirection = eyeLocation + Ibl::Vector3f(lookAt, 0, 0.0f);
+		Ibl::Vector3f upDirection = Ibl::Vector3f(0.0f, 1.0f, 0.0f);
+		Ibl::viewMatrixLH(eyeLocation, lookDirection, upDirection, &cubeViews[0]);
+
+		lookDirection = eyeLocation + Ibl::Vector3f(-lookAt, 0.0f, 0.0f);
+		upDirection = Ibl::Vector3f(0.0f, 1.0f, 0.0f);
+		Ibl::viewMatrixLH(eyeLocation, lookDirection, upDirection, &cubeViews[1]);
+
+		lookDirection = eyeLocation + Ibl::Vector3f(0.0f, lookAt, 0.0f);
+		upDirection = Ibl::Vector3f(0.0f, 0.0f, -1.0f);
+		Ibl::viewMatrixLH(eyeLocation, lookDirection, upDirection, &cubeViews[2]);
+
+		lookDirection = eyeLocation + Ibl::Vector3f(0.0f, -lookAt, 0.0f);
+		upDirection = Ibl::Vector3f(0.0f, 0.0f, 1.0f);
+		Ibl::viewMatrixLH(eyeLocation, lookDirection, upDirection, &cubeViews[3]);
+
+		lookDirection = eyeLocation + Ibl::Vector3f(0.0f, 0, lookAt);
+		upDirection = Ibl::Vector3f(0.0f, 1.0f, 0.0f);
+		Ibl::viewMatrixLH(eyeLocation, lookDirection, upDirection, &cubeViews[4]);
+
+		lookDirection = eyeLocation + Ibl::Vector3f(0.0f, 0, -lookAt);
+		upDirection = Ibl::Vector3f(0.0f, 1.0f, 0.0f);
+		Ibl::viewMatrixLH(eyeLocation, lookDirection, upDirection, &cubeViews[5]);
+
+		_variable->setMatrixArray((const float*)&cubeViews[0], 6);
+	}
+
+	static bool supports(GpuVariable* variable)
+	{
+		return _strcmpi((char*)variable->semantic().c_str(), "CUBEVIEWS") == 0;
+	}
+
+};
+
+
 class IBLSpecularProbeMapValue :  public ShaderParameterValue
 {
   public:
@@ -1463,6 +1519,8 @@ ShaderParameterValueFactory::createShaderParameterValue (Ibl::IDevice* device,
         _parameters.insert (new ShaderParameterFactory <ViewProjectionValue>());
         _parameters.insert (new ShaderParameterFactory <ProjectionValue>);
         _parameters.insert (new ShaderParameterFactory <WorldViewValue>());
+		_parameters.insert(new ShaderParameterFactory <CubeViewsValue>());
+		
         _parameters.insert (new ShaderParameterFactory <DiffuseMapValue>());
         _parameters.insert (new ShaderParameterFactory <RenderDebugTermValue>());
         

@@ -51,7 +51,7 @@ float4x4 mView : VIEW;
 float4x4 mProj : PROJECTION;
 float3 vEye : EYELOCATION;
 
-float4x4 g_mViewCM[6] : ENVIRONMENTVIEWS; 
+float4x4 g_mViewCM[6] : CUBEVIEWS;
 Texture2DArray paraboloidMap : PARABOLOIDMAP;
 
 SamplerState g_samLinear
