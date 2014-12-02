@@ -99,5 +99,5 @@ void CSMain(uint2 id : SV_DispatchThreadID)
       
     float2 result = integrate(roughness, NoV); 
     // [TODO]: I need to fix my DDS saver so that is can save R32G32 and R16G16
-    BRDFResult[int2(id.x, 255-id.y)] = float4(result.x, result.y,0,1);
+    BRDFResult[int2(id.x, 255-id.y)] = float4(result.x, result.y,roughness,1);
 }

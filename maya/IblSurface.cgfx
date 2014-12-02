@@ -78,6 +78,9 @@ sampler2D AlbedoSampler = sampler_state
     MinFilter = LinearMipMapLinear;
     MagFilter = Linear;
     MipFilter = Linear;
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
+    WrapR = ClampToEdge;
 };
 
 texture Normal < string ResourceType = "2D"; >;
@@ -185,6 +188,7 @@ float4 IblSurfaceFS(VertexOutput input) : COLOR
 
     // Specular material terms.
     float4 maskMap   = tex2D(MaskSampler, input.texcoord0);
+
     float  roughness = 1.0 - maskMap.r;
     float  metal     = maskMap.g;
     float  bakedAO   = maskMap.b;
@@ -205,20 +209,25 @@ float4 IblSurfaceFS(VertexOutput input) : COLOR
     // Specular.
     // Alter roughnessMipCount depending on the output resolution of the baker.
     const float roughnessMipCount = 9.0f; 
-    float2 brdf                   = texture2DLod(BrdfSampler, float2(NoV, roughness), 0.0f).xy;
+    // Already flipped because roughness is encoded as gloss in the cerberus model.
+    float3 brdf                   = texture2DLod(BrdfSampler, float2(NoV, roughness), 0.0f).xyz;
+
     float4 specularEnvironment    = toLinear(RGBMDecode(textureCubeLod(SpecularLightingSampler, reflection, roughness * roughnessMipCount)));
     const float4 dielectricColor  = float4(0.04f, 0.04f, 0.04f, 1.0f);
 
     // Hack version to decrease fresnel the more metal a meterial is.
-    float4 specular = lerp(dielectricColor, albedo, metal) * brdf.x + (brdf.y*(clamp(1.0-metal, 0.04f, 1.0f)));
+    //float4 specular = lerp(dielectricColor, albedo, metal) * brdf.x + (brdf.y*(clamp(1.0-metal, 0.04f, 1.0f)));
     // Non hack version.
-    // specular                   = lerp(dielectricColor, albedo, metal) * brdf.x + brdf.y;
+    float4 specular                   = lerp(dielectricColor, albedo, metal) * brdf.x + brdf.y;
 
     specular                      = specularEnvironment * specular;
 
     // Final.
     output = float4((diffuse.rgb+specular.rgb) * bakedAO, 1);
     output = float4(toGamma(output.rgb), 1.0);
+
+    // Debug, verify roughness lookup.
+    //    output.rgb = abs(brdf.bbb - 	float3(roughness,roughness,roughness));
     return output;
 }
 

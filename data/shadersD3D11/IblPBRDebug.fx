@@ -206,7 +206,7 @@ shade (float vdotn,
 {
     roughness = roughness * (1.0f / roughnessRescale);
 
-    float4 brdfTerm = specularIntegration.SampleLevel(clampSampler, float2(vdotn, roughness), 0);
+    float4 brdfTerm = specularIntegration.SampleLevel(clampSampler, float2(vdotn, 1.0-roughness), 0);
     float3 metalSpecularIBL = specularIBL.rgb; 
 
     float3 dielectricColor = float3(0.04, 0.04, 0.04);

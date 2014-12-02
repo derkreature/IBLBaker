@@ -133,6 +133,9 @@ sampler2D BrdfSampler = sampler_state
     MinFilter = LinearMipMapLinear;
     MagFilter = Linear;
     MipFilter = Linear;
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
+    WrapR = ClampToEdge;
 };
 
 texture DiffuseLight : Environment < string ResourceType = "Cube"; >;
@@ -233,7 +236,7 @@ float4 IblSurfaceFS(VertexOutput input) : COLOR
     // Specular.
     // Alter roughnessMipCount depending on the output resolution of the baker.
     const float roughnessMipCount = 9.0f; 
-    float2 brdf                   = texture2DLod(BrdfSampler, float2(NoV, roughness), 0.0f).xy;
+    float3 brdf                   = texture2DLod(BrdfSampler, float2(NoV, roughness), 0.0f).xyz;
     float4 specularEnvironment    = toLinear(RGBMDecode(textureCubeLod(SpecularLightingSampler, reflection, roughness * roughnessMipCount)));
     const float4 dielectricColor  = float4(0.04f, 0.04f, 0.04f, 1.0f);
 
@@ -246,6 +249,11 @@ float4 IblSurfaceFS(VertexOutput input) : COLOR
     // Final.
     output = float4((diffuse.rgb+specular.rgb) * bakedAO, 1);
     output = float4(toGamma(output.rgb), 1.0);
+
+// Debug, verify roughness lookup.
+//    output.rgb = abs(brdf.bbb - float3(roughness,roughness,roughness));
+
+
     return output;
 }
 
