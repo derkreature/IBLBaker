@@ -203,7 +203,7 @@ float4 IblSurfaceFS(VertexOutput input) : COLOR
     float3 reflection = normalize(reflect(input.eye.xyz, normal.xyz));
 
     // Diffuse.
-    float4 diffuseEnvironment  = toLinear(RGBMDecode(textureCubeLod(DiffuseLightingSampler, normal, 0.0f)));    
+    float4 diffuseEnvironment  = toLinear(RGBMDecode(textureCubeLod(DiffuseLightingSampler, normal, 0.0f))) / 3.14159;    
     float4 diffuse     = albedo * (1.0 - metal) * diffuseEnvironment; 
 
     // Specular.

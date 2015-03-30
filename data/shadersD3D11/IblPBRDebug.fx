@@ -159,7 +159,6 @@ resolveAlbedo(PixelShaderInput vertexShaderOut)
 {
     float4 textureGammaColor = materialDiffuse;
     float4 texColor0 = diffuseMap.Sample(anisotropicSampler, vertexShaderOut.uv);
-    textureGammaColor *= texColor0;
     float4 diffuseColor = float4(pow(textureGammaColor, textureGamma).rgb, textureGammaColor.a);
     return diffuseColor;
 }
@@ -268,8 +267,8 @@ PixelShaderOut psHDR (PixelShaderInput vertexShaderOut)
     float bakedAO = specularRMC.b;
 
 
-    // Diffuse Probe
-    float4 diffuseIBL = diffuseProbe.SampleLevel(anisotropicSampler, normal, 0) * EnvironmentScale;
+    // Diffuse Probe. Convert Irradiance to Radiance.
+    float4 diffuseIBL = ((diffuseProbe.SampleLevel(anisotropicSampler, normal, 0)/ 3.14159) * EnvironmentScale) ;
 
     // Specular Probe.
     float specMipLevel = (roughness) * RoughnessScale;
