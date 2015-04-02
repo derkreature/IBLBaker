@@ -58,9 +58,9 @@ class IIndexBuffer : public IRenderResource
     virtual bool                initialize (const IndexBufferParameters* data) = 0;
     virtual bool                create() = 0;
     virtual bool                free() = 0;
-    virtual bool                bind() const = 0;
+    virtual bool                bind(uint32_t bufferOffset = 0) const = 0;
 
-    virtual void*                lock() = 0;
+    virtual void*               lock(size_t size = 0) = 0;
     virtual bool                unlock() = 0;
 };
 }

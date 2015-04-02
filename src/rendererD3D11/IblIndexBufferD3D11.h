@@ -50,27 +50,36 @@ namespace Ibl
 {
 class IndexBufferD3D11 : public Ibl::IIndexBuffer
 {
-  public:
+public:
     IndexBufferD3D11(Ibl::DeviceD3D11* device);
     virtual ~IndexBufferD3D11();
-    
-    virtual bool                initialize (const Ibl::IndexBufferParameters* data);
+
+    virtual bool                initialize(const Ibl::IndexBufferParameters* data);
     virtual bool                create();
     virtual bool                free();
     virtual bool                cache();
 
-    virtual void*               lock();
+    virtual void*               lock(size_t byteSize);
     virtual bool                unlock();
-    virtual bool                bind() const;
+    virtual bool                bind(uint32_t bufferOffset) const;
     ID3D11ShaderResourceView *  resourceView() const;
 
-  private:
+private:
     bool                        _locked;
     ID3D11Buffer*               _indexBuffer;
-    ID3D11ShaderResourceView *  _resourceView;
-    Ibl::IndexBufferParameters   _resource;
+    ID3D11Buffer*               _stagingBuffer;
 
-  protected:
+    mutable ID3D11ShaderResourceView *  _resourceView;
+    Ibl::IndexBufferParameters  _resource;
+
+    size_t                       _sizeInBytes;
+    size_t                       _bufferCursor;
+    size_t                       _lastCopySize;
+    bool                         _needsDiscard;
+    bool                         _isRingBuffer;
+    bool                        _dynamic;
+
+protected:
     ID3D11Device*               _direct3d;
     ID3D11DeviceContext *      _immediateCtx;
 };

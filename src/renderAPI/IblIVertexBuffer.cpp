@@ -57,4 +57,10 @@ IVertexBuffer::setVertexDeclaration (const IVertexDeclaration* decl)
 bool
 IVertexBuffer::bindToStreamOut() const { return false; }
 
+const IVertexDeclaration*  
+IVertexBuffer::vertexDeclaration() const
+{
+    return _vertexDeclaration;
+}
+
 }

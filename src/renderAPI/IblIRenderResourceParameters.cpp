@@ -390,20 +390,40 @@ DepthSurfaceParameters::setHeight (int height) {
     _height = height;
 }
 
-IndexBufferParameters::IndexBufferParameters(uint32_t sizeInBytesVal) 
+IndexBufferParameters::IndexBufferParameters(uint32_t sizeInBytesVal, bool isRingBuffered, bool isDynamic) 
 {
     _sizeInBytes = sizeInBytesVal;
+    _isRingBuffered = isRingBuffered;
+    _isDynamic = isDynamic;
 };
 
 IndexBufferParameters::IndexBufferParameters (const IndexBufferParameters& in)
 {
     _sizeInBytes =     in.sizeInBytes();
+    _isDynamic = in.dynamic();
+    _isRingBuffered = in.ringBuffered();
 };
 
 unsigned int                
-IndexBufferParameters::sizeInBytes() const { return _sizeInBytes;}
+IndexBufferParameters::sizeInBytes() const 
+{ 
+    return _sizeInBytes;
+}
 
-VertexBufferParameters::VertexBufferParameters(uint32_t sizeInBytesVal, 
+bool
+IndexBufferParameters::ringBuffered() const
+{
+    return _isRingBuffered;
+}
+
+bool
+IndexBufferParameters::dynamic() const
+{
+    return _isDynamic;
+}
+
+VertexBufferParameters::VertexBufferParameters(uint32_t sizeInBytesVal,
+                     bool isRingBuffered, 
                      bool streamOut , 
                      uint32_t vertexStride , 
                      void* vertexPtr , 
@@ -415,6 +435,7 @@ VertexBufferParameters::VertexBufferParameters(uint32_t sizeInBytesVal,
 {
     _bindUAV = false;
     _sizeInBytes = sizeInBytesVal;
+    _isRingBuffered = isRingBuffered;
     _streamOut = streamOut;
     _vertexPtr = vertexPtr;
     _vertexStride = vertexStride;
@@ -429,6 +450,7 @@ VertexBufferParameters::VertexBufferParameters()
 {
     _bindUAV = false;
     _sizeInBytes = 0;
+    _isRingBuffered = false;
     _streamOut = false;
     _vertexPtr = nullptr;
     _vertexStride = 0;
@@ -443,6 +465,7 @@ VertexBufferParameters::VertexBufferParameters (const VertexBufferParameters& in
 {
     _sizeInBytes =     in._sizeInBytes;
     _streamOut = in._streamOut;
+    _isRingBuffered = in._isRingBuffered;
     _vertexStride = in._vertexStride;
     _vertexPtr = in._vertexPtr;
     _dynamic = in._dynamic;
@@ -465,6 +488,12 @@ bool
 VertexBufferParameters::bindUAV() const
 {
     return _bindUAV;
+}
+
+bool
+VertexBufferParameters::ringBuffered() const
+{
+    return _isRingBuffered;
 }
 
 uint32_t                      

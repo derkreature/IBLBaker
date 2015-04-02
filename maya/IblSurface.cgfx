@@ -171,7 +171,7 @@ float3 toGamma( float3 linear)
 
 float4 toLinear( float4 gamma)
 {
-    return pow(gamma, 2.2f);
+    return pow(gamma, 1.8f);
 }
 
 float4 RGBMDecode ( float4 rgbm ) 
@@ -226,6 +226,7 @@ float4 IblSurfaceFS(VertexOutput input) : COLOR
     output = float4((diffuse.rgb+specular.rgb) * bakedAO, 1);
     output = float4(toGamma(output.rgb), 1.0);
 
+    
     // Debug, verify roughness lookup.
     //    output.rgb = abs(brdf.bbb - 	float3(roughness,roughness,roughness));
     return output;

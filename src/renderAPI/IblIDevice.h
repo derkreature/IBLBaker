@@ -178,6 +178,26 @@ class IDevice
     virtual void                setFrontFaceStencilPass(Ibl::StencilOp compareFunc) = 0;
     virtual void                enableStencilTest() = 0;
     virtual void                disableStencilTest() = 0;
+
+
+    
+    virtual void                setupStencil(uint8_t readMask,
+                                             uint8_t writeMask,
+                                             Ibl::CompareFunction frontCompare,
+                                             Ibl::StencilOp frontStencilFailOp,
+                                             Ibl::StencilOp frontStencilPassOp,
+                                             Ibl::StencilOp frontZFailOp,
+                                             Ibl::CompareFunction backCompare,
+                                             Ibl::StencilOp backStencilFailOp,
+                                             Ibl::StencilOp backStencilPassOp,
+                                             Ibl::StencilOp backZFailOp) = 0;
+
+    virtual void                setupStencil(uint8_t readMask,
+                                             uint8_t writeMask,
+                                             Ibl::CompareFunction frontCompare,
+                                             Ibl::StencilOp frontStencilFailOp,
+                                             Ibl::StencilOp frontStencilPassOp,
+                                             Ibl::StencilOp frontZFailOp) = 0;
     
     virtual Ibl::CullMode cullMode() const = 0;
     virtual void                setCullMode (CullMode) = 0;
@@ -189,14 +209,17 @@ class IDevice
                                                const IVertexBuffer*, 
                                                const GpuTechnique *,
                                                PrimitiveType, 
-                                               uint32_t) const = 0;
+                                               uint32_t faceCount,
+                                               uint32_t vertexOffset) const = 0;
 
     virtual bool                drawIndexedPrimitive (const IVertexDeclaration*, 
                                                       const IIndexBuffer*, 
                                                       const IVertexBuffer*, 
                                                       const GpuTechnique *,
                                                       PrimitiveType, 
-                                                      uint32_t, uint32_t) const = 0;
+                                                      uint32_t faceCount, 
+                                                      uint32_t indexOffset,
+                                                      uint32_t vertexOffset) const = 0;
     
     virtual bool                blitSurfaces (const ISurface* destination, 
                                               const ISurface* src, 
@@ -234,6 +257,10 @@ class IDevice
     virtual void                setSrcFunction (const Ibl::AlphaFunction&) = 0;
     virtual void                setDestFunction (const Ibl::AlphaFunction&) = 0;
     virtual Ibl::BlendPipelineType blendPipeline() const = 0;
+
+    virtual bool                 scissorEnabled() const = 0;
+    virtual void                 setScissorEnabled(bool scissorEnabled) = 0;
+    virtual void                 setScissorRect(int x, int y, int width, int height) = 0;
 
     virtual void                setAlphaBlendProperty (const Ibl::BlendOp&) = 0;
     virtual void                setAlphaDestFunction (const Ibl::AlphaFunction&) = 0;

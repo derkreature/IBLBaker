@@ -51,18 +51,18 @@ namespace Ibl
 {
 class VertexBufferD3D11 : public Ibl::IVertexBuffer
 {
-  public:
+public:
     VertexBufferD3D11(Ibl::DeviceD3D11* device);
     virtual ~VertexBufferD3D11();
-    
-    virtual bool                initialize (const Ibl::VertexBufferParameters* data);
+
+    virtual bool                initialize(const Ibl::VertexBufferParameters* data);
     virtual bool                create();
     virtual bool                free();
     virtual bool                cache();
 
-    virtual void*               lock();
+    virtual void*               lock(size_t byteSize);
     virtual bool                unlock();
-    virtual bool                bind() const;
+    virtual bool                bind(uint32_t bufferOffset) const;
 
     virtual bool                bindToStreamOut() const;
 
@@ -72,24 +72,30 @@ class VertexBufferD3D11 : public Ibl::IVertexBuffer
     ID3D11UnorderedAccessView * unorderedResourceView() const;
     ID3D11Buffer*               resource() const;
 
-    size_t                      size() const; 
+    size_t                      size() const;
 
-  protected:
+protected:
     void                        upload() const;
     bool                        _usingUploadBuffer;
-    ID3D11Buffer*               _uploadBuffer;
+    mutable ID3D11Buffer*       _uploadBuffer;
 
-  private:
+private:
     bool                                _locked;
     ID3D11Buffer*                       _vertexBuffer;
-    Ibl::VertexBufferParameters          _resource;
-    ID3D11ShaderResourceView *          _shaderResourceView;
-    ID3D11RenderTargetView *            _renderTargetView;
+    Ibl::VertexBufferParameters   _resource;
+    mutable ID3D11ShaderResourceView *  _shaderResourceView;
+    mutable ID3D11RenderTargetView *    _renderTargetView;
     D3D11_UNORDERED_ACCESS_VIEW_DESC    _uavDesc;
-    ID3D11UnorderedAccessView *         _unorderedResourceView;
+    mutable ID3D11UnorderedAccessView * _unorderedResourceView;
     uint32_t                            _sizeInBytes;
 
-  protected:
+    // Ring buffer stuff.
+    size_t                              _bufferCursor;
+    size_t                              _lastCopySize;
+    bool                                _needsDiscard;
+    bool                                _isRingBuffer;
+
+protected:
     ID3D11Device*               _direct3d;
     ID3D11DeviceContext *      _immediateCtx;
 };

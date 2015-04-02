@@ -111,7 +111,6 @@ Texture2DD3D11::mapForRead() const
         stagingDesc.BindFlags =        0;
         _direct3d->CreateTexture2D( &stagingDesc, nullptr, &_stagingTexture);
 
-        // Copy contents of height map into staging version
         _immediateCtx->CopyResource(_stagingTexture, _texture);
         _mapped = true;
         return true;
@@ -132,135 +131,155 @@ Texture2DD3D11::create()
     ID3D11Resource * resource = 0;
     bool staging = _resource->type() == Ibl::StagingFromFile;
 
+    D3D11_TEXTURE2D_DESC desc;
+    ID3D11Texture2D* map = nullptr;
+    D3D11_SUBRESOURCE_DATA* initData = nullptr;
+
+    bool isCubeMap = false;
+    bool isTextureArray = false;
     const std::vector<std::string>      & filenames = ITexture::_resource->filenames();
-
     std::ostringstream fileNameSet;
-
     std::vector<Ibl::TextureImagePtr>       images;
-    for (auto it = filenames.begin(); it != filenames.end(); it++)
-    {
-        const std::string& filename = (*it);
-        fileNameSet << filename.c_str();
-        TextureImagePtr image;
-        image.reset(new Ibl::TextureImage());
-        image->load(filename, std::string());
 
-        if (image)
+    if (_resource->type() != Ibl::Procedural)
+    {
+        for (auto it = filenames.begin(); it != filenames.end(); it++)
         {
-            images.push_back(image);
+            const std::string& filename = (*it);
+            fileNameSet << filename.c_str();
+            TextureImagePtr image;
+            image.reset(new Ibl::TextureImage());
+            image->load(filename, std::string());
+
+            if (image)
+            {
+                images.push_back(image);
+            }
+            else
+            {
+                LOG ("Failed to load image " << filename << " " << __LINE__ << " " << __FILE__);
+                return false;
+            }
         }
-        else
+
+        ITexture::_filename = fileNameSet.str().c_str();    
+        isTextureArray = images.size() > 1;
+        if (images.size() == 0)
         {
-            LOG ("Failed to load image " << filename << " " << __LINE__ << " " << __FILE__);
+            LOG ("Failed to load any images for " << fileNameSet.str() << " " << __LINE__ << " " << __FILE__);
             return false;
         }
-    }
-
-    ITexture::_filename = fileNameSet.str().c_str();    
-    bool isTextureArray = images.size() > 1;
-    if (images.size() == 0)
-    {
-        LOG ("Failed to load any images for " << fileNameSet.str() << " " << __LINE__ << " " << __FILE__);
-        return false;
-    }
 
 
-    // Check that all of the images are the same.
-    if (isTextureArray)
-    {
-        // Check everyone is the same
-        const Ibl::TextureImagePtr& image = images[0];
-        for (auto it = images.begin()+1; it != images.end(); it++)
+        // Check that all of the images are the same.
+        if (isTextureArray)
         {
-            if ((*it)->getWidth() != image->getWidth() ||
-                (*it)->getHeight() != image->getHeight())
+            // Check everyone is the same
+            const Ibl::TextureImagePtr& image = images[0];
+            for (auto it = images.begin()+1; it != images.end(); it++)
             {
-                LOG ("Failed to load image array due to size mismatch");
-                return false;
-            }
-            if ((*it)->getFormat() != image->getFormat())
-            {
-                LOG ("Failed to load image array due to format mismatch");
-                return false;
+                if ((*it)->getWidth() != image->getWidth() ||
+                    (*it)->getHeight() != image->getHeight())
+                {
+                    LOG ("Failed to load image array due to size mismatch");
+                    return false;
+                }
+                if ((*it)->getFormat() != image->getFormat())
+                {
+                    LOG ("Failed to load image array due to format mismatch");
+                    return false;
+                }
             }
         }
-    }
 
-    size_t mipMapCount = images[0]->getNumMipmaps();
-    if (mipMapCount == 0)
-        mipMapCount = 1;
+        size_t mipMapCount = images[0]->getNumMipmaps();
+        if (mipMapCount == 0)
+            mipMapCount = 1;
 
-    // Force mip maps.
-    bool forceMipMaps = true;
+        // Force mip maps.
+        bool forceMipMaps = true;
 
 
-    // HDR loads without the alpha channel data in place.
+        // HDR loads without the alpha channel data in place.
     
-    if (images[0]->hasFlag(IF_CUBEMAP))
-    {
-        LOG ("Cubemap...");
-    }
-
-    PixelFormat flipped = images[0]->getFormat();
-
-    D3D11_TEXTURE2D_DESC desc;
-    desc.Width = static_cast<UINT>(images[0]->getWidth());
-    desc.Height = static_cast<UINT>(images[0]->getHeight());
-    desc.MipLevels = static_cast<UINT>( mipMapCount );
-    desc.ArraySize = static_cast<UINT>( images[0]->getNumFaces() * images.size());
-    desc.Format = findFormat(flipped); 
-    desc.SampleDesc.Count = 1;
-    desc.SampleDesc.Quality = 0;
-    desc.Usage = staging ? D3D11_USAGE_STAGING : D3D11_USAGE_DEFAULT;
-    desc.BindFlags = staging ? 0 : D3D11_BIND_SHADER_RESOURCE;
-    desc.CPUAccessFlags = staging ? D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ : 0;
-    desc.MiscFlags = (images[0]->hasFlag(IF_CUBEMAP)) ? D3D11_RESOURCE_MISC_TEXTURECUBE : 0;
-
-    // Override the format on the resource.
-    _format = findFormat(desc.Format);
-    _resource->setFormat(_format);
-
-    _resource->setWidth((float)(desc.Width));
-    _resource->setHeight((float)(desc.Height));
-    _resource->setNumMipLevels(desc.MipLevels);
-
-    ID3D11Texture2D* map = nullptr;
-    D3D11_SUBRESOURCE_DATA* initData = new D3D11_SUBRESOURCE_DATA[ images.size() * images[0]->getNumFaces() * mipMapCount ];
-
-    // Load initialization data for subresource information.
-    size_t offset = 0;
-    for (size_t imageId = 0; imageId < images.size(); imageId++)
-    {
-        const Ibl::TextureImagePtr& image = images[imageId];
-        for (size_t face = 0; face < image->getNumFaces(); face++)
+        if (images[0]->hasFlag(IF_CUBEMAP))
         {
-            for (size_t m = 0; m < mipMapCount; m++)
+            LOG ("Cubemap...");
+        }
+
+        PixelFormat flipped = images[0]->getFormat();
+
+
+        desc.Width = static_cast<UINT>(images[0]->getWidth());
+        desc.Height = static_cast<UINT>(images[0]->getHeight());
+        desc.MipLevels = static_cast<UINT>( mipMapCount );
+        desc.ArraySize = static_cast<UINT>( images[0]->getNumFaces() * images.size());
+        desc.Format = findFormat(flipped); 
+        desc.SampleDesc.Count = 1;
+        desc.SampleDesc.Quality = 0;
+        desc.Usage = staging ? D3D11_USAGE_STAGING : D3D11_USAGE_DEFAULT;
+        desc.BindFlags = staging ? 0 : D3D11_BIND_SHADER_RESOURCE;
+        desc.CPUAccessFlags = staging ? D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ : 0;
+        desc.MiscFlags = (images[0]->hasFlag(IF_CUBEMAP)) ? D3D11_RESOURCE_MISC_TEXTURECUBE : 0;
+
+        // Override the format on the resource.
+        _format = findFormat(desc.Format);
+        _resource->setFormat(_format);
+
+        _resource->setWidth((float)(desc.Width));
+        _resource->setHeight((float)(desc.Height));
+        _resource->setNumMipLevels(desc.MipLevels);
+
+        initData = new D3D11_SUBRESOURCE_DATA[ images.size() * images[0]->getNumFaces() * mipMapCount ];
+
+        // Load initialization data for subresource information.
+        size_t offset = 0;
+        for (size_t imageId = 0; imageId < images.size(); imageId++)
+        {
+            const Ibl::TextureImagePtr& image = images[imageId];
+            for (size_t face = 0; face < image->getNumFaces(); face++)
             {
-                size_t outNumBytes = 0;
-                size_t outNumRows = 0;
-                size_t outRowBytes = 0;
-                Ibl::PixelBox box = image->getPixelBox(face, m);
+                for (size_t m = 0; m < mipMapCount; m++)
+                {
+                    size_t outNumBytes = 0;
+                    size_t outNumRows = 0;
+                    size_t outRowBytes = 0;
+                    Ibl::PixelBox box = image->getPixelBox(face, m);
 
-                GetSurfaceInfo( box.size().x,
-                                box.size().y,
-                                desc.Format,
-                                &outNumBytes,
-                                &outRowBytes,
-                                &outNumRows);
+                    GetSurfaceInfo( box.size().x,
+                                    box.size().y,
+                                    desc.Format,
+                                    &outNumBytes,
+                                    &outRowBytes,
+                                    &outNumRows);
     
-                initData[offset].pSysMem = box.data;
-                initData[offset].SysMemPitch = unsigned int(outRowBytes);
-                initData[offset].SysMemSlicePitch = unsigned int(outNumBytes);
+                    initData[offset].pSysMem = box.data;
+                    initData[offset].SysMemPitch = unsigned int(outRowBytes);
+                    initData[offset].SysMemSlicePitch = unsigned int(outNumBytes);
 
-                offset++;
+                    offset++;
+                }
             }
         }
+        isCubeMap = (images[0]->hasFlag(IF_CUBEMAP));
+    }
+    else
+    {
+        D3D11_TEXTURE2D_DESC desc;
+        desc.ArraySize = 1;
+        desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+        desc.Format = findFormat(_resource->format());
+        desc.Width = _resource->width();
+        desc.Height = _resource->height();
+        desc.MipLevels = 1;
+        desc.MiscFlags = 0;
+        desc.SampleDesc.Count = 1;
+        desc.SampleDesc.Quality = 0;
+        desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        desc.Usage = D3D11_USAGE_DYNAMIC;
     }
 
-    // Foce mips.
-    // desc.MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
-
-    HRESULT hr = _direct3d->CreateTexture2D( &desc, &initData[0], &map);
+    HRESULT hr = _direct3d->CreateTexture2D(&desc, initData, &map);
     if (SUCCEEDED(hr))
     {
         map->GetDesc (&_desc);
@@ -273,25 +292,14 @@ Texture2DD3D11::create()
         {
             D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 
-            if ((images[0]->hasFlag(IF_CUBEMAP)))
+            if (isCubeMap)
             {
-                if (images.size() > 1 || images[0]->getNumFaces() > 6)
-                {
-                    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBEARRAY;
-                    srvDesc.Format = _desc.Format;
-                    srvDesc.TextureCubeArray.MipLevels = _desc.MipLevels;
-                    srvDesc.TextureCubeArray.MostDetailedMip = 0;
-                    srvDesc.TextureCubeArray.NumCubes = (UINT)(images.size() == 1 ? images[0]->getNumFaces() / 6 : images.size());
-                }
-                else
-                {
                     srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
                     srvDesc.Format = _desc.Format;
                     srvDesc.TextureCube.MipLevels = _desc.MipLevels;
                     srvDesc.TextureCube.MostDetailedMip = 0;
-                }
             }
-            else if (images.size() > 1)
+            else if (isTextureArray)
             {
                 srvDesc.Format = _desc.Format;
                 srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;

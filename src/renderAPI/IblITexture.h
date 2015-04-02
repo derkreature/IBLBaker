@@ -95,7 +95,7 @@ ITexture : public IRenderResource
     // Write all pixels. Pixels is assumed to be the correct type and
     // allocated to byteSize()
     virtual bool               write (const Ibl::byte* pixels) = 0;
-
+    virtual bool               writeSubRegion(const Ibl::byte* srcPtr, uint32_t offsetX, uint32_t offsetY, uint32_t w, uint32_t h, uint32_t bytesPerPixel) = 0;
     // Read a texel
     virtual Ibl::Vector4f      read (const Ibl::Vector2f& pos) const  = 0;
     // read a pixel

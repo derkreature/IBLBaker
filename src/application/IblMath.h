@@ -50,6 +50,11 @@ namespace Ibl
     #define RANDOM_SCALAR      (((FLOAT)rand())/RAND_MAX)
     const float BB_PI = 3.14159265358979323f;
 
+    inline float lerp(float _a, float _b, float _t)
+    {
+        return _a + (_b - _a) * _t;
+    }
+
     inline bool
     isPOT(int32_t v) 
     {
@@ -107,23 +112,81 @@ namespace Ibl
         return (x<min  ? min : x<max ? x : max);
     }
 
-    template <class T>
-    inline void
-    saturate(T& x) 
+
+    inline float step(float _edge, float _a)
     {
-        clamp(x, T(0), T(1));
+        return _a < _edge ? 0.0f : 1.0f;
+    }
+
+    // Lifted from bgfx.
+    inline void rgbToHsv(float _hsv[3], const float _rgb[3])
+    {
+        const float rr = _rgb[0];
+        const float gg = _rgb[1];
+        const float bb = _rgb[2];
+
+        const float s0 = step(bb, gg);
+
+        const float px = lerp(bb, gg, s0);
+        const float py = lerp(gg, bb, s0);
+        const float pz = lerp(-1.0f, 0.0f, s0);
+        const float pw = lerp(2.0f / 3.0f, -1.0f / 3.0f, s0);
+
+        const float s1 = step(px, rr);
+
+        const float qx = lerp(px, rr, s1);
+        const float qy = py;
+        const float qz = lerp(pw, pz, s1);
+        const float qw = lerp(rr, px, s1);
+
+        const float dd = qx - fmin(qw, qy);
+        const float ee = 1.0e-10f;
+
+        _hsv[0] = fabsf(qz + (qw - qy) / (6.0f * dd + ee));
+        _hsv[1] = dd / (qx + ee);
+        _hsv[2] = qx;
+    }
+
+
+    template <class T>
+    inline float
+        saturate(T x)
+    {
+        return clamped(x, T(0), T(1));
     }
 
     template <class T>
     inline T
-    saturated(const T& x) 
+        saturated(const T& x)
     {
         return clamped(x, T(0), T(1));
     }
 
 
     template <class T>
-    inline T abs ( T f ) { return (T)fabsf((float)(f)); }
+    inline T abs(T f) { return (T)fabsf((float)(f)); }
+    inline float fract(float _a)
+    {
+        return _a - floorf(_a);
+    }
+
+    // Lifted from bgfx.
+    inline void hsvToRgb(float _rgb[3], const float _hsv[3])
+    {
+        const float hh = _hsv[0];
+        const float ss = _hsv[1];
+        const float vv = _hsv[2];
+
+        const float px = fabsf(fract(hh + 1.0f) * 6.0f - 3.0f);
+        const float py = fabsf(fract(hh + 2.0f / 3.0f) * 6.0f - 3.0f);
+        const float pz = fabsf(fract(hh + 1.0f / 3.0f) * 6.0f - 3.0f);
+
+        _rgb[0] = vv * lerp(1.0f, saturate(px - 1.0f), ss);
+        _rgb[1] = vv * lerp(1.0f, saturate(py - 1.0f), ss);
+        _rgb[2] = vv * lerp(1.0f, saturate(pz - 1.0f), ss);
+    }
+
+
 
     typedef uint16_t half;
 }

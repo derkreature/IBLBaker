@@ -441,7 +441,7 @@ IndexedMesh::render(const Ibl::RenderRequest* request,
     {
         return _device->drawIndexedPrimitive (_vertexDeclaration, _indexBuffer, 
                                               vertexBuffer(), technique, (PrimitiveType)primitiveType(), 
-                                              primitiveDrawCount(), vertexCount());
+                                              primitiveDrawCount(), 0, 0);
     }
     return true;
 }

@@ -113,6 +113,8 @@ protected:
     // allocated to byteSize()
     virtual bool               write (const Ibl::byte* pixels);
 
+    virtual bool               writeSubRegion(const Ibl::byte* srcPtr, uint32_t offsetX, uint32_t offsetY, uint32_t w, uint32_t h, uint32_t bytesPerPixel);
+
     // Read a texel
     virtual Ibl::Vector4f       read (const Ibl::Vector2f& pos) const;
     // read a pixel

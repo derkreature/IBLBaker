@@ -184,7 +184,7 @@ Mesh::create()
 
         VertexBufferParameters vertexBufferParameters;
         vertexBufferParameters = 
-                VertexBufferParameters (vertexBufferSize(), false, 
+                VertexBufferParameters (vertexBufferSize(), false, false, 
                                         _vertexDeclaration->vertexStride(), 
                                         vbData, _useResource, 
                                         _dynamic);
@@ -270,7 +270,7 @@ void*
 Mesh::lock() 
 {
     _locked = true; 
-    return _vertexBuffer->lock();
+    return _vertexBuffer->lock(0);
 }
 
 bool
@@ -298,7 +298,7 @@ Mesh::render(const Ibl::RenderRequest* request,
 
     {
         return _device->drawPrimitive (_vertexDeclaration, _vertexBuffer, technique, 
-                                      (PrimitiveType)primitiveType(), _primitiveCount);
+                                      (PrimitiveType)primitiveType(), _primitiveCount, 0);
     }
     return true;
 }

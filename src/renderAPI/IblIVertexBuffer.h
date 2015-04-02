@@ -60,13 +60,16 @@ class IVertexBuffer : public IRenderResource
     virtual bool               create() = 0;
     virtual bool               free() = 0;
 
-    virtual void*              lock() = 0;
+    virtual void*              lock(size_t byteSize) = 0;
     virtual bool               unlock() = 0;
 
     virtual void               setVertexDeclaration (const IVertexDeclaration* decl);
-    virtual bool               bind() const = 0;
+    virtual bool               bind(uint32_t bufferOffset = 0) const = 0;
     
     virtual bool               bindToStreamOut() const;
+
+    const IVertexDeclaration*  vertexDeclaration() const;
+
   protected:
     const IVertexDeclaration*  _vertexDeclaration;
 };

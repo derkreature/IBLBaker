@@ -221,19 +221,25 @@ class DepthSurfaceParameters  : public RenderResourceParameters
 class IndexBufferParameters : public RenderResourceParameters
 {    
   public:
-    IndexBufferParameters(uint32_t sizeInBytesVal);
+    IndexBufferParameters(uint32_t sizeInBytesVal, bool isRingBuffered = false, bool isDynamic = false);
 
     IndexBufferParameters (const IndexBufferParameters& in);
 
-    unsigned int                sizeInBytes() const;
+    unsigned int               sizeInBytes() const;
+    bool                       ringBuffered() const;
+    bool                       dynamic() const;
+
   private:
-    unsigned                    _sizeInBytes;
+    unsigned                   _sizeInBytes;
+    bool                       _isRingBuffered;
+    bool                       _isDynamic;
 };
 
 class VertexBufferParameters : public RenderResourceParameters
 {  
   public:
     VertexBufferParameters(uint32_t sizeInBytesVal, 
+                         bool ringBuffered = false,
                          bool streamOut = false, 
                          uint32_t vertexStride = 0, 
                          void* vertexPtr = 0, 
@@ -248,9 +254,10 @@ class VertexBufferParameters : public RenderResourceParameters
 
     virtual ~VertexBufferParameters();
 
-    uint32_t                      vertexStride() const;
+    uint32_t                    vertexStride() const;
     void*                       vertexPtr() const;
     unsigned int                sizeInBytes() const;
+    bool                        ringBuffered() const;
     bool                        bindStreamOut () const;
     bool                        dynamic() const;
     bool                        useResource() const;
@@ -265,6 +272,7 @@ class VertexBufferParameters : public RenderResourceParameters
     Ibl::PixelFormat           format() const;
   private:
     unsigned int                _sizeInBytes;
+    bool                        _isRingBuffered;
     bool                        _streamOut;
     uint32_t                    _vertexStride;
     void*                       _vertexPtr;

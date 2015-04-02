@@ -463,7 +463,6 @@ D3D11AlphaFunction (const Ibl::AlphaFunction& alphaFunc)
 
 DeviceD3D11::DeviceD3D11() 
 {    
-
     _window = nullptr;
     _factory = new DXGIFactory();
 
@@ -489,7 +488,7 @@ DeviceD3D11::DeviceD3D11()
     _immediateCtx = nullptr;
     _currentDepthSurface = nullptr;
     _initialized = false;
-
+    _scissorEnabled = false;
     _currentSurfaceCount = 0;
     _currentUAVCount = 0;        
     _blendFactor = Ibl::Vector4f(1,1,1,1);
@@ -635,7 +634,7 @@ DeviceD3D11::initializeDeviceStates()
     _currentRasterStateDesc.DepthBiasClamp = 0.0f;
     _currentRasterStateDesc.SlopeScaledDepthBias = 0;
     _currentRasterStateDesc.DepthClipEnable = true;
-    _currentRasterStateDesc.ScissorEnable = false;
+    _currentRasterStateDesc.ScissorEnable = _scissorEnabled;
     _currentRasterStateDesc.MultisampleEnable = _useMultiSampleAntiAliasing;
     _currentRasterStateDesc.AntialiasedLineEnable = true;
 
@@ -677,8 +676,61 @@ DeviceD3D11::initializeDeviceStates()
 }
 
 void
+DeviceD3D11::setupStencil(uint8_t readMask, 
+                          uint8_t writeMask,
+                          Ibl::CompareFunction frontCompare,
+                          Ibl::StencilOp frontStencilFailOp, 
+                          Ibl::StencilOp frontStencilPassOp,
+                          Ibl::StencilOp frontZFailOp)
+{
+    _currentDepthStateDesc.FrontFace.StencilFailOp = (D3D11_STENCIL_OP)(frontStencilFailOp);
+    _currentDepthStateDesc.FrontFace.StencilPassOp = (D3D11_STENCIL_OP)(frontStencilPassOp);
+    _currentDepthStateDesc.FrontFace.StencilDepthFailOp = (D3D11_STENCIL_OP)(frontZFailOp);
+    _currentDepthStateDesc.FrontFace.StencilFunc = (D3D11_COMPARISON_FUNC)(frontCompare);
+
+    _currentDepthStateDesc.BackFace.StencilFailOp = (D3D11_STENCIL_OP)(frontStencilPassOp);
+    _currentDepthStateDesc.BackFace.StencilPassOp = (D3D11_STENCIL_OP)(frontStencilFailOp);
+    _currentDepthStateDesc.BackFace.StencilDepthFailOp = (D3D11_STENCIL_OP)(frontZFailOp);
+    _currentDepthStateDesc.BackFace.StencilFunc = (D3D11_COMPARISON_FUNC)(frontCompare);
+
+    _currentDepthStateDesc.StencilReadMask = readMask;
+    _currentDepthStateDesc.StencilWriteMask = writeMask;
+
+    bindDepthState();
+}
+
+void
+DeviceD3D11::setupStencil(uint8_t readMask,
+                          uint8_t writeMask,
+                          Ibl::CompareFunction frontCompare,
+                          Ibl::StencilOp frontStencilFailOp,
+                          Ibl::StencilOp frontStencilPassOp,
+                          Ibl::StencilOp frontZFailOp,
+                          Ibl::CompareFunction backCompare,
+                          Ibl::StencilOp backStencilFailOp,
+                          Ibl::StencilOp backStencilPassOp,
+                          Ibl::StencilOp backZFailOp)
+{
+    _currentDepthStateDesc.FrontFace.StencilFailOp = (D3D11_STENCIL_OP)(frontStencilFailOp);
+    _currentDepthStateDesc.FrontFace.StencilPassOp = (D3D11_STENCIL_OP)(frontStencilPassOp);
+    _currentDepthStateDesc.FrontFace.StencilDepthFailOp = (D3D11_STENCIL_OP)(frontZFailOp);
+    _currentDepthStateDesc.FrontFace.StencilFunc = (D3D11_COMPARISON_FUNC)(frontCompare);
+
+    _currentDepthStateDesc.BackFace.StencilFailOp = (D3D11_STENCIL_OP)(backStencilPassOp);
+    _currentDepthStateDesc.BackFace.StencilPassOp = (D3D11_STENCIL_OP)(backStencilFailOp);
+    _currentDepthStateDesc.BackFace.StencilDepthFailOp = (D3D11_STENCIL_OP)(backZFailOp);
+    _currentDepthStateDesc.BackFace.StencilFunc = (D3D11_COMPARISON_FUNC)(backCompare);
+
+    _currentDepthStateDesc.StencilReadMask = readMask;
+    _currentDepthStateDesc.StencilWriteMask = writeMask;
+
+    bindDepthState();
+}
+
+void
 DeviceD3D11::bindBlendState()
 {
+    // Todo, this state should be hashed and stored
    saferelease(_currentBlendState);
    _direct3d->CreateBlendState ( &_currentBlendStateDesc, &_currentBlendState);
       
@@ -688,6 +740,7 @@ DeviceD3D11::bindBlendState()
 void
 DeviceD3D11::bindDepthState()
 {
+    // Todo, this state should be hashed and stored
     saferelease(_currentDepthState);
     _direct3d->CreateDepthStencilState (&_currentDepthStateDesc, &_currentDepthState);
     _immediateCtx->OMSetDepthStencilState (_currentDepthState, 0xff);
@@ -696,6 +749,7 @@ DeviceD3D11::bindDepthState()
 void
 DeviceD3D11::bindRasterState()
 {
+    // Todo, this stuff should be hashed and stored.
     saferelease(_currentRasterState);    
     _direct3d->CreateRasterizerState( &_currentRasterStateDesc, &_currentRasterState);
     _immediateCtx->RSSetState(_currentRasterState);
@@ -898,6 +952,31 @@ DestBlendAlpha = D3D11_BLEND_ONE;
     {
         LOG ("Unknown blend pipeline type " << blendPipelineType << __LINE__ << " " << __FILE__);
     }
+}
+
+bool
+DeviceD3D11::scissorEnabled() const
+{
+    return _scissorEnabled;
+}
+
+void
+DeviceD3D11::setScissorEnabled(bool scissorEnabled)
+{
+    _scissorEnabled = scissorEnabled;
+    _currentRasterStateDesc.ScissorEnable = _scissorEnabled;
+    bindRasterState();
+}
+
+void
+DeviceD3D11::setScissorRect(int x, int y, int width, int height)
+{
+    D3D11_RECT rc;
+    rc.left = x;
+    rc.top = y;
+    rc.right = x + width;
+    rc.bottom = y + height;
+    _immediateCtx->RSSetScissorRects(1, &rc);
 }
 
 void
@@ -1180,7 +1259,8 @@ DeviceD3D11::drawPrimitive (const IVertexDeclaration* vertexDeclaration,
                                const IVertexBuffer* vertexBuffer, 
                                const GpuTechnique* technique,
                                PrimitiveType primitiveType, 
-                               uint32_t primitiveCount) const
+                               uint32_t primitiveCount,
+                               uint32_t vertexOffset) const
 {
     _immediateCtx->IASetIndexBuffer (0, DXGI_FORMAT_R32_UINT,0);
     if (vertexBuffer->bind())
@@ -1227,7 +1307,7 @@ DeviceD3D11::drawPrimitive (const IVertexDeclaration* vertexDeclaration,
             default: 
                 break;
         }
-        _immediateCtx->Draw (vertexCount, 0);
+        _immediateCtx->Draw (vertexCount, vertexOffset);
     }
     return true;
 }
@@ -1251,7 +1331,8 @@ DeviceD3D11::drawIndexedPrimitive (const IVertexDeclaration* vertexDeclaration,
                                       const GpuTechnique* technique,
                                       PrimitiveType primitiveType, 
                                       uint32_t faceCount,
-                                      uint32_t vertexCount) const
+                                      uint32_t indexOffset,
+                                      uint32_t vertexOffset) const
 {
     bool result = false;
     if (vertexBuffer->bind() && indexBuffer->bind())
@@ -1269,7 +1350,6 @@ DeviceD3D11::drawIndexedPrimitive (const IVertexDeclaration* vertexDeclaration,
                     break;    
             }
         }
-
 
         _immediateCtx->IASetPrimitiveTopology (topology);
         //LOG ("Set topology " << (uint32_t)(topology));
@@ -1355,7 +1435,7 @@ DeviceD3D11::drawIndexedPrimitive (const IVertexDeclaration* vertexDeclaration,
             default: 
                 break;
         }        
-        _immediateCtx->DrawIndexed( indexCount, 0, 0);
+        _immediateCtx->DrawIndexed(indexCount, indexOffset, vertexOffset);
     }
     return result;
 }
@@ -1740,7 +1820,8 @@ DeviceD3D11::createTexture (const Ibl::RenderResourceParameters* data)
             dynamic_cast<const Ibl::TextureParameters*>(data))
         {
             if (textureData->type() == Ibl::FromFile ||
-                textureData->type() == Ibl::StagingFromFile)
+                textureData->type() == Ibl::StagingFromFile ||
+                textureData->type() == Ibl::Procedural)
             {
                 if (textureData->dimension() == Ibl::TwoD)
                 {

@@ -147,7 +147,8 @@ class DeviceD3D11 : public IDevice
                                               const IVertexBuffer*, 
                                               const GpuTechnique* technique,
                                               PrimitiveType, 
-                                              uint32_t) const;
+                                              uint32_t primitiveCount,
+                                              uint32_t vertexOffset) const;
 
     virtual bool               drawIndexedPrimitive (const IVertexDeclaration*, 
                                                      const IIndexBuffer*, 
@@ -155,7 +156,8 @@ class DeviceD3D11 : public IDevice
                                                      const GpuTechnique* technique,
                                                      PrimitiveType, 
                                                      uint32_t faceCount,
-                                                     uint32_t vertexCount) const;
+                                                     uint32_t indexOffset,
+                                                     uint32_t vertexOffset) const;
 
     virtual bool               blitSurfaces (const ISurface* destination, 
                                              const ISurface* src, 
@@ -171,6 +173,10 @@ class DeviceD3D11 : public IDevice
                                               float greenClear = 0.0f, 
                                               float blueClear = 0.0f, 
                                               float alphaClear = 0.0f) const;
+
+    virtual bool               scissorEnabled() const;
+    virtual void               setScissorEnabled(bool scissorEnabled);
+    virtual void               setScissorRect(int x, int y, int width, int height);
 
     virtual bool               setNullTarget (uint32_t index);
 
@@ -212,6 +218,25 @@ class DeviceD3D11 : public IDevice
 
     virtual void                setFrontFaceStencilFunction(Ibl::CompareFunction);
     virtual void                setFrontFaceStencilPass(Ibl::StencilOp compareFunc);
+
+    virtual void                setupStencil(uint8_t readMask,
+                                             uint8_t writeMask,
+                                             Ibl::CompareFunction frontCompare,
+                                             Ibl::StencilOp frontStencilFailOp,
+                                             Ibl::StencilOp frontStencilPassOp,
+                                             Ibl::StencilOp frontZFailOp,
+                                             Ibl::CompareFunction backCompare,
+                                             Ibl::StencilOp backStencilFailOp,
+                                             Ibl::StencilOp backStencilPassOp,
+                                             Ibl::StencilOp backZFailOp);
+
+    virtual void                setupStencil(uint8_t readMask,
+                                             uint8_t writeMask,
+                                             Ibl::CompareFunction frontCompare,
+                                             Ibl::StencilOp frontStencilFailOp,
+                                             Ibl::StencilOp frontStencilPassOp,
+                                             Ibl::StencilOp frontZFailOp);
+
 
     virtual void                enableStencilTest();
     virtual void                disableStencilTest();
@@ -270,17 +295,17 @@ class DeviceD3D11 : public IDevice
 
     SurfaceD3D11*              _backbuffer;
     DepthSurfaceD3D11*         _depthbuffer;
-    Ibl::FrameBuffer            _deviceFrameBuffer;
+    Ibl::FrameBuffer           _deviceFrameBuffer;
 
-    const ISurface*             _currentSurfaces [MAX_RENDER_TARGETS];
-    uint32_t                    _currentSurfaceCount;
-    uint32_t                    _currentUAVCount;
-    const IRenderResource*      _currentUnorderedSurfaces[MAX_RENDER_TARGETS];
-    const IDepthSurface*        _currentDepthSurface;
+    const ISurface*            _currentSurfaces [MAX_RENDER_TARGETS];
+    uint32_t                   _currentSurfaceCount;
+    uint32_t                   _currentUAVCount;
+    const IRenderResource*     _currentUnorderedSurfaces[MAX_RENDER_TARGETS];
+    const IDepthSurface*       _currentDepthSurface;
 
-    Ibl::DrawMode                 _drawMode;
-    Ibl::CullMode                 _cullMode;
-
+    Ibl::DrawMode              _drawMode;
+    Ibl::CullMode              _cullMode;
+    bool                       _scissorEnabled;
     ID3D11RasterizerState *    _currentRasterState;
     D3D11_RASTERIZER_DESC      _currentRasterStateDesc;
 

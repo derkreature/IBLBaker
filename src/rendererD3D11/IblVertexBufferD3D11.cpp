@@ -47,21 +47,25 @@
 
 namespace Ibl
 {
-VertexBufferD3D11::VertexBufferD3D11(Ibl::DeviceD3D11* device) : 
-    IVertexBuffer (device),
-    _locked (false),
-    _resource (0),
-    _vertexBuffer (0),
-    _shaderResourceView (0),
+VertexBufferD3D11::VertexBufferD3D11(Ibl::DeviceD3D11* device) :
+    IVertexBuffer(device),
+    _locked(false),
+    _resource(0),
+    _vertexBuffer(0),
+    _shaderResourceView(0),
     _unorderedResourceView(nullptr),
     _renderTargetView(nullptr),
     _usingUploadBuffer(false),
     _uploadBuffer(nullptr),
     _direct3d(nullptr),
     _immediateCtx(nullptr),
-    _sizeInBytes(0)
+    _sizeInBytes(0),
+    _bufferCursor(0),
+    _needsDiscard(true),
+    _isRingBuffer(false),
+    _lastCopySize(0)
 {
-    if (Ibl::DeviceD3D11* _device = 
+    if (Ibl::DeviceD3D11* _device =
         dynamic_cast <Ibl::DeviceD3D11*>(device))
     {
         _direct3d = *_device;
@@ -69,67 +73,70 @@ VertexBufferD3D11::VertexBufferD3D11(Ibl::DeviceD3D11* device) :
     }
 }
 
-size_t
-VertexBufferD3D11::size() const
+size_t VertexBufferD3D11::size() const
 {
     return _sizeInBytes;
-} 
+}
 
 VertexBufferD3D11::~VertexBufferD3D11()
 {
     free();
 }
 
-bool
-VertexBufferD3D11::initialize (const Ibl::VertexBufferParameters* data)
+bool VertexBufferD3D11::initialize(const Ibl::VertexBufferParameters* data)
 {
     _resource = Ibl::VertexBufferParameters(*data);
     return VertexBufferD3D11::create();
 }
 
-ID3D11ShaderResourceView * 
-VertexBufferD3D11::shaderResourceView() const
+ID3D11ShaderResourceView * VertexBufferD3D11::shaderResourceView() const
 {
     return _shaderResourceView;
 }
 
-ID3D11UnorderedAccessView * 
-VertexBufferD3D11::unorderedResourceView() const
+ID3D11UnorderedAccessView * VertexBufferD3D11::unorderedResourceView() const
 {
     return _unorderedResourceView;
 }
 
-ID3D11Buffer*
-VertexBufferD3D11::resource() const
+ID3D11Buffer* VertexBufferD3D11::resource() const
 {
     return _vertexBuffer;
 }
 
-void
-VertexBufferD3D11::upload() const
+void VertexBufferD3D11::upload() const
 {
     if (_uploadBuffer)
     {
         D3D11_BOX srcBox = { 0, 0, 0, _resource.sizeInBytes(), 1, 1 };
         _immediateCtx->CopySubresourceRegion(_vertexBuffer, 0, 0, 0, 0,
-                                             _uploadBuffer, 0, &srcBox);
+            _uploadBuffer, 0, &srcBox);
     }
     else
     {
-        LOG ("Attempting to upload from vertex buffer with no upload resource");
+        LOG("Attempting to upload from vertex buffer with no upload resource");
     }
 }
 
-bool
-VertexBufferD3D11::create()
+bool VertexBufferD3D11::create()
 {
+
     _sizeInBytes = _resource.sizeInBytes();
+    _isRingBuffer = _resource.ringBuffered();
+    if (_isRingBuffer)
+    {
+        // Align to 16 bytes.
+        if (_sizeInBytes % 16 != 0)
+            _sizeInBytes += 16 - (_sizeInBytes % 16);
+        _sizeInBytes *= 4;
+    }
+
     D3D11_BUFFER_DESC bd;
     memset(&bd, 0, sizeof(D3D11_BUFFER_DESC));
     bd.Usage = _resource.dynamic() ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = _resource.sizeInBytes();
+    bd.ByteWidth = _sizeInBytes;
     bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.MiscFlags =  0;
+    bd.MiscFlags = 0;
     bd.CPUAccessFlags = 0;
     bd.StructureByteStride = sizeof(float);
 
@@ -149,26 +156,27 @@ VertexBufferD3D11::create()
     {
         bd.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
         bd.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+        //bd.MiscFlags |=  D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
     }
 
     if (!_resource.dynamic())
-    {        
+    {
         D3D11_SUBRESOURCE_DATA resource;
-        memset( &resource, 0, sizeof(D3D11_SUBRESOURCE_DATA) );
+        memset(&resource, 0, sizeof(D3D11_SUBRESOURCE_DATA));
         resource.pSysMem = _resource.vertexPtr();
         resource.SysMemPitch = _resource.vertexStride();
-    
+
         if (_resource.useResource())
         {
             // UAV and binding?
-           if (FAILED(_direct3d->CreateBuffer( &bd, &resource, &_vertexBuffer)))
-           {
+            if (FAILED(_direct3d->CreateBuffer(&bd, &resource, &_vertexBuffer)))
+            {
                 return false;
-           }
+            }
         }
         else
         {
-            if(FAILED(_direct3d->CreateBuffer( &bd, 0, &_vertexBuffer)))
+            if (FAILED(_direct3d->CreateBuffer(&bd, 0, &_vertexBuffer)))
             {
                 return false;
             }
@@ -177,7 +185,7 @@ VertexBufferD3D11::create()
     else
     {
         bd.CPUAccessFlags = _usingUploadBuffer ? 0 : D3D11_CPU_ACCESS_WRITE;
-        if (FAILED(_direct3d->CreateBuffer( &bd, 0, &_vertexBuffer)))
+        if (FAILED(_direct3d->CreateBuffer(&bd, 0, &_vertexBuffer)))
         {
             return false;
         }
@@ -197,7 +205,7 @@ VertexBufferD3D11::create()
 
         if (FAILED(_direct3d->CreateShaderResourceView(_vertexBuffer, &srDesc, &_shaderResourceView)))
         {
-            LOG ("FAILED to create shader resource view for vertex buffer");
+            LOG("FAILED to create shader resource view for vertex buffer");
             return false;
         }
     }
@@ -208,13 +216,13 @@ VertexBufferD3D11::create()
 
         _uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
         _uavDesc.Buffer.FirstElement = 0;
-        _uavDesc.Buffer.NumElements  = _resource.sizeInBytes() / sizeof(float);
+        _uavDesc.Buffer.NumElements = _resource.sizeInBytes() / sizeof(float);
         _uavDesc.Format = DXGI_FORMAT_R32_FLOAT;
 
         //_uavDesc.Buffer.Flags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-        if (FAILED(_direct3d->CreateUnorderedAccessView (_vertexBuffer, &_uavDesc, &_unorderedResourceView)))
+        if (FAILED(_direct3d->CreateUnorderedAccessView(_vertexBuffer, &_uavDesc, &_unorderedResourceView)))
         {
-            LOG ("Failed to create unordered access view for vertex buffer");
+            LOG("Failed to create unordered access view for vertex buffer");
             return false;
         }
     }
@@ -226,10 +234,10 @@ VertexBufferD3D11::create()
         rtDesc.Format = findFormat(_resource.format());
         rtDesc.ViewDimension = D3D11_RTV_DIMENSION_BUFFER;
         rtDesc.Buffer.ElementOffset = 0;
-        rtDesc.Buffer.ElementWidth = elementWidth;        
+        rtDesc.Buffer.ElementWidth = elementWidth;
         if (FAILED(_direct3d->CreateRenderTargetView(_vertexBuffer, &rtDesc, &_renderTargetView)))
-        {            
-            LOG ("FAILED to create render target view for vertex buffer");
+        {
+            LOG("FAILED to create render target view for vertex buffer");
             return false;
         }
     }
@@ -243,54 +251,87 @@ VertexBufferD3D11::create()
     return true;
 }
 
-bool
-VertexBufferD3D11::free()
+bool VertexBufferD3D11::free()
 {
-    saferelease (_vertexBuffer);
-    saferelease (_shaderResourceView);
+    saferelease(_vertexBuffer);
+    saferelease(_shaderResourceView);
     saferelease(_renderTargetView);
     saferelease(_unorderedResourceView);
-    saferelease (_uploadBuffer);
+    saferelease(_uploadBuffer);
 
     return true;
 }
 
-bool
-VertexBufferD3D11::cache()
+bool VertexBufferD3D11::cache()
 {
     return true;
 }
 
-void*
-VertexBufferD3D11::lock()
+void* VertexBufferD3D11::lock(size_t byteSize)
 {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
 
-    if (_usingUploadBuffer)
+    if (_isRingBuffer)
     {
-        if (SUCCEEDED(_immediateCtx->Map (_uploadBuffer, 0, 
-                                          D3D11_MAP_WRITE_DISCARD, 0, 
-                                          &mappedResource)))
+        if (byteSize <= 0)
+        {
+            LOG("Massive mapping failure while attempting to map ring buffer");
+        }
+
+        //Align to 16 bytes.
+        if (byteSize % 16 != 0)
+            byteSize += 16 - (byteSize % 16);
+
+
+        if ((_bufferCursor + _lastCopySize + byteSize) > _sizeInBytes)
+        {
+            //_needsDiscard = true;
+            _bufferCursor = 0;
+        }
+        else
+        {
+            _bufferCursor += _lastCopySize;
+        }
+
+        // Stash the last copy size.
+        _lastCopySize = byteSize;
+
+        if (SUCCEEDED(_immediateCtx->Map(_vertexBuffer, 0,
+            _needsDiscard ? D3D11_MAP(D3D11_MAP_WRITE_DISCARD | D3D11_MAP_WRITE_NO_OVERWRITE) : D3D11_MAP_WRITE_NO_OVERWRITE, 0,
+            &mappedResource)))
         {
             _locked = true;
-            return mappedResource.pData;
+            _needsDiscard = false;
+            return ((uint8_t*)mappedResource.pData) + _bufferCursor;
         }
     }
     else
     {
-        if (SUCCEEDED(_immediateCtx->Map (_vertexBuffer, 0, 
-                                          D3D11_MAP_WRITE_DISCARD, 0, 
-                                          &mappedResource)))
+        if (_usingUploadBuffer)
         {
-            _locked = true;
-            return mappedResource.pData;
+            if (SUCCEEDED(_immediateCtx->Map(_uploadBuffer, 0,
+                D3D11_MAP_WRITE_DISCARD, 0,
+                &mappedResource)))
+            {
+                _locked = true;
+                return mappedResource.pData;
+            }
+        }
+        else
+        {
+            if (SUCCEEDED(_immediateCtx->Map(_vertexBuffer, 0,
+                D3D11_MAP_WRITE_DISCARD, 0,
+                &mappedResource)))
+            {
+                _locked = true;
+                return mappedResource.pData;
+            }
         }
     }
     return 0;
 }
 
-bool
-VertexBufferD3D11::unlock()
+bool VertexBufferD3D11::unlock()
 {
     if (_usingUploadBuffer)
     {
@@ -307,25 +348,21 @@ VertexBufferD3D11::unlock()
     return true;
 }
 
-bool
-VertexBufferD3D11::bind() const
+bool VertexBufferD3D11::bind(uint32_t bufferOffset) const
 {
-    uint32_t offset = 0;
+    uint32_t offset = _bufferCursor+bufferOffset;
     uint32_t stride = _vertexDeclaration->vertexStride();
     _immediateCtx->IASetVertexBuffers(0, 1, &_vertexBuffer, &stride, &offset);
     return true;
 }
 
-bool
-VertexBufferD3D11::bindToStreamOut() const
+bool VertexBufferD3D11::bindToStreamOut() const
 {
     // Set stream out to null
     ID3D11Buffer *buffer[1];
-    buffer [0] = _vertexBuffer;
+    buffer[0] = _vertexBuffer;
     UINT offset[1] = { 0 };
-    _immediateCtx->SOSetTargets (1, buffer, offset);
+    _immediateCtx->SOSetTargets(1, buffer, offset);
     return true;
 }
-
-
 }

@@ -907,6 +907,37 @@ TextureD3D11::unmap() const
 }
 
 bool
+TextureD3D11::writeSubRegion(const Ibl::byte* srcPtr, uint32_t offsetX, uint32_t offsetY, uint32_t w, uint32_t h, uint32_t bytesPerPixel)
+{
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+
+    uint32_t srcRowPitch = bytesPerPixel * width();
+    uint32_t rowCopyPitch = width() * bytesPerPixel;
+
+    if (SUCCEEDED(_immediateCtx->Map(texture(), 0,
+        D3D11_MAP_WRITE, 0,
+        &mappedResource)))
+    {
+        for (uint32_t rowId = offsetY; rowId < h; rowId++)
+        {
+            Ibl::byte* dstPtr = (Ibl::byte*)mappedResource.pData + ((rowId * srcRowPitch) + (offsetX * bytesPerPixel));
+            memcpy(dstPtr, srcPtr, rowCopyPitch);
+            srcPtr += w * bytesPerPixel;
+        }
+
+        _immediateCtx->Unmap(texture(), 0);
+
+        LOG("Success in write procedural texture");
+        return true;
+    }
+    else
+    {
+        LOG("Failed to write procedural texture");
+        return false;
+    }
+}
+
+bool
 TextureD3D11::write (const Ibl::byte* ptr)
 {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -923,7 +954,7 @@ TextureD3D11::write (const Ibl::byte* ptr)
 
         _immediateCtx->Unmap(texture(), 0);
 
-        //LOG ("Success in write procedural texture");FC
+        LOG ("Success in write procedural texture");
         return true;
     }
     else
