@@ -118,6 +118,12 @@ namespace Ibl
         return _a < _edge ? 0.0f : 1.0f;
     }
 
+
+    inline float pulse(float _a, float _start, float _end)
+    {
+        return step(_a, _start) - step(_a, _end);
+    }
+
     // Lifted from bgfx.
     inline void rgbToHsv(float _hsv[3], const float _rgb[3])
     {

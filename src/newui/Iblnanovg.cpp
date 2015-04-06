@@ -40,10 +40,7 @@
 
 namespace
 {
-//#include "vs_nanovg_fill.bin.h"
-//#include "fs_nanovg_fill.bin.h"
     static Ibl::IDevice* s_Device;
-    static Ibl::UIRenderer* _uiRenderer;
     static Ibl::IVertexDeclaration* s_nvgDecl;
 
     enum GLNVGshaderType
@@ -55,7 +52,8 @@ namespace
     };
 
     // These are additional flags on top of NVGimageFlags.
-    enum NVGimageFlagsGL {
+    enum NVGimageFlagsGL 
+    {
         NVG_IMAGE_NODELETE = 1<<16, // Do not delete GL texture handle.
     };
 
@@ -227,18 +225,6 @@ namespace
             }
         }
 
-        /* // In place set.
-        gl->u_scissorMat      = bgfx::createUniform("u_scissorMat",      bgfx::UniformType::Uniform3x3fv);
-        gl->u_paintMat        = bgfx::createUniform("u_paintMat",        bgfx::UniformType::Uniform3x3fv);
-        gl->u_innerCol        = bgfx::createUniform("u_innerCol",        bgfx::UniformType::Uniform4fv);
-        gl->u_outerCol        = bgfx::createUniform("u_outerCol",        bgfx::UniformType::Uniform4fv);
-        gl->u_viewSize        = bgfx::createUniform("u_viewSize",        bgfx::UniformType::Uniform2fv);
-        gl->u_scissorExtScale = bgfx::createUniform("u_scissorExtScale", bgfx::UniformType::Uniform4fv);
-        gl->u_extentRadius    = bgfx::createUniform("u_extentRadius",    bgfx::UniformType::Uniform4fv);
-        gl->u_params          = bgfx::createUniform("u_params",          bgfx::UniformType::Uniform4fv);
-        gl->s_tex             = bgfx::createUniform("s_tex",             bgfx::UniformType::Uniform1i);
-        */
-
         std::vector<Ibl::VertexElement> vertexElements;
         vertexElements.push_back(Ibl::VertexElement(0, 0, Ibl::FLOAT2, Ibl::METHOD_DEFAULT, Ibl::POSITION, 0));
         vertexElements.push_back(Ibl::VertexElement(0, 8, Ibl::FLOAT2, Ibl::METHOD_DEFAULT, Ibl::TEXCOORD, 0));
@@ -277,22 +263,18 @@ namespace
         uint32_t bytesPerPixel = NVG_TEXTURE_RGBA == tex->type ? 4 : 1;
         uint32_t pitch = tex->width * bytesPerPixel;
 
-        if (NULL != _rgba)
-        {
-            //mem = bgfx::alloc(tex->height * pitch);
-            //bgfx::imageSwizzleBgra8(tex->width, tex->height, pitch, _rgba, mem->data);
-        }
 
         static int textureId = 1;
 
         Ibl::TextureParameters textureData =
-            Ibl::TextureParameters("Normal Offsets Texture",
+            Ibl::TextureParameters("nanovg texture",
             Ibl::TwoD,
             Ibl::Procedural,
             NVG_TEXTURE_RGBA == _type ? Ibl::PF_BYTE_RGBA : Ibl::PF_L8,
             Ibl::Vector3i(tex->width, tex->height, 1));
         tex->texture = s_Device->createTexture(&textureData);
-        tex->texture->write(_rgba);
+        if (_rgba != nullptr)
+            tex->texture->write(_rgba);
         tex->id = textureId;
         textureId++;
 
@@ -381,26 +363,50 @@ namespace
     static void nvg_copyMatrix3to4(float* pDest, const float* pSource)
     {
         unsigned int i;
-        for (i = 0; i < 4; i++)
+        for (i = 0; i < 3; i++)
         {
             memcpy(&pDest[i * 4], &pSource[i * 3], sizeof(float) * 3);
         }
     }
 
+    static struct NVGcolor glnvg__premulColor(struct NVGcolor c)
+    {
+        c.r *= c.a;
+        c.g *= c.a;
+        c.b *= c.a;
+        return c;
+    }
+
+    static void glnvg__xformToMat3x3(float* m3, float* t)
+    {
+        m3[0] = t[0];
+        m3[1] = t[1];
+        m3[2] = 0.0f;
+        m3[3] = t[2];
+        m3[4] = t[3];
+        m3[5] = 0.0f;
+        m3[6] = t[4];
+        m3[7] = t[5];
+        m3[8] = 1.0f;
+    }
+
+
+
     static int glnvg__convertPaint(struct GLNVGcontext* gl, struct GLNVGfragUniforms* frag, struct NVGpaint* paint,
                                    struct NVGscissor* scissor, float width, float fringe)
     {
         struct GLNVGtexture* tex = NULL;
-        float invxform[6] = {};
-        float transform[16] = {};
+        float invxform[6], paintMat[9], scissorMat[9];
 
         memset(frag, 0, sizeof(*frag));
 
-        frag->innerCol = paint->innerColor;
-        frag->outerCol = paint->outerColor;
+        frag->innerCol = glnvg__premulColor(paint->innerColor);
+        frag->outerCol = glnvg__premulColor(paint->outerColor);
 
-        glnvg__xformInverse(invxform, paint->xform);
-        nvg_copyMatrix3to4(frag->paintMat, invxform);
+
+        nvgTransformInverse(invxform, paint->xform);
+        glnvg__xformToMat3x3(paintMat, invxform);
+        nvg_copyMatrix3to4(frag->paintMat, paintMat);
 
         if (scissor->extent[0] < 0.5f || scissor->extent[1] < 0.5f)
         {
@@ -412,13 +418,15 @@ namespace
         }
         else
         {
-            glnvg__xformInverse(invxform, scissor->xform);
-            nvg_copyMatrix3to4(frag->scissorMat, invxform);
+            nvgTransformInverse(invxform, scissor->xform);
+            glnvg__xformToMat3x3(scissorMat, invxform);
             frag->scissorExt[0] = scissor->extent[0];
             frag->scissorExt[1] = scissor->extent[1];
-            frag->scissorScale[0] = sqrtf(scissor->xform[0]*scissor->xform[0] + scissor->xform[2]*scissor->xform[2]) / fringe;
-            frag->scissorScale[1] = sqrtf(scissor->xform[1]*scissor->xform[1] + scissor->xform[3]*scissor->xform[3]) / fringe;
+            frag->scissorScale[0] = sqrtf(scissor->xform[0] * scissor->xform[0] + scissor->xform[2] * scissor->xform[2]) / fringe;
+            frag->scissorScale[1] = sqrtf(scissor->xform[1] * scissor->xform[1] + scissor->xform[3] * scissor->xform[3]) / fringe;
         }
+        nvg_copyMatrix3to4(frag->scissorMat, scissorMat);
+
 
         memcpy(frag->extent, paint->extent, sizeof(frag->extent));
         frag->strokeMult = (width*0.5f + fringe*0.5f) / fringe;
@@ -472,7 +480,6 @@ namespace
         const Ibl::GpuVariable*      paintMatVariable = nullptr;
         const Ibl::GpuVariable*      innerColVariable= nullptr;
         const Ibl::GpuVariable*      outerColVariable = nullptr;
-
         const Ibl::GpuVariable*      scissorExtScaleVariable = nullptr;
         const Ibl::GpuVariable*      extentRadiusVariable = nullptr;
         const Ibl::GpuVariable*      paramsVariable = nullptr;
@@ -489,21 +496,31 @@ namespace
         gl->prog->getParameterByName("s_tex", texVariable);
 
         struct GLNVGfragUniforms* frag = nvg__fragUniformPtr(gl, uniformOffset);
+
         if (scissorMatVariable)
-            scissorMatVariable->setMatrix(frag->scissorMat);
+            scissorMatVariable->setMatrix(&frag->scissorMat[0]);
         if (paintMatVariable)
-            paintMatVariable->setMatrix(frag->paintMat);
+            paintMatVariable->setMatrix(&frag->paintMat[0]);
 
         if (innerColVariable)
-            innerColVariable->setVector(frag->innerCol.rgba);
+            innerColVariable->setVector(&frag->innerCol.rgba[0]);
         if (outerColVariable)
-            outerColVariable->setVector(frag->outerCol.rgba);
+            outerColVariable->setVector(&frag->outerCol.rgba[0]);
+
+        Ibl::Vector4f scissorExt(frag->scissorExt[0], frag->scissorExt[1], frag->scissorScale[0], frag->scissorScale[1]);
         if (scissorExtScaleVariable)
-            scissorExtScaleVariable->set(&frag->scissorExt[0], sizeof(float) * 2);
+            scissorExtScaleVariable->setVector(&scissorExt.x);
+
+
+        Ibl::Vector4f extentRadius = Ibl::Vector4f(frag->extent[0], frag->extent[1], frag->radius, 0);
         if (extentRadiusVariable)
-            extentRadiusVariable->set(&frag->extent[0], sizeof(float) * 2);
+            extentRadiusVariable->setVector(&extentRadius.x);
+
+        // u_param
+
+        Ibl::Vector4f params = Ibl::Vector4f(frag->feather, frag->strokeMult, frag->texType, frag->type);
         if (paramsVariable)
-            paramsVariable->set(&frag->feather, sizeof(float));
+            paramsVariable->setVector(&params.x);
 
         Ibl::ITexture* handle = nullptr;
         gl->th = 0;
@@ -533,15 +550,27 @@ namespace
     static void fan(uint32_t _start, uint32_t _count)
     {
         uint32_t numTris = _count-2;
-        uint32_t* data = (uint32_t*)_uiRenderer->indexBuffer()->lock(numTris * 3);
+        Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
+        uint32_t* data = (uint32_t*)uiRenderer->indexBuffer()->lock(numTris * 3 * sizeof(uint32_t));
         for (uint32_t ii = 0; ii < numTris; ++ii)
         {
             data[ii*3+0] = _start;
             data[ii*3+1] = _start + ii + 1;
             data[ii*3+2] = _start + ii + 2;
         }
+        uiRenderer->indexBuffer()->unlock();
 
-        _uiRenderer->setDrawIndexed(true);
+        uiRenderer->setDrawIndexed(true);
+    }
+
+    void setupNanoVgBlending()
+    {
+        s_Device->setBlendProperty(Ibl::OpAdd);
+        s_Device->setSrcFunction(Ibl::BlendOne);
+        s_Device->setAlphaSrcFunction(Ibl::BlendOne);
+        s_Device->setDestFunction(Ibl::InverseSourceAlpha);
+        s_Device->setAlphaDestFunction(Ibl::InverseSourceAlpha);
+        s_Device->setAlphaBlendProperty(Ibl::OpAdd);
     }
 
     static void glnvg__fill(struct GLNVGcontext* gl, struct GLNVGcall* call)
@@ -550,127 +579,164 @@ namespace
         int i, npaths = call->pathCount;
 
         // set bindpoint for solid loc
+        s_Device->setZFunction(Ibl::LessEqual);
         nvgRenderSetUniforms(gl, call->uniformOffset, 0);
         s_Device->setCullMode(Ibl::CullNone);
         s_Device->enableStencilTest();
+        s_Device->disableZTest();
+        s_Device->disableAlphaBlending();
+        s_Device->setColorWriteState(false, false, false, false);
+        Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
 
         // TODO, need primitive types, culling and blend setup.
-
+        s_Device->disableDepthWrite();
         for (i = 0; i < npaths; i++)
         {
             if (2 < paths[i].fillCount)
             {
-                _uiRenderer->setPrimitiveType(Ibl::TriangleList);
-                _uiRenderer->setShader(gl->prog);
-
+                uiRenderer->setPrimitiveType(Ibl::TriangleList);
+                uiRenderer->setShader(gl->prog);
+                //D3D11_DEPTH_STENCILOP_DESC
                 s_Device->setupStencil(0xff, 0xff, 
-                                       Ibl::Always, Ibl::StencilKeep, Ibl::StencilKeep, Ibl::StencilIncrement,
-                                       Ibl::Always, Ibl::StencilKeep, Ibl::StencilKeep, Ibl::StencilDecrement);
+                                       Ibl::Always, Ibl::StencilKeep, Ibl::StencilIncrement, Ibl::StencilKeep, 
+                                       Ibl::Always, Ibl::StencilKeep, Ibl::StencilDecrement, Ibl::StencilKeep);
 
-                _uiRenderer->setVertexBuffer(gl->tvb);
+                uiRenderer->setVertexBuffer(gl->tvb);
                 //bgfx::setTexture(0, gl->s_tex, gl->th);
                 fan(paths[i].fillOffset, paths[i].fillCount);
 
                 // Input to render is the index count if an index buffer is bound.
-                _uiRenderer->render((paths[i].fillCount-2)*3, 0);
-                _uiRenderer->setDrawIndexed(false);
+                uiRenderer->render((paths[i].fillCount-2)*3, 0);
+                uiRenderer->setDrawIndexed(false);
             }
         }
 
         // Draw aliased off-pixels
         nvgRenderSetUniforms(gl, call->uniformOffset + gl->fragSize, call->image);
-        _uiRenderer->setPrimitiveType(Ibl::TriangleStrip);
+
+        /*
+        s_Device->setSrcFunction(Ibl::BlendOne);
+        s_Device->setBlendProperty(Ibl::OpAdd);
+        s_Device->setAlphaSrcFunction(Ibl::BlendOne);
+        s_Device->setDestFunction(Ibl::InverseSourceAlpha);
+        s_Device->setAlphaDestFunction(Ibl::InverseSourceAlpha);
+        s_Device->setAlphaBlendProperty(Ibl::OpAdd);
+        */
+
+        setupNanoVgBlending();
+
+        s_Device->setColorWriteState(true, true, true, true);
+
+        s_Device->enableAlphaBlending();
+        s_Device->setCullMode(Ibl::CW);
+        uiRenderer->setPrimitiveType(Ibl::TriangleStrip);
         if (gl->edgeAntiAlias)
         {
-            // Draw fringes
+            // Draw fringesD3D11_DEPTH_STENCILOP_DESC
             for (i = 0; i < npaths; i++)
             {
-                _uiRenderer->setShader(gl->prog);
+                uiRenderer->setShader(gl->prog);
 
                 s_Device->setupStencil(0xff, 0xff, Ibl::Equal, Ibl::StencilKeep, Ibl::StencilKeep, Ibl::StencilKeep);
 
-                _uiRenderer->setVertexBuffer(gl->tvb);
-                //bgfx::setTexture(0, gl->s_tex, gl->th);
-                //bgfx::submit(gl->viewid);
-                _uiRenderer->render(paths[i].strokeCount, paths[i].strokeOffset);
+                uiRenderer->setVertexBuffer(gl->tvb);
+                uiRenderer->render(paths[i].strokeCount, paths[i].strokeOffset);
             }
         }
 
         // Draw fill
-        _uiRenderer->setShader(gl->prog);        
-        _uiRenderer->setVertexBuffer(gl->tvb);
-        s_Device->setupStencil(0xff, 0xff, Ibl::NotEqual, Ibl::StencilZero, Ibl::StencilZero, Ibl::StencilZero );
+        s_Device->setCullMode(Ibl::CullNone);
+        s_Device->setupStencil(0xff, 0xff, Ibl::NotEqual, Ibl::StencilZero, Ibl::StencilZero, Ibl::StencilZero);
+        uiRenderer->setPrimitiveType(Ibl::TriangleList);
 
-        _uiRenderer->render(call->vertexCount, call->vertexOffset);
+        uiRenderer->setShader(gl->prog);        
+        uiRenderer->setVertexBuffer(gl->tvb);
+
+
+        uiRenderer->render(call->vertexCount, call->vertexOffset);
 
         s_Device->disableStencilTest();
+        s_Device->enableDepthWrite();
+        s_Device->enableZTest();
+        // New
     }
 
     static void glnvg__convexFill(struct GLNVGcontext* gl, struct GLNVGcall* call)
     {
-
+        
         struct GLNVGpath* paths = &gl->paths[call->pathOffset];
         int i, npaths = call->pathCount;
+        Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
 
         nvgRenderSetUniforms(gl, call->uniformOffset, call->image);
-        _uiRenderer->setPrimitiveType(Ibl::TriangleList);
+        uiRenderer->setPrimitiveType(Ibl::TriangleList);
 
         for (i = 0; i < npaths; i++)
         {
             if (paths[i].fillCount == 0) continue;
-            _uiRenderer->setShader(gl->prog);
+            uiRenderer->setShader(gl->prog);
             //bgfx::setState(gl->state);
-            _uiRenderer->setVertexBuffer(gl->tvb);
+            uiRenderer->setVertexBuffer(gl->tvb);
             //bgfx::setTexture(0, gl->s_tex, gl->th);
             fan(paths[i].fillOffset, paths[i].fillCount);
 
             // Index count. Offset is baked into the indices.
-            _uiRenderer->render((paths[i].fillCount - 2) * 3, 0);
+            uiRenderer->render((paths[i].fillCount - 2) * 3, 0);
         }
 
-        _uiRenderer->setPrimitiveType(Ibl::TriangleStrip);
+        uiRenderer->setPrimitiveType(Ibl::TriangleStrip);
         if (gl->edgeAntiAlias)
         {
             // Draw fringes
             for (i = 0; i < npaths; i++)
             {
-                _uiRenderer->setShader(gl->prog);
+                uiRenderer->setShader(gl->prog);
                 //bgfx::setTexture(0, gl->s_tex, gl->th);
                 // Vertex count and vertex offset.
-                _uiRenderer->render(paths[i].strokeCount, paths[i].strokeOffset);
+                uiRenderer->render(paths[i].strokeCount, paths[i].strokeOffset);
             }
         }
+        // New primitive
+        uiRenderer->setPrimitiveType(Ibl::TriangleList);
     }
 
     static void glnvg__stroke(struct GLNVGcontext* gl, struct GLNVGcall* call)
     {
+        // TODO: State setup.
         struct GLNVGpath* paths = &gl->paths[call->pathOffset];
         int npaths = call->pathCount, i;
         nvgRenderSetUniforms(gl, call->uniformOffset, call->image);
 
+        Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
         // Draw Strokes
-        _uiRenderer->setPrimitiveType(Ibl::TriangleStrip);
+        uiRenderer->setPrimitiveType(Ibl::TriangleStrip);
         for (i = 0; i < npaths; i++)
         {
-            _uiRenderer->setShader(gl->prog);
-
-            _uiRenderer->setVertexBuffer(gl->tvb);
-            //bgfx::setTexture(0, gl->s_tex, gl->th);
-            _uiRenderer->render(paths[i].strokeCount, paths[i].strokeOffset);
+            uiRenderer->setShader(gl->prog);
+            uiRenderer->setVertexBuffer(gl->tvb);
+            uiRenderer->render(paths[i].strokeCount, paths[i].strokeOffset);
         }
+        // New primitive
+        uiRenderer->setPrimitiveType(Ibl::TriangleList);
+        
     }
 
     static void glnvg__triangles(struct GLNVGcontext* gl, struct GLNVGcall* call)
     {
-        _uiRenderer->setPrimitiveType(Ibl::TriangleList);
+        /*
+        // TODO: State setup.
+        Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
+        uiRenderer->setPrimitiveType(Ibl::TriangleList);
         if (3 <= call->vertexCount)
         {
             nvgRenderSetUniforms(gl, call->uniformOffset, call->image);
 
-            _uiRenderer->setShader(gl->prog);
-            //_uiRenderer->setState(gl->state);
-            _uiRenderer->render(call->vertexCount, call->vertexOffset);
+            uiRenderer->setShader(gl->prog);
+            // And other mixed state. Uggh.
+            //uiRenderer->setState(gl->state);
+            uiRenderer->render(call->vertexCount, call->vertexOffset);
         }
+        */
     }
 
     static void nvgRenderFlush(void* _userPtr)
@@ -678,32 +744,16 @@ namespace
         struct GLNVGcontext* gl = (struct GLNVGcontext*)_userPtr;
         if (gl->ncalls > 0)
         {
-            gl->tvb = _uiRenderer->vertexBuffer(s_nvgDecl);
+            Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
+            gl->tvb = uiRenderer->vertexBuffer(s_nvgDecl);
             size_t vertexBufferSize = gl->nverts * sizeof(struct NVGvertex);
             void* vertexBufferData = gl->tvb->lock(vertexBufferSize);
             memcpy(vertexBufferData, gl->verts, gl->nverts * sizeof(struct NVGvertex) );
             gl->tvb->unlock();
 
-            // TODO: Blend Setup
-//            gl->state = 0
-            //                | BGFX_STATE_RGB_WRITE
-            //                | BGFX_STATE_ALPHA_WRITE
-            //    ;
+            uiRenderer->device()->enableAlphaBlending();
+            uiRenderer->device()->setupBlendPipeline(Ibl::BlendAlpha);
 
-// 			if (alphaBlend == NVG_PREMULTIPLIED_ALPHA)
-// 			{
-// 				gl->state |= BGFX_STATE_BLEND_FUNC_SEPARATE(
-// 								  BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA
-// 								, BGFX_STATE_BLEND_ONE,       BGFX_STATE_BLEND_INV_SRC_ALPHA
-// 								);
-// 			}
-// 			else
-/*            {
-                gl->state |= BGFX_STATE_BLEND_FUNC(
-                                BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA
-                                );
-            }
-*/
             const Ibl::GpuVariable*      viewSizeVariable = nullptr;
             gl->prog->getParameterByName("u_viewSize", viewSizeVariable);
             if (viewSizeVariable)
@@ -731,6 +781,7 @@ namespace
                     break;
                 }
             }
+            uiRenderer->device()->disableAlphaBlending();
         }
 
         // Reset calls

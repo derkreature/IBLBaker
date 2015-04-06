@@ -341,7 +341,7 @@ ShaderD3D11::createEffect ()
                     memset(&buffer[0], 0, errors->GetBufferSize()+1);
                     memcpy(&buffer[0], errors->GetBufferPointer(), errors->GetBufferSize());
                     generateDumpFile(IShader::filePathName(), buffer, shaderStream());
-                    // LOG ("Error Compiling ShaderD3D11" << buffer);
+                    LOG ("Error Compiling ShaderD3D11" << buffer);
                     delete[] (buffer);
                 } 
                 return false;
@@ -505,7 +505,7 @@ ShaderD3D11::getParameterByName (const std::string& parameterName,
             return true;
         }
     }
-    LOG ("Failed to find parameter by name = " << parameterName << " for shader " << name()  << "\n");
+    // LOG ("Failed to find parameter by name = " << parameterName << " for shader " << name()  << "\n");
     return false;
 }
 

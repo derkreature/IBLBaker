@@ -103,8 +103,9 @@ InputLayoutCacheD3D11::bindLayout (const Ibl::VertexDeclarationD3D11* vertexDecl
                                                   &inputLayout)))
         {
             LOG ("Failed to setup input layout");
+            return false;
         }
-       
+
         _layouts.insert (std::make_pair (vertexDeclaration, inputLayout));
         it = _layouts.find (vertexDeclaration);
     }

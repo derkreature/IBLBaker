@@ -58,6 +58,7 @@
 #include <IblIBLProbe.h>
 #include <IblBrdf.h>
 #include <IblImageWidget.h>
+#include <Iblimgui.h>
 #include <CommDlg.h>
 
 namespace Ibl
@@ -460,6 +461,37 @@ ApplicationHUD::update(double elapsedTime)
 void
 ApplicationHUD::render(const Ibl::Camera* camera)
 {
+    static int32_t scrollArea = 0;
+    int32_t width = _deviceInterface->backbuffer()->width();
+    int32_t height = _deviceInterface->backbuffer()->height();
+#define IMGUI_IMPL 0
+#if IMGUI_IMPL
+// Bgfx rip off code for testing :).
+    LOG("x = " << _inputState->_x << " y = " << _inputState->_y);
+
+    imguiBeginFrame(_inputState, _inputState->_cursorPositionX, _inputState->_cursorPositionY, _inputState->leftMouseDown() ? IMGUI_MBUT_LEFT : 0 | _inputState->rightMouseDown() ? IMGUI_MBUT_RIGHT : 0, 0, width, height);
+
+    float speed, middleGray, white, threshold;
+    speed = middleGray = white = threshold = 0;
+
+    imguiBeginScrollArea("Settings", 5, 10, width / 5, height / 3, &scrollArea);
+    imguiSeparatorLine();
+
+    imguiSlider("Speed", speed, 0.0f, 1.0f, 0.01f);
+    imguiSeparator();
+
+    imguiSlider("Middle gray", middleGray, 0.1f, 1.0f, 0.01f);
+    imguiSlider("White point", white, 0.1f, 2.0f, 0.01f);
+    imguiSlider("Threshold", threshold, 0.1f, 2.0f, 0.01f);
+    static float blah[3] = {0.0, 1.0, 1.0};
+    static bool activated = true;
+    imguiColorWheel("Diffuse color:", blah, activated);
+    imguiEndScrollArea();
+
+
+    imguiEndFrame();
+#endif
+
     RenderHUD::render(camera);
 }
 

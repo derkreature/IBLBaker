@@ -28,9 +28,6 @@
     <Filter Include="rendererD3D11\D3D11Effects\Binary">
       <UniqueIdentifier>{8add02a3-a104-4b46-b00f-a54c3dd3bdd9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ui">
-      <UniqueIdentifier>{4ec3db26-2c81-462d-95d7-87dea3210703}</UniqueIdentifier>
-    </Filter>
     <Filter Include="codecs">
       <UniqueIdentifier>{ffd3da9a-136b-42ef-9f14-aa8f22a678db}</UniqueIdentifier>
     </Filter>
@@ -48,6 +45,18 @@
     </Filter>
     <Filter Include="tiny_obj_loader">
       <UniqueIdentifier>{66d906d4-ae67-40ae-a4ee-a3a3a8824d06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oldui">
+      <UniqueIdentifier>{4ec3db26-2c81-462d-95d7-87dea3210703}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{b6249836-d994-419d-b287-ec117dd3b0ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui\imgui">
+      <UniqueIdentifier>{5e065cce-63fb-4de4-b0b4-43dbcc851ccc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui\nanosvg">
+      <UniqueIdentifier>{f1a4f7bf-8513-4b66-8f66-ee8a55ea6eb0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -388,72 +397,93 @@
       <Filter>rendererD3D11</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblButton.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblCheckBox.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblComboBox.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblControl.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblDialogBase.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblDialogResourceManager.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblDynamicRenderer.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblEditBox.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblFont.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblFontMgr.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblImageWidget.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblListBox.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblRadioButton.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblRenderHUD.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblScrollBar.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblSlider.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblSprite.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblStatic.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblWidgetDialog.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblWidgetTypes.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="ui\IblWidgetUIElement.cpp">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="nodes\IblBrdf.cpp">
       <Filter>nodes</Filter>
     </ClCompile>
     <ClCompile Include="dependencies\tinyobjloader\tiny_obj_loader.cc" />
+    <ClCompile Include="dependencies\imgui\imgui.cpp">
+      <Filter>ui\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="newui\Iblimgui.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="newui\Iblnanovg.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="newui\ocornut_imgui.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\imgui\stb_image.c">
+      <Filter>ui\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="newui\IblUIRenderer.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\nanovg\nanovg.c">
+      <Filter>ui\nanosvg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rendererD3D11\effectsD3D11\Inc\d3dx11dbg.h">
@@ -857,75 +887,108 @@
       <Filter>rendererD3D11</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblButton.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblCheckBox.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblComboBox.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblControl.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblDialogBase.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblDialogResourceManager.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblDynamicRenderer.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblEditBox.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblFont.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblFontMgr.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblImageWidget.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblListBox.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblRadioButton.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblRenderHUD.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblScrollBar.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblSlider.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblSprite.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblStatic.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblWidgetAPI.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblWidgetDialog.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblWidgetTypes.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="ui\IblWidgetUIElement.h">
-      <Filter>ui</Filter>
+      <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="nodes\IblBrdf.h">
       <Filter>nodes</Filter>
     </ClInclude>
     <ClInclude Include="dependencies\tinyobjloader\tiny_obj_loader.h" />
+    <ClInclude Include="dependencies\imgui\imconfig.h">
+      <Filter>ui\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imgui.h">
+      <Filter>ui\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\stb_rect_pack.h">
+      <Filter>ui\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\stb_textedit.h">
+      <Filter>ui\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\stb_truetype.h">
+      <Filter>ui\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\nanovg\fontstash.h">
+      <Filter>ui\nanosvg</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\nanovg\fs_nanovg_fill.bin.h">
+      <Filter>ui\nanosvg</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\nanovg\nanovg.h">
+      <Filter>ui\nanosvg</Filter>
+    </ClInclude>
+    <ClInclude Include="newui\Iblimgui.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="newui\ocornut_imgui.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="newui\IblUIRenderer.h">
+      <Filter>ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="rendererD3D11\effectsD3D11\EffectVariable.inl">

@@ -18,17 +18,17 @@ struct PSOutput
 
 Texture2D s_tex;
 
-SamplerState linearSampler;
+SamplerState linearSampler
 {
     Filter = MIN_MAG_MIP_LINEAR;
-    AddressU = REPEAT;
-    AddressV = REPEAT;
+    AddressU = WRAP;
+    AddressV = WRAP;
     MipLODBias = 0.0f;
 };
 
 float4x4 u_viewProj;
 
-void vs(VSInput vsInput)
+VSOutput vs(VSInput input)
 {
     VSOutput output;
 
@@ -41,15 +41,14 @@ void vs(VSInput vsInput)
 float4 u_imageLodEnabled;
 float4 u_swizzle;
 
-PSOutput ps(VSOutput psInput)
+PSOutput ps(VSOutput input)
 {
     PSOutput output;
 
-    float texel = dot(s_tex.SampleLevel(linearSampler, v_texcoord0, u_imageLodEnabled.x).xyz, u_swizzle);
+    float texel = dot(s_tex.SampleLevel(linearSampler, input.v_texcoord0, u_imageLodEnabled.x).xyz, u_swizzle);
     float alpha = 0.2 + 0.8*u_imageLodEnabled.y;
     float4 color = float4(texel, texel, texel, alpha);
-
-    output.output0 = texel;
+    output.output0 = color;
 
     return output;
 }

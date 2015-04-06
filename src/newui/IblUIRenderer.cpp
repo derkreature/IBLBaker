@@ -54,6 +54,21 @@
 
 namespace Ibl
 {
+
+UIRenderer*         UIRenderer::_uiRenderer = nullptr;
+
+void
+UIRenderer::create(Ibl::IDevice* device)
+{
+    _uiRenderer = new UIRenderer(device);
+}
+
+UIRenderer*
+UIRenderer::renderer()
+{
+    return _uiRenderer;
+}
+
 UIRenderer::UIRenderer(Ibl::IDevice* device) :
     Ibl::Mesh (device),
     _vertexOffset(0)
@@ -62,23 +77,39 @@ UIRenderer::UIRenderer(Ibl::IDevice* device) :
     setPrimitiveType(Ibl::TriangleList);
 
     // Setup a Default Material.
+    setMaterial(new Material(device));
+
+    // Setup Ringbuffered index buffer.
+    IndexBufferParameters ibResource = IndexBufferParameters(sizeof(uint32_t)*10000, true, true);
+    _indexBuffer = _device->createIndexBuffer(&ibResource);
+    if (!_indexBuffer)
+    {
+        LOG("Failed to create ringed IndexBuffer for UIRenderer")
+        assert(0);
+    }
 }
 
 UIRenderer::~UIRenderer()
 {
 }
 
+Ibl::IDevice*
+UIRenderer::device()
+{
+    return _device;
+}
 
 void
 UIRenderer::setDrawIndexed(bool drawIndexed)
 {
-
+    _drawIndexed = drawIndexed;
 }
 
 void
 UIRenderer::setVertexBuffer(IVertexBuffer* vertexBuffer)
 {
     _currentVertexBuffer = vertexBuffer;
+    _vertexDeclaration = vertexBuffer->vertexDeclaration();
 }
 
 void
@@ -88,10 +119,43 @@ UIRenderer::setShader(const Ibl::IShader* shader)
     _material->setTechnique(shader->getTechnique(0));
 }
 
+void
+UIRenderer::setViewProj(const Ibl::Matrix44f& ortho)
+{
+    _viewProj = ortho;
+}
+
 IVertexBuffer*
 UIRenderer::vertexBuffer(IVertexDeclaration* declaration)
 {
-    return nullptr;
+    // This is a bit of a waste. I really prefer the bgfx "Transient Buffer" idea.
+
+    // Find the matching vertex declaration for this buffer.
+    // If it doesn't exist, create it.
+    auto vit = _vertexBuffers.find(declaration);
+    if (vit == _vertexBuffers.end())
+    {
+        // Create one.
+        VertexBufferParameters vertexBufferParameters;
+        vertexBufferParameters =
+            VertexBufferParameters((uint32_t)(10000 * (declaration->vertexStride())), true, false,
+            declaration->vertexStride(),
+            nullptr, false, true);
+        if (IVertexBuffer* vertexBuffer = _device->createVertexBuffer(&vertexBufferParameters))
+        {
+            vertexBuffer->setVertexDeclaration(declaration);
+            _vertexBuffers[declaration] = vertexBuffer;
+            vit = _vertexBuffers.find(declaration);
+            assert(vit != _vertexBuffers.end());
+        }
+        else
+        {
+            LOG("Failed to create ringbuffered vertex buffer for UIRenderer");
+            assert(0);
+        }
+    }
+
+    return vit->second;
 }
 
 IIndexBuffer*
@@ -114,8 +178,7 @@ UIRenderer::render(const Ibl::RenderRequest* request,
     }
     else
     {
-
-        return _device->drawPrimitive(_vertexDeclaration, _currentVertexBuffer, technique,
+        return _device->drawPrimitive(_currentVertexBuffer->vertexDeclaration(), _currentVertexBuffer, technique,
             (PrimitiveType)primitiveType(), _primitiveCount, _vertexOffset);
     }
 
@@ -136,6 +199,34 @@ UIRenderer::render(uint32_t count, uint32_t vertexOffset)
     else if (primitiveType() == Ibl::TriangleStrip)
     {
         _primitiveCount = (count-1) / 2;
+    }
+
+    const Ibl::GpuVariable* viewProjVariable = nullptr;
+    if (shader->getParameterByName("u_viewProj", viewProjVariable))
+    {
+        const float L = 0.0f;
+        const float R = _device->backbuffer()->width();
+        const float B = _device->backbuffer()->height();
+        const float T = 0.0f;
+        const float mvp[4][4] =
+        {
+            { 2.0f / (R - L), 0.0f, 0.0f, 0.0f },
+            { 0.0f, 2.0f / (T - B), 0.0f, 0.0f, },
+            { 0.0f, 0.0f, 0.5f, 0.0f },
+            { (R + L) / (L - R), (T + B) / (B - T), 0.5f, 1.0f },
+        };
+
+        // TODO: Fix.
+        viewProjVariable->setMatrix(&mvp[0][0]);
+//        viewProjVariable->setMatrix(_viewProj._mat);
+    }
+
+    const Ibl::GpuVariable* viewTexelVariable = nullptr;
+    if (shader->getParameterByName("u_viewTexel", viewTexelVariable))
+    {
+        Ibl::Vector4f viewTexel = Ibl::Vector4f(1.0f / _device->backbuffer()->width(), 
+                                                1.0f / _device->backbuffer()->height(), 0,0);
+        viewTexelVariable->setVector(&viewTexel.x);
     }
 
 

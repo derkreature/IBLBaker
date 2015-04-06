@@ -265,7 +265,6 @@ Texture2DD3D11::create()
     }
     else
     {
-        D3D11_TEXTURE2D_DESC desc;
         desc.ArraySize = 1;
         desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
         desc.Format = findFormat(_resource->format());

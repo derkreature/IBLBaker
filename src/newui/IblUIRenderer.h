@@ -61,6 +61,10 @@ class UIRenderer :
     UIRenderer(Ibl::IDevice* device);
     virtual ~UIRenderer();
 
+    static void                create(Ibl::IDevice* device);
+    static UIRenderer*         renderer();
+    Ibl::IDevice*              device();
+
     void                       setDrawIndexed(bool drawIndexed);
     void                       setVertexBuffer(IVertexBuffer* vertexBuffer);
     void                       setShader(const Ibl::IShader* vertexBuffer);
@@ -73,7 +77,8 @@ class UIRenderer :
     // Get a vertex buffer to satisfy a given declaration.
     IVertexBuffer*             vertexBuffer(IVertexDeclaration* declaration);
     IIndexBuffer*              indexBuffer();
-    
+
+    void                       setViewProj(const Ibl::Matrix44f& ortho);
 
   protected:
     // Pipeline State.
@@ -88,6 +93,10 @@ class UIRenderer :
     // Buffers
     Ibl::IIndexBuffer*         _indexBuffer;
     std::map<IVertexDeclaration*, IVertexBuffer*> _vertexBuffers;
+
+    Ibl::Matrix44f             _viewProj;
+
+    static UIRenderer*         _uiRenderer;
 };
 }
 

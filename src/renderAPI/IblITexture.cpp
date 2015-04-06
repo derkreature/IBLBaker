@@ -155,7 +155,7 @@ ITexture::bytesPerPixel() const
 unsigned int
 ITexture::area() const
 { 
-    return _width * _height * _depth;
+    return _width * _height;
 }
 
 size_t

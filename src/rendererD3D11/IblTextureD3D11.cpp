@@ -1128,6 +1128,12 @@ TextureD3D11::setFormat (DXGI_FORMAT format)
         _pixelChannelPitch = sizeof(unsigned short);
         break;
     }
+    case DXGI_FORMAT_R8_UNORM:
+    {
+        _channels = 1;
+        _pixelChannelPitch = sizeof(uint8_t);
+        break;
+    }
     case DXGI_FORMAT_R16G16B16A16_UINT:
     {
         _channels = 4;
@@ -1411,12 +1417,6 @@ TextureD3D11::setFormat (DXGI_FORMAT format)
         break;
     }
     case DXGI_FORMAT_R8_TYPELESS:
-    {
-        _channels = 1;
-        _pixelChannelPitch = sizeof(unsigned char);
-        break;
-    }
-    case DXGI_FORMAT_R8_UNORM:
     {
         _channels = 1;
         _pixelChannelPitch = sizeof(unsigned char);

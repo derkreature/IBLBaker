@@ -160,6 +160,9 @@ class InputState
 
     bool                        _hasGuiFocus;
 
+    int32_t                     _cursorPositionX;
+    int32_t                     _cursorPositionY;
+
 };
 
 }

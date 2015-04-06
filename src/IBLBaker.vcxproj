@@ -26,7 +26,10 @@
     <ClCompile Include="codecs\IblPixelFormat.cpp" />
     <ClCompile Include="codecs\IblStringUtilities.cpp" />
     <ClCompile Include="codecs\IblTextureImage.cpp" />
+    <ClCompile Include="dependencies\imgui\imgui.cpp" />
+    <ClCompile Include="dependencies\imgui\stb_image.c" />
     <ClCompile Include="dependencies\MurmerHash\MurmurHash.cpp" />
+    <ClCompile Include="dependencies\nanovg\nanovg.c" />
     <ClCompile Include="dependencies\pugixml\src\pugixml.cpp" />
     <ClCompile Include="dependencies\pugixml\src\pugixpath.cpp" />
     <ClCompile Include="dependencies\tinyobjloader\tiny_obj_loader.cc" />
@@ -39,6 +42,10 @@
     <ClCompile Include="input\IblInputState.cpp" />
     <ClCompile Include="input\IblX360Controller.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="newui\Iblimgui.cpp" />
+    <ClCompile Include="newui\Iblnanovg.cpp" />
+    <ClCompile Include="newui\IblUIRenderer.cpp" />
+    <ClCompile Include="newui\ocornut_imgui.cpp" />
     <ClCompile Include="nodes\IblBrdf.cpp" />
     <ClCompile Include="nodes\IblCamera.cpp" />
     <ClCompile Include="nodes\IblEntity.cpp" />
@@ -171,7 +178,15 @@
     <ClInclude Include="codecs\IblPixelFormat.h" />
     <ClInclude Include="codecs\IblStringUtilities.h" />
     <ClInclude Include="codecs\IblTextureImage.h" />
+    <ClInclude Include="dependencies\imgui\imconfig.h" />
+    <ClInclude Include="dependencies\imgui\imgui.h" />
+    <ClInclude Include="dependencies\imgui\stb_rect_pack.h" />
+    <ClInclude Include="dependencies\imgui\stb_textedit.h" />
+    <ClInclude Include="dependencies\imgui\stb_truetype.h" />
     <ClInclude Include="dependencies\MurmerHash\MurmurHash.h" />
+    <ClInclude Include="dependencies\nanovg\fontstash.h" />
+    <ClInclude Include="dependencies\nanovg\fs_nanovg_fill.bin.h" />
+    <ClInclude Include="dependencies\nanovg\nanovg.h" />
     <ClInclude Include="dependencies\pugixml\src\pugiconfig.hpp" />
     <ClInclude Include="dependencies\pugixml\src\pugixml.hpp" />
     <ClInclude Include="dependencies\tinyobjloader\tiny_obj_loader.h" />
@@ -192,6 +207,9 @@
     <ClInclude Include="math\IblVector2.h" />
     <ClInclude Include="math\IblVector3.h" />
     <ClInclude Include="math\IblVector4.h" />
+    <ClInclude Include="newui\Iblimgui.h" />
+    <ClInclude Include="newui\IblUIRenderer.h" />
+    <ClInclude Include="newui\ocornut_imgui.h" />
     <ClInclude Include="nodes\IblBrdf.h" />
     <ClInclude Include="nodes\IblCamera.h" />
     <ClInclude Include="nodes\IblEntity.h" />
@@ -365,7 +383,7 @@
     <ExecutablePath>$(VC_ExecutablePath_x64);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(FxCopDir);$(PATH);</ExecutablePath>
     <SourcePath>$(VC_SourcePath);</SourcePath>
     <ExcludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;$(MSBuildToolsPath32);$(VCInstallDir)atlmfc\lib;$(VCInstallDir)lib;</ExcludePath>
-    <OutDir>$(SolutionDir)\..\bin64\</OutDir>
+    <OutDir>..\..\bin64\</OutDir>
     <IntDir>$(SolutionDir)\..\build\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -375,7 +393,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>IBL_USE_ASS_IMP_AND_FREEIMAGE=0;DIRECTINPUT_VERSION=0x0800;_SCL_SECURE_NO_WARNINGS=1;_CRT_SECURE_NO_WARNINGS=1;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>dependencies\tinyobjloader;dependencies\assimp\include\assimp;../dependencies\assimp\include\assimp;../dependencies;../../dependencies;dependencies\MurmerHash;../../dependencies\MurmerHash;../dependencies\MurmerHash;../dependencies\pugixml\src;dependencies\pugixml\src;dependencies\ois\includes;rendererD3D11\errorD3D11;dependencies\FreeImage\inc;dependencies\AntTweakBar\include;../IBLBaker;../;../RenderAPI;RenderAPI;../Codecs;../math;math;../application;application;input;../input;Codecs/;RendererD3D11;../RendererD3D11;RendererD3D11/;rendererD3D11\effectsD3D11;rendererD3D11\effectsD3D11\inc;rendererD3D11\effectsD3D11\binary;../nodes;nodes;../ui;ui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>newui;../newui;dependencies\imgui;dependencies\nanovg;dependencies\tinyobjloader;dependencies\assimp\include\assimp;../dependencies\assimp\include\assimp;../dependencies;../../dependencies;dependencies\MurmerHash;../../dependencies\MurmerHash;../dependencies\MurmerHash;../dependencies\pugixml\src;dependencies\pugixml\src;dependencies\ois\includes;rendererD3D11\errorD3D11;dependencies\FreeImage\inc;dependencies\AntTweakBar\include;../IBLBaker;../;../RenderAPI;RenderAPI;../Codecs;../math;math;../application;application;input;../input;Codecs/;RendererD3D11;../RendererD3D11;RendererD3D11/;rendererD3D11\effectsD3D11;rendererD3D11\effectsD3D11\inc;rendererD3D11\effectsD3D11\binary;../nodes;nodes;../ui;ui</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -395,7 +413,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>IBL_USE_ASS_IMP_AND_FREEIMAGE=0;DIRECTINPUT_VERSION=0x0800;_SCL_SECURE_NO_WARNINGS=1;_CRT_SECURE_NO_WARNINGS=1;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>dependencies\tinyobjloader;dependencies\assimp\include\assimp;../dependencies\murmerhash;;dependencies\murmerhash;../dependencies\murmerhash;dependencies\murmerhash;../dependencies\pugixml\src;dependencies\pugixml\src;dependencies\ois\includes;rendererD3D11\errorD3D11;dependencies\FreeImage\inc;dependencies\AntTweakBar\include;../IBLBaker;../;../RenderAPI;RenderAPI;../Codecs;../math;math;../application;application;input;../input;Codecs/;RendererD3D11;../RendererD3D11;RendererD3D11/;rendererD3D11\effectsD3D11;rendererD3D11\effectsD3D11\inc;rendererD3D11\effectsD3D11\binary;../nodes;nodes;../ui;ui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>newui;../newui;dependencies\imgui;dependencies\nanovg;dependencies\tinyobjloader;dependencies\assimp\include\assimp;../dependencies\murmerhash;;dependencies\murmerhash;../dependencies\murmerhash;dependencies\murmerhash;../dependencies\pugixml\src;dependencies\pugixml\src;dependencies\ois\includes;rendererD3D11\errorD3D11;dependencies\FreeImage\inc;dependencies\AntTweakBar\include;../IBLBaker;../;../RenderAPI;RenderAPI;../Codecs;../math;math;../application;application;input;../input;Codecs/;RendererD3D11;../RendererD3D11;RendererD3D11/;rendererD3D11\effectsD3D11;rendererD3D11\effectsD3D11\inc;rendererD3D11\effectsD3D11\binary;../nodes;nodes;../ui;ui</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <OpenMPSupport>false</OpenMPSupport>
     </ClCompile>
@@ -405,7 +423,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>Comctl32.lib;dependencies\AntTweakBar\lib64\release\AntTweakBar64.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dxgi.lib;dinput8.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(SolutionDir)../bin64/$(TargetName)$(TargetExt)</OutputFile>
+      <OutputFile>../../bin64/$(TargetName)$(TargetExt)</OutputFile>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
   </ItemDefinitionGroup>

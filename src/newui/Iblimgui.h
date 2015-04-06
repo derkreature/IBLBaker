@@ -32,6 +32,7 @@ namespace Ibl
 {
 class IDevice;
 class ITexture;
+class InputState;
 }
 
 #define IMGUI_MBUT_LEFT  0x01
@@ -129,7 +130,7 @@ ImguiFontReference imguiGetCurrentFont();
 ImguiFontReference imguiCreate(Ibl::IDevice* _device, const void* _data = NULL, uint32_t _size = 0, float _fontSize = 15.0f);
 void imguiDestroy();
 
-void imguiBeginFrame(int32_t _mx, int32_t _my, uint8_t _button, int32_t _scroll, uint16_t _width, uint16_t _height, char _inputChar = 0, uint8_t _view = 31);
+void imguiBeginFrame(Ibl::InputState* inputState, int32_t _mx, int32_t _my, uint8_t _button, int32_t _scroll, uint16_t _width, uint16_t _height, char _inputChar = 0, uint8_t _view = 31);
 void imguiEndFrame();
 
 void imguiDrawText(int _x, int _y, ImguiTextAlign::Enum _align, const char* _text, uint32_t _argb);

@@ -21,31 +21,33 @@ struct PSOutput
 
 Texture2D s_tex;
 
-SamplerState linearSampler;
+float4 u_viewTexel;
+
+SamplerState linearSampler
 {
-    Filter = MIN_MAG_MIP_LINEAR;
-    AddressU = REPEAT;
-    AddressV = REPEAT;
+    Filter = MIN_MAG_MIP_POINT;
+    AddressU = WRAP;
+    AddressV = WRAP;
     MipLODBias = 0.0f;
 };
 
-void vs(VSInput vsInput)
+VSOutput vs(VSInput input)
 {
     VSOutput output;
 
-    float2 pos = 2.0*a_position.xy*u_viewTexel.xy;
-    output.v_position = float4(pos.x - 1.0, 1.0 - pos.y, 0.0, 1.0);
+    float2 pos = 2.0*input.a_position.xy*u_viewTexel.xy;
+    output.v_position = float4(pos.x - 1.0, 1.0- pos.y, 0.0, 1.0);
     output.v_texcoord0 = input.a_texcoord0;
     output.v_color0 = input.a_color0;
 
     return output;
 }
 
-PSOutput ps(VSOutput psInput)
+PSOutput ps(VSOutput input)
 {
     PSOutput output;
-    float4 texel = s_tex.Sample(linearSampler, psInput.v_texcoord0.xy);
-    output.output0 = texel * psInput.v_color0;
+    float4 texel = s_tex.Sample(linearSampler, input.v_texcoord0.xy);
+    output.output0 = texel * input.v_color0;
     return output;
 }
 

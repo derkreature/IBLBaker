@@ -43,6 +43,8 @@
 #include <IblVertexDeclarationD3D11.h>
 #include <IblInputLayoutCacheD3D11.h>
 #include <IblMesh.h>
+#include <IblMaterial.h>
+#include <IblIShader.h>
 
 namespace Ibl
 {
@@ -97,9 +99,16 @@ GpuTechniqueD3D11::setupInputLayout (const Ibl::Mesh* mesh,
     {
         if (passIndex < _layoutCache.size())
         {
-            return _layoutCache[passIndex]->bindLayout (declaration);
+            if (!_layoutCache[passIndex]->bindLayout(declaration))
+            {
+                LOG("Failed to bind layout for shader " << mesh->material()->shader()->filePathName());
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
-        return false;
     }
     else
     {

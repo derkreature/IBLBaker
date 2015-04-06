@@ -221,8 +221,8 @@ bool Input::update()
     GetCursorPos(&cursorPosition);
     ScreenToClient(_application->window()->windowHandle(), &cursorPosition);
     
-    _inputState._x = (float)cursorPosition.x;
-    _inputState._y = (float)cursorPosition.y;
+    _inputState._cursorPositionX = (float)cursorPosition.x;
+    _inputState._cursorPositionY = (float)cursorPosition.y;
 
     if (readKeyBoardInputBuffer() && 
         readMouseInputBuffer())
@@ -234,7 +234,7 @@ bool Input::update()
         result = false;
     }
 
-    Ibl::Vector2i pos = Ibl::Vector2i ((int)_inputState._x, (int)_inputState._y);
+    Ibl::Vector2i pos = Ibl::Vector2i ((int)_inputState._cursorPositionX, (int)_inputState._cursorPositionY);
     const Ibl::Region2i& box = _application->window()->windowBounds();
     bool hasFocus = _application->window()->hasFocus();
 

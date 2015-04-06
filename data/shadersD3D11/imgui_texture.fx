@@ -21,17 +21,17 @@ struct PSOutput
 
 Texture2D s_tex;
 
-SamplerState linearSampler;
+SamplerState linearSampler
 {
     Filter = MIN_MAG_MIP_LINEAR;
-    AddressU = REPEAT;
-    AddressV = REPEAT;
+    AddressU = WRAP;
+    AddressV = WRAP;
     MipLODBias = 0.0f;
 };
 
 float4x4 u_viewProj;
 
-void vs(VSInput vsInput)
+VSOutput vs(VSInput input)
 {
     VSOutput output;
 
@@ -42,13 +42,11 @@ void vs(VSInput vsInput)
     return output;
 }
 
-PSOutput ps(VSOutput psInput)
+PSOutput ps(VSOutput input)
 {
     PSOutput output;
-
-    float4 alpha = s_tex.Sample(linearSampler, psInput.v_texcoord0.xy).x;
-    output.output0 = vec4(psInput.v_color0.xyz, psInput.v_color0.w * alpha);
-
+    float alpha = s_tex.Sample(linearSampler, input.v_texcoord0.xy).x;
+    output.output0 = float4(input.v_color0.x, input.v_color0.y, input.v_color0.z, input.v_color0.w * alpha);
     return output;
 }
 

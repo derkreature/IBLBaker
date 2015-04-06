@@ -19,20 +19,20 @@ struct PSOutput
 
 float4x4 u_viewProj;
 
-void vs(VSInput vsInput)
+VSOutput vs(VSInput input)
 {
     VSOutput output;
 
-    output.v_position = mul(float4(a_position.xy, 0.0, 1.0), u_viewProj);
-    output.v_color0 = vsInput.a_color0;
+    output.v_position = mul(float4(input.a_position.xy, 0.0, 1.0), u_viewProj);
+    output.v_color0 = input.a_color0;
 
     return output;
 }
 
-PSOutput ps(VSOutput psInput)
+PSOutput ps(VSOutput input)
 {
     PSOutput output;
-    output.output0 = psInput.v_color0;
+    output.output0 = input.v_color0;
     return output;
 }
 

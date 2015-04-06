@@ -205,7 +205,8 @@ DepthSurfaceD3D11::create()
             srvFormat = DXGI_FORMAT_R32_FLOAT;
             dsvFormat = DXGI_FORMAT_D32_FLOAT;
         }
-        else if (_textureDesc.Format ==  DXGI_FORMAT_R24G8_TYPELESS)
+        else if (_textureDesc.Format ==  DXGI_FORMAT_R24G8_TYPELESS ||
+            _textureDesc.Format == DXGI_FORMAT_D24_UNORM_S8_UINT)
         { 
             dsvFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
             srvFormat = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;

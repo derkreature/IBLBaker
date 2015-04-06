@@ -533,7 +533,7 @@ DeviceD3D11::syncState()
 {
     _immediateCtx->RSSetState(_currentRasterState);
     _immediateCtx->OMSetDepthStencilState (_currentDepthState, 0xff);
-    _immediateCtx->OMSetBlendState(_currentBlendState, &_blendFactor.x, 0xffffffff);
+    _immediateCtx->OMSetBlendState(_currentBlendState, NULL, 0xffffffff);
 }
 
 ID3D11DepthStencilView*
@@ -640,7 +640,8 @@ DeviceD3D11::initializeDeviceStates()
 
     // Initialize the blend state defaults
     _currentBlendStateDesc.AlphaToCoverageEnable = false;
-    _currentBlendStateDesc.IndependentBlendEnable = true;
+    _currentBlendStateDesc.IndependentBlendEnable = false;
+
     for (int i = 0; i < 8; i++)
     {
         _currentBlendStateDesc.RenderTarget[i].BlendEnable = false;
@@ -688,8 +689,8 @@ DeviceD3D11::setupStencil(uint8_t readMask,
     _currentDepthStateDesc.FrontFace.StencilDepthFailOp = (D3D11_STENCIL_OP)(frontZFailOp);
     _currentDepthStateDesc.FrontFace.StencilFunc = (D3D11_COMPARISON_FUNC)(frontCompare);
 
-    _currentDepthStateDesc.BackFace.StencilFailOp = (D3D11_STENCIL_OP)(frontStencilPassOp);
-    _currentDepthStateDesc.BackFace.StencilPassOp = (D3D11_STENCIL_OP)(frontStencilFailOp);
+    _currentDepthStateDesc.BackFace.StencilFailOp = (D3D11_STENCIL_OP)(frontStencilFailOp);
+    _currentDepthStateDesc.BackFace.StencilPassOp = (D3D11_STENCIL_OP)(frontStencilPassOp);
     _currentDepthStateDesc.BackFace.StencilDepthFailOp = (D3D11_STENCIL_OP)(frontZFailOp);
     _currentDepthStateDesc.BackFace.StencilFunc = (D3D11_COMPARISON_FUNC)(frontCompare);
 
@@ -716,8 +717,8 @@ DeviceD3D11::setupStencil(uint8_t readMask,
     _currentDepthStateDesc.FrontFace.StencilDepthFailOp = (D3D11_STENCIL_OP)(frontZFailOp);
     _currentDepthStateDesc.FrontFace.StencilFunc = (D3D11_COMPARISON_FUNC)(frontCompare);
 
-    _currentDepthStateDesc.BackFace.StencilFailOp = (D3D11_STENCIL_OP)(backStencilPassOp);
-    _currentDepthStateDesc.BackFace.StencilPassOp = (D3D11_STENCIL_OP)(backStencilFailOp);
+    _currentDepthStateDesc.BackFace.StencilFailOp = (D3D11_STENCIL_OP)(backStencilFailOp);
+    _currentDepthStateDesc.BackFace.StencilPassOp = (D3D11_STENCIL_OP)(backStencilPassOp);
     _currentDepthStateDesc.BackFace.StencilDepthFailOp = (D3D11_STENCIL_OP)(backZFailOp);
     _currentDepthStateDesc.BackFace.StencilFunc = (D3D11_COMPARISON_FUNC)(backCompare);
 
@@ -743,7 +744,7 @@ DeviceD3D11::bindDepthState()
     // Todo, this state should be hashed and stored
     saferelease(_currentDepthState);
     _direct3d->CreateDepthStencilState (&_currentDepthStateDesc, &_currentDepthState);
-    _immediateCtx->OMSetDepthStencilState (_currentDepthState, 0xff);
+    _immediateCtx->OMSetDepthStencilState (_currentDepthState, 0x0); // 0xff
 }
 
 void
@@ -925,16 +926,6 @@ DeviceD3D11::setupBlendPipeline(Ibl::BlendPipelineType blendPipelineType)
         setAlphaDestFunction (Ibl::BlendOne);
         setAlphaBlendProperty(Ibl::OpAdd);
 
-/*
-BlendEnable = TRUE;
-BlendOp = D3D11_BLEND_OP_ADD;
-BlendOpAlpha = D3D11_BLEND_OP_ADD;
-SrcBlend = D3D11_BLEND_SRC_ALPHA;
-SrcBlendAlpha = D3D11_BLEND_ONE;
-DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-DestBlendAlpha = D3D11_BLEND_ONE;
-*/
-
         _blendPipelineType = blendPipelineType;
     }
     else if (blendPipelineType == Ibl::BlendPipelineOne)
@@ -945,6 +936,8 @@ DestBlendAlpha = D3D11_BLEND_ONE;
         setAlphaSrcFunction (Ibl::SourceAlpha);
         setAlphaDestFunction (Ibl::InverseSourceAlpha);
         setAlphaBlendProperty(Ibl::OpAdd);
+
+
 
         _blendPipelineType = blendPipelineType;
     }

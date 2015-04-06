@@ -60,6 +60,7 @@
 #include <IblTitles.h>
 #include <IblImageWidget.h>
 #include <IblBrdf.h>
+#include <Iblimgui.h>
 #include <strstream>
 
 namespace Ibl
@@ -180,6 +181,8 @@ Application::initialize()
     if (device->initialize(deviceParams))
     {
         _device = device;
+        imguiCreate(_device);
+
         _mainWindow = _device->renderWindow();
 
         _scene = new Ibl::Scene(_device);

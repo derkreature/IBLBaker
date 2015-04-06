@@ -31,29 +31,23 @@
 #include <IblIDevice.h>
 #include <IblITexture.h>
 #include <IblIShader.h>
+#include <IblGpuVariable.h>
 #include <IblIVertexDeclaration.h>
 #include <IblIGpuBuffer.h>
 #include <IblGpuVariable.h>
 #include <IblShaderMgr.h>
 #include <IblTextureMgr.h>
 #include <IblDynamicRenderer.h>
+#include <IblVertexDeclarationMgr.h>
+#include <IblIVertexBuffer.h>
+#include <IblIIndexBuffer.h>
+#include <IblUIRenderer.h>
 
 #include "Iblimgui.h"
 #include "ocornut_imgui.h"
 #include "../nanovg/nanovg.h"
 
-#if READY_TO_PORT
-// embedded shaders
-#include "vs_imgui_color.bin.h"
-#include "fs_imgui_color.bin.h"
-#include "vs_imgui_texture.bin.h"
-#include "fs_imgui_texture.bin.h"
-#include "vs_imgui_cubemap.bin.h"
-#include "fs_imgui_cubemap.bin.h"
-#include "vs_imgui_image.bin.h"
-#include "fs_imgui_image.bin.h"
-#include "fs_imgui_image_swizz.bin.h"
-#endif
+
 // embedded font
 #include "droidsans.ttf.h"
 
@@ -93,7 +87,7 @@ static void imguiFree(void* _ptr, void* /*_userptr*/)
 
 namespace
 {
-    static uint32_t addQuad(uint16_t* _indices, uint16_t _idx0, uint16_t _idx1, uint16_t _idx2, uint16_t _idx3)
+    static uint32_t addQuad(uint32_t* _indices, uint16_t _idx0, uint16_t _idx1, uint16_t _idx2, uint16_t _idx3)
     {
         _indices[0] = _idx0;
         _indices[1] = _idx3;
@@ -227,15 +221,24 @@ namespace
 
         static void init()
         {
-#if READY_TO_ROCK
-            ms_decl
-                .begin()
-                .add(bgfx::Attrib::Position, 2, bgfx::AttribType::Float)
-                .add(bgfx::Attrib::Color0,   4, bgfx::AttribType::Uint8, true)
-                .end();
-#endif
-        }
 
+            std::vector<Ibl::VertexElement> vertexElements;
+            vertexElements.push_back(Ibl::VertexElement(0, 0, Ibl::FLOAT2, Ibl::METHOD_DEFAULT, Ibl::POSITION, 0));
+            vertexElements.push_back(Ibl::VertexElement(0, 8, Ibl::UBYTE4, Ibl::METHOD_DEFAULT, Ibl::COLOR, 0));
+            vertexElements.push_back(Ibl::VertexElement(0xFF, 0, Ibl::UNUSED, 0, 0, 0));
+
+            Ibl::VertexDeclarationParameters resource = Ibl::VertexDeclarationParameters(vertexElements);
+            if (Ibl::IVertexDeclaration* vertexDeclaration =
+                Ibl::VertexDeclarationMgr::vertexDeclarationMgr()->createVertexDeclaration(&resource))
+            {
+                ms_decl = vertexDeclaration;
+            }
+            else
+            {
+                LOG("Failed to init PosColorVertex decl.")
+                assert(0);
+            }
+        }
 
         static Ibl::IVertexDeclaration* ms_decl;
     };
@@ -250,17 +253,25 @@ namespace
         float m_v;
         uint32_t m_abgr;
 
-
         static void init()
         {
-#if READY_TO_ROCK
-            ms_decl
-                .begin()
-                .add(bgfx::Attrib::Position,  2, bgfx::AttribType::Float)
-                .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
-                .add(bgfx::Attrib::Color0,    4, bgfx::AttribType::Uint8, true)
-                .end();
-#endif
+            std::vector<Ibl::VertexElement> vertexElements;
+            vertexElements.push_back(Ibl::VertexElement(0, 0, Ibl::FLOAT2, Ibl::METHOD_DEFAULT, Ibl::POSITION, 0));
+            vertexElements.push_back(Ibl::VertexElement(0, 8, Ibl::FLOAT2, Ibl::METHOD_DEFAULT, Ibl::TEXCOORD, 0));
+            vertexElements.push_back(Ibl::VertexElement(0, 16, Ibl::UBYTE4, Ibl::METHOD_DEFAULT, Ibl::COLOR, 0));
+            vertexElements.push_back(Ibl::VertexElement(0xFF, 0, Ibl::UNUSED, 0, 0, 0));
+
+            Ibl::VertexDeclarationParameters resource = Ibl::VertexDeclarationParameters(vertexElements);
+            if (Ibl::IVertexDeclaration* vertexDeclaration =
+                Ibl::VertexDeclarationMgr::vertexDeclarationMgr()->createVertexDeclaration(&resource))
+            {
+                ms_decl = vertexDeclaration;
+            }
+            else
+            {
+                LOG("Failed to init PosCorVertex decl.")
+                    assert(0);
+            }
         }
 
         static Ibl::IVertexDeclaration* ms_decl;
@@ -277,13 +288,23 @@ namespace
 
         static void init()
         {
-#if READY_TO_ROCK
-            ms_decl
-                .begin()
-                .add(bgfx::Attrib::Position,  2, bgfx::AttribType::Float)
-                .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
-                .end();
-#endif
+
+            std::vector<Ibl::VertexElement> vertexElements;
+            vertexElements.push_back(Ibl::VertexElement(0, 0, Ibl::FLOAT2, Ibl::METHOD_DEFAULT, Ibl::POSITION, 0));
+            vertexElements.push_back(Ibl::VertexElement(0, 8, Ibl::FLOAT2, Ibl::METHOD_DEFAULT, Ibl::TEXCOORD, 0));
+            vertexElements.push_back(Ibl::VertexElement(0xFF, 0, Ibl::UNUSED, 0, 0, 0));
+
+            Ibl::VertexDeclarationParameters resource = Ibl::VertexDeclarationParameters(vertexElements);
+            if (Ibl::IVertexDeclaration* vertexDeclaration =
+                Ibl::VertexDeclarationMgr::vertexDeclarationMgr()->createVertexDeclaration(&resource))
+            {
+                ms_decl = vertexDeclaration;
+            }
+            else
+            {
+                LOG("Failed to init PosCorVertex decl.")
+                    assert(0);
+            }
         }
 
         static Ibl::IVertexDeclaration* ms_decl;
@@ -302,12 +323,24 @@ namespace
 
         static void init()
         {
-#if READY_TO_ROCK
-            ms_decl.begin()
-                   .add(bgfx::Attrib::Position,  3, bgfx::AttribType::Float)
-                   .add(bgfx::Attrib::Normal,    3, bgfx::AttribType::Float)
-                   .end();
-#endif
+
+
+            std::vector<Ibl::VertexElement> vertexElements;
+            vertexElements.push_back(Ibl::VertexElement(0, 0, Ibl::FLOAT3, Ibl::METHOD_DEFAULT, Ibl::POSITION, 0));
+            vertexElements.push_back(Ibl::VertexElement(0, 12, Ibl::FLOAT3, Ibl::METHOD_DEFAULT, Ibl::NORMAL, 0));
+            vertexElements.push_back(Ibl::VertexElement(0xFF, 0, Ibl::UNUSED, 0, 0, 0));
+
+            Ibl::VertexDeclarationParameters resource = Ibl::VertexDeclarationParameters(vertexElements);
+            if (Ibl::IVertexDeclaration* vertexDeclaration =
+                Ibl::VertexDeclarationMgr::vertexDeclarationMgr()->createVertexDeclaration(&resource))
+            {
+                ms_decl = vertexDeclaration;
+            }
+            else
+            {
+                LOG("Failed to init PosCorVertex decl.")
+                    assert(0);
+            }
         }
 
         void set(float _x, float _y, float _z, float _nx, float _ny, float _nz)
@@ -416,15 +449,22 @@ struct Imgui
 
     ImguiFontReference createFont(const void* _data, float _fontSize)
     {
-#if READY_TO_ROCK
-        const ImguiFontHandle handle = { m_fontHandle.alloc() };
-        const bgfx::Memory* mem = bgfx::alloc(m_textureWidth * m_textureHeight);
-        stbtt_BakeFontBitmap( (uint8_t*)_data, 0, _fontSize, mem->data, m_textureWidth, m_textureHeight, 32, 96, m_fonts[handle.idx].m_cdata);
-        m_fonts[handle.idx].m_texture = bgfx::createTexture2D(m_textureWidth, m_textureHeight, 1, bgfx::TextureFormat::R8, BGFX_TEXTURE_NONE, mem);
-        m_fonts[handle.idx].m_size = _fontSize;
-        return handle;
-#endif
-        return -1;
+        static uint32_t id = 0;
+        uint8_t* mem = (uint8_t*)malloc(m_textureWidth * m_textureHeight);
+        stbtt_BakeFontBitmap( (uint8_t*)_data, 0, _fontSize, mem, m_textureWidth, m_textureHeight, 32, 96, m_fonts[id].m_cdata);
+                
+        Ibl::TextureParameters textureData =
+            Ibl::TextureParameters("Normal Offsets Texture",
+            Ibl::TwoD,
+            Ibl::Procedural,
+            Ibl::PF_L8,
+            Ibl::Vector3i(m_textureWidth, m_textureHeight, 1));
+        m_fonts[id].m_texture = m_Device->createTexture(&textureData);
+        m_fonts[id].m_texture->write(mem);
+
+        m_fonts[id].m_size = _fontSize;
+        m_fonts[id].m_id = ++id;
+        return m_fonts[id].m_id;
     }
 
     void setFont(ImguiFontReference _handle)
@@ -436,10 +476,8 @@ struct Imgui
 
     Ibl::ITexture* genMissingTexture(uint32_t _width, uint32_t _height, float _lineWidth = 0.02f)
     {
-#if READY_TO_ROCK
-        const bgfx::Memory* mem = bgfx::alloc(_width*_height*4);
-        uint32_t* bgra8 = (uint32_t*)mem->data;
-
+        uint8_t* bgra8Ptr = (uint8_t*)malloc(_width*_height * 4);
+        uint32_t* bgra8 = (uint32_t*)bgra8Ptr;
         const float sx = 0.70710677f;
         const float cx = 0.70710677f;
 
@@ -450,28 +488,37 @@ struct Imgui
                 float px = xx / float(_width)  * 2.0f - 1.0f;
                 float py = yy / float(_height) * 2.0f - 1.0f;
 
-                float sum = bx::fpulse(px * cx - py * sx, _lineWidth, -_lineWidth)
-                          + bx::fpulse(px * sx + py * cx, _lineWidth, -_lineWidth)
+                float sum = Ibl::pulse(px * cx - py * sx, _lineWidth, -_lineWidth)
+                          + Ibl::pulse(px * sx + py * cx, _lineWidth, -_lineWidth)
                           ;
                 *bgra8++ = sum >= 1.0f ? 0xffff0000 : 0xffffffff;
             }
         }
 
-        return bgfx::createTexture2D(_width, _height, 0, bgfx::TextureFormat::BGRA8, 0, mem);
-#endif
-        return nullptr;
+        Ibl::TextureParameters textureData =
+            Ibl::TextureParameters("Normal Offsets Texture",
+            Ibl::TwoD,
+            Ibl::Procedural,
+            Ibl::PF_BYTE_RGBA,
+            Ibl::Vector3i(_width, _height, 1));
+        Ibl::ITexture* texture = m_Device->createTexture(&textureData);
+        texture->write(bgra8Ptr);
+
+        return texture;
     }
 
     ImguiFontReference create(Ibl::IDevice* _device, const void* _data, uint32_t _size, float _fontSize)
     {
         m_Device = _device;
-#if READY_TO_ROCK
+
         if (NULL == _data)
         {
             _data = s_droidSansTtf;
             _size = sizeof(s_droidSansTtf);
         }
 
+        Ibl::UIRenderer::create(m_Device);
+        Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
         IMGUI_create(_data, _size, _fontSize);
 
         m_nvg = nvgCreate(1, m_view, m_Device);
@@ -479,9 +526,10 @@ struct Imgui
         nvgFontSize(m_nvg, _fontSize);
         nvgFontFace(m_nvg, "default");
 
+
         for (int32_t ii = 0; ii < NUM_CIRCLE_VERTS; ++ii)
         {
-            float a = (float)ii / (float)NUM_CIRCLE_VERTS * (float)(bx::pi * 2.0);
+            float a = (float)ii / (float)NUM_CIRCLE_VERTS * (float)(3.141591 * 2.0);
             m_circleVerts[ii * 2 + 0] = cosf(a);
             m_circleVerts[ii * 2 + 1] = sinf(a);
         }
@@ -491,127 +539,52 @@ struct Imgui
         PosUvVertex::init();
         PosNormalVertex::init();
 
-        u_imageLodEnabled = bgfx::createUniform("u_imageLodEnabled", bgfx::UniformType::Uniform4fv);
-        u_imageSwizzle    = bgfx::createUniform("u_swizzle",         bgfx::UniformType::Uniform4fv);
-        s_texColor        = bgfx::createUniform("s_texColor",        bgfx::UniformType::Uniform1i);
-
-        const bgfx::Memory* vs_imgui_color;
-        const bgfx::Memory* fs_imgui_color;
-        const bgfx::Memory* vs_imgui_texture;
-        const bgfx::Memory* fs_imgui_texture;
-        const bgfx::Memory* vs_imgui_cubemap;
-        const bgfx::Memory* fs_imgui_cubemap;
-        const bgfx::Memory* vs_imgui_image;
-        const bgfx::Memory* fs_imgui_image;
-        const bgfx::Memory* fs_imgui_image_swizz;
-
-        switch (bgfx::getRendererType() )
-        {
-        case bgfx::RendererType::Direct3D9:
-            vs_imgui_color       = bgfx::makeRef(vs_imgui_color_dx9, sizeof(vs_imgui_color_dx9) );
-            fs_imgui_color       = bgfx::makeRef(fs_imgui_color_dx9, sizeof(fs_imgui_color_dx9) );
-            vs_imgui_texture     = bgfx::makeRef(vs_imgui_texture_dx9, sizeof(vs_imgui_texture_dx9) );
-            fs_imgui_texture     = bgfx::makeRef(fs_imgui_texture_dx9, sizeof(fs_imgui_texture_dx9) );
-            vs_imgui_cubemap     = bgfx::makeRef(vs_imgui_cubemap_dx9, sizeof(vs_imgui_cubemap_dx9) );
-            fs_imgui_cubemap     = bgfx::makeRef(fs_imgui_cubemap_dx9, sizeof(fs_imgui_cubemap_dx9) );
-            vs_imgui_image       = bgfx::makeRef(vs_imgui_image_dx9, sizeof(vs_imgui_image_dx9) );
-            fs_imgui_image       = bgfx::makeRef(fs_imgui_image_dx9, sizeof(fs_imgui_image_dx9) );
-            fs_imgui_image_swizz = bgfx::makeRef(fs_imgui_image_swizz_dx9, sizeof(fs_imgui_image_swizz_dx9) );
-            m_halfTexel = 0.5f;
-            break;
-
-        case bgfx::RendererType::Direct3D11:
-            vs_imgui_color       = bgfx::makeRef(vs_imgui_color_dx11, sizeof(vs_imgui_color_dx11) );
-            fs_imgui_color       = bgfx::makeRef(fs_imgui_color_dx11, sizeof(fs_imgui_color_dx11) );
-            vs_imgui_texture     = bgfx::makeRef(vs_imgui_texture_dx11, sizeof(vs_imgui_texture_dx11) );
-            fs_imgui_texture     = bgfx::makeRef(fs_imgui_texture_dx11, sizeof(fs_imgui_texture_dx11) );
-            vs_imgui_cubemap     = bgfx::makeRef(vs_imgui_cubemap_dx11, sizeof(vs_imgui_cubemap_dx11) );
-            fs_imgui_cubemap     = bgfx::makeRef(fs_imgui_cubemap_dx11, sizeof(fs_imgui_cubemap_dx11) );
-            vs_imgui_image       = bgfx::makeRef(vs_imgui_image_dx11, sizeof(vs_imgui_image_dx11) );
-            fs_imgui_image       = bgfx::makeRef(fs_imgui_image_dx11, sizeof(fs_imgui_image_dx11) );
-            fs_imgui_image_swizz = bgfx::makeRef(fs_imgui_image_swizz_dx11, sizeof(fs_imgui_image_swizz_dx11) );
-            break;
-
-        default:
-            vs_imgui_color       = bgfx::makeRef(vs_imgui_color_glsl, sizeof(vs_imgui_color_glsl) );
-            fs_imgui_color       = bgfx::makeRef(fs_imgui_color_glsl, sizeof(fs_imgui_color_glsl) );
-            vs_imgui_texture     = bgfx::makeRef(vs_imgui_texture_glsl, sizeof(vs_imgui_texture_glsl) );
-            fs_imgui_texture     = bgfx::makeRef(fs_imgui_texture_glsl, sizeof(fs_imgui_texture_glsl) );
-            vs_imgui_cubemap     = bgfx::makeRef(vs_imgui_cubemap_glsl, sizeof(vs_imgui_cubemap_glsl) );
-            fs_imgui_cubemap     = bgfx::makeRef(fs_imgui_cubemap_glsl, sizeof(fs_imgui_cubemap_glsl) );
-            vs_imgui_image       = bgfx::makeRef(vs_imgui_image_glsl, sizeof(vs_imgui_image_glsl) );
-            fs_imgui_image       = bgfx::makeRef(fs_imgui_image_glsl, sizeof(fs_imgui_image_glsl) );
-            fs_imgui_image_swizz = bgfx::makeRef(fs_imgui_image_swizz_glsl, sizeof(fs_imgui_image_swizz_glsl) );
-            break;
+        if (Ibl::ShaderMgr* shaderMgr = m_Device->shaderMgr())
+        { 
+            if (!shaderMgr->addShader("imgui_color.fx", m_colorProgram, true, false))
+            {
+                LOG("Failed to load imgui color shader");
+                assert(0);
+            }
+            if (!shaderMgr->addShader("imgui_texture.fx", m_textureProgram, true, false))
+            {
+                LOG("Failed to load texture shader");
+                assert(0);
+            }
+            if (!shaderMgr->addShader("imgui_cubemap.fx", m_cubeMapProgram, true, false))
+            {
+                LOG("Failed to load imgui cubemap shader");
+                assert(0);
+            }
+            if (!shaderMgr->addShader("imgui_image.fx", m_imageProgram, true, false))
+            {
+                LOG("Failed to load imgui image shader");
+                assert(0);
+            }
+            if (!shaderMgr->addShader("imgui_image_swizz.fx", m_imageSwizzProgram, true, false))
+            {
+                LOG("Failed to load imgui image shader");
+                assert(0);
+            }
         }
-
-        bgfx::ShaderHandle vsh;
-        bgfx::ShaderHandle fsh;
-
-        vsh = bgfx::createShader(vs_imgui_color);
-        fsh = bgfx::createShader(fs_imgui_color);
-        m_colorProgram = bgfx::createProgram(vsh, fsh);
-        bgfx::destroyShader(vsh);
-        bgfx::destroyShader(fsh);
-
-        vsh = bgfx::createShader(vs_imgui_texture);
-        fsh = bgfx::createShader(fs_imgui_texture);
-        m_textureProgram = bgfx::createProgram(vsh, fsh);
-        bgfx::destroyShader(vsh);
-        bgfx::destroyShader(fsh);
-
-        vsh = bgfx::createShader(vs_imgui_cubemap);
-        fsh = bgfx::createShader(fs_imgui_cubemap);
-        m_cubeMapProgram = bgfx::createProgram(vsh, fsh);
-        bgfx::destroyShader(vsh);
-        bgfx::destroyShader(fsh);
-
-        vsh = bgfx::createShader(vs_imgui_image);
-        fsh = bgfx::createShader(fs_imgui_image);
-        m_imageProgram = bgfx::createProgram(vsh, fsh);
-        bgfx::destroyShader(fsh);
-
-        // Notice: using the same vsh.
-        fsh = bgfx::createShader(fs_imgui_image_swizz);
-        m_imageSwizzProgram = bgfx::createProgram(vsh, fsh);
-        bgfx::destroyShader(fsh);
-        bgfx::destroyShader(vsh);
-
+        else
+        {
+            LOG("Could not find the shader manager");
+            assert(0);
+        }
+        
         m_missingTexture = genMissingTexture(256, 256, 0.04f);
 
-        const ImguiFontHandle handle = createFont(_data, _fontSize);
-        m_currentFontIdx = handle.idx;
+        const ImguiFontReference handle = createFont(_data, _fontSize);
+        m_currentFontIdx = handle;
 
         return handle;
-#endif
-        return -1;
     }
 
     void destroy()
     {
-#if READY_TO_ROCK
-        bgfx::destroyUniform(u_imageLodEnabled);
-        bgfx::destroyUniform(u_imageSwizzle);
-        bgfx::destroyUniform(s_texColor);
-
-        for (uint16_t ii = 0; ii < IMGUI_CONFIG_MAX_FONTS; ++ii)
-        {
-            if (bgfx::isValid(m_fonts[ii].m_texture) )
-            {
-                bgfx::destroyTexture(m_fonts[ii].m_texture);
-            }
-        }
-
-        bgfx::destroyTexture(m_missingTexture);
-        bgfx::destroyProgram(m_colorProgram);
-        bgfx::destroyProgram(m_textureProgram);
-        bgfx::destroyProgram(m_cubeMapProgram);
-        bgfx::destroyProgram(m_imageProgram);
-        bgfx::destroyProgram(m_imageSwizzProgram);
-        nvgDelete(m_nvg);
 
         IMGUI_destroy();
-#endif
     }
 
     bool anyActive() const
@@ -802,46 +775,22 @@ struct Imgui
         m_char = _inputChar;
     }
 
-    void beginFrame(int32_t _mx, int32_t _my, uint8_t _button, int32_t _scroll, uint16_t _width, uint16_t _height, char _inputChar, uint8_t _view)
+    void beginFrame(Ibl::InputState* inputState, int32_t _mx, int32_t _my, uint8_t _button, int32_t _scroll, uint16_t _width, uint16_t _height, char _inputChar, uint8_t _view)
     {
-#if READY_TO_ROCK
-        IMGUI_beginFrame(_mx, _my, _button, _width, _height, _inputChar, _view);
+        IMGUI_beginFrame(inputState, _mx, _my, _button, _width, _height, _inputChar, _view);
 
         m_view = _view;
         m_viewWidth = _width;
         m_viewHeight = _height;
-        bgfx::setViewName(_view, "IMGUI");
-        bgfx::setViewSeq(_view, true);
-
-        const bgfx::HMD* hmd = bgfx::getHMD();
-        if (NULL != hmd)
+        //bgfx::setViewName(_view, "IMGUI");
+        //bgfx::setViewSeq(_view, true);
         {
-            m_viewWidth  = _width / 2;
-
-            float proj[16];
-            bx::mtxProj(proj, hmd->eye[0].fov, 0.1f, 100.0f);
-
-            static float time = 0.0f;
-            time += 0.05f;
-
-            const float dist = 10.0f;
-            const float offset0 = -proj[8] + (hmd->eye[0].viewOffset[0] / dist * proj[0]);
-            const float offset1 = -proj[8] + (hmd->eye[1].viewOffset[0] / dist * proj[0]);
-
-            float ortho[2][16];
-            const float viewOffset = _width/4.0f;
-            const float viewWidth  = _width/2.0f;
-            bx::mtxOrtho(ortho[0], viewOffset, viewOffset + viewWidth, (float)m_viewHeight, 0.0f, 0.0f, 1000.0f, offset0);
-            bx::mtxOrtho(ortho[1], viewOffset, viewOffset + viewWidth, (float)m_viewHeight, 0.0f, 0.0f, 1000.0f, offset1);
-            bgfx::setViewTransform(_view, NULL, ortho[0], BGFX_VIEW_STEREO, ortho[1]);
-            bgfx::setViewRect(_view, 0, 0, hmd->width, hmd->height);
-        }
-        else
-        {
-            float ortho[16];
-            bx::mtxOrtho(ortho, 0.0f, (float)m_viewWidth, (float)m_viewHeight, 0.0f, 0.0f, 1000.0f);
-            bgfx::setViewTransform(_view, NULL, ortho);
-            bgfx::setViewRect(_view, 0, 0, _width, _height);
+            Ibl::Matrix44f matrix;
+            matrix.makeOrthoOffCenterLH(0, m_viewWidth, 0, m_viewHeight, 0, 1000);
+            Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
+            uiRenderer->setViewProj(matrix);
+            Ibl::Viewport viewport(0.0f, 0.0f, float(_width), float(_height), 0.0f, 1.0f);
+            m_Device->setViewport(&viewport);
         }
 
         updateInput(_mx, _my, _button, _scroll, _inputChar);
@@ -863,7 +812,6 @@ struct Imgui
         m_insideArea = false;
 
         m_isActivePresent = false;
-#endif
     }
 
     void endFrame()
@@ -878,6 +826,8 @@ struct Imgui
         clearInput();
 
         IMGUI_endFrame();
+        // Reset Scissor Enabled.
+        m_Device->setScissorEnabled(false);
     }
 
     bool beginScroll(int32_t _height, int32_t* _scroll, bool _enabled)
@@ -1420,7 +1370,7 @@ struct Imgui
         if (drawLabel)
         {
             uint32_t numVertices = 0; //unused
-            const int32_t labelWidth = int32_t(getTextLength(m_fonts[m_currentFontIdx].m_cdata, _label, numVertices));
+            const int32_t labelWidth = int32_t(getTextLength(m_fonts[m_currentFontIdx-1].m_cdata, _label, numVertices));
             xx    += (labelWidth + 6);
             width -= (labelWidth + 6);
         }
@@ -1522,7 +1472,7 @@ struct Imgui
         uint8_t selected = _selected;
         const int32_t tabWidth     = width / tabCount;
         const int32_t tabWidthHalf = width / (tabCount*2);
-        const int32_t textY = yy + _height/2 + int32_t(m_fonts[m_currentFontIdx].m_size)/2 - 2;
+        const int32_t textY = yy + _height/2 + int32_t(m_fonts[m_currentFontIdx-1].m_size)/2 - 2;
 
         drawRoundedRect( (float)xx
                        , (float)yy
@@ -1587,9 +1537,9 @@ struct Imgui
 
     bool image(Ibl::ITexture* _image, float _lod, int32_t _width, int32_t _height, ImguiAlign::Enum _align, bool _enabled, bool _originBottomLeft)
     {
-#if READY_TO_ROCK
         const uint32_t id = getId();
         Area& area = getCurrentArea();
+        Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
 
         int32_t xx;
         if (ImguiAlign::Left == _align)
@@ -1623,18 +1573,29 @@ struct Imgui
         const float lodEnabled[4] = { _lod, float(enabled), 0.0f, 0.0f };
 
         screenQuad(xx, yy, _width, _height, _originBottomLeft);
-        bgfx::setUniform(u_imageLodEnabled, lodEnabled);
-        bgfx::setTexture(0, s_texColor, bgfx::isValid(_image) ? _image : m_missingTexture);
-        bgfx::setState(BGFX_STATE_RGB_WRITE
-                      |BGFX_STATE_ALPHA_WRITE
-                      |BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
-                      );
-        bgfx::setProgram(m_imageProgram);
+
+        // TODO. Primitive type!
+        const Ibl::GpuVariable* imageLodEnabledVariable = nullptr;
+        if (m_imageProgram->getParameterByName("u_imageLodEnabled", imageLodEnabledVariable))
+        {
+            imageLodEnabledVariable->setVector(lodEnabled);
+        }
+        const Ibl::GpuVariable* textureVariable = nullptr;
+        if (m_imageProgram->getParameterByName("s_tex", textureVariable))
+        {
+            textureVariable->setTexture(_image ? _image : m_missingTexture);
+        }
+
+        uiRenderer->device()->enableAlphaBlending();
+        uiRenderer->device()->setupBlendPipeline(Ibl::BlendAlpha);
+        uiRenderer->setShader(m_imageProgram);
         setCurrentScissor();
-        bgfx::submit(m_view);
+        uiRenderer->render(6, 0);
+        uiRenderer->device()->disableAlphaBlending();
+
+
+
         return res;
-#endif
-        return false;
     }
 
     bool image(Ibl::ITexture* _image, float _lod, float _width, float _aspect, ImguiAlign::Enum _align, bool _enabled, bool _originBottomLeft)
@@ -1648,9 +1609,9 @@ struct Imgui
     bool imageChannel(Ibl::ITexture* _image, uint8_t _channel, float _lod, int32_t _width, int32_t _height, ImguiAlign::Enum _align, bool _enabled)
     {
 //        BX_CHECK(_channel < 4, "Channel param must be from 0 to 3!");
-#if READY_TO_ROCK
         const uint32_t id = getId();
         Area& area = getCurrentArea();
+        Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
 
         int32_t xx;
         if (ImguiAlign::Left == _align)
@@ -1684,24 +1645,38 @@ struct Imgui
         screenQuad(xx, yy, _width, _height);
 
         const float lodEnabled[4] = { _lod, float(enabled), 0.0f, 0.0f };
-        bgfx::setUniform(u_imageLodEnabled, lodEnabled);
+        const Ibl::GpuVariable* imageLodEnabledVariable = nullptr;
+        if (m_imageSwizzProgram->getParameterByName("u_imageLodEnabled", imageLodEnabledVariable))
+        {
+            imageLodEnabledVariable->setVector(lodEnabled);
+        }
 
+
+        const Ibl::GpuVariable* imageSwizzleVariable = nullptr;
         float swizz[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
         swizz[_channel] = 1.0f;
-        bgfx::setUniform(u_imageSwizzle, swizz);
 
-        bgfx::setTexture(0, s_texColor, bgfx::isValid(_image) ? _image : m_missingTexture);
-        bgfx::setState(BGFX_STATE_RGB_WRITE
-                      |BGFX_STATE_ALPHA_WRITE
-                      |BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
-                      );
-        bgfx::setProgram(m_imageSwizzProgram);
+        if (m_imageSwizzProgram->getParameterByName("u_imageSwizzle", imageSwizzleVariable))
+        {
+            imageSwizzleVariable->setVector(swizz);
+        }
+
+        const Ibl::GpuVariable* textureVariable = nullptr;
+        if (m_imageSwizzProgram->getParameterByName("s_tex", textureVariable))
+        {
+            textureVariable->setTexture(_image ? _image : m_missingTexture);
+        }
+
+        uiRenderer->device()->enableAlphaBlending();
+        uiRenderer->device()->setupBlendPipeline(Ibl::BlendAlpha);
+
+        uiRenderer->setShader(m_imageSwizzProgram);
         setCurrentScissor();
-        bgfx::submit(m_view);
+        // Draw screen quad.
+        uiRenderer->render(6, 0);
+        uiRenderer->device()->disableAlphaBlending();
 
         return res;
-#endif
-        return false;
     }
 
     bool imageChannel(Ibl::ITexture*_image, uint8_t _channel, float _lod, float _width, float _aspect, ImguiAlign::Enum _align, bool _enabled)
@@ -1714,19 +1689,16 @@ struct Imgui
 
     bool cubeMap(Ibl::ITexture* _cubemap, float _lod, bool _cross, ImguiAlign::Enum _align, bool _enabled)
     {
-#if READY_TO_ROCK
         const uint32_t numVertices = 14;
         const uint32_t numIndices  = 36;
-        if (bgfx::checkAvailTransientBuffers(numVertices, PosNormalVertex::ms_decl, numIndices) )
+
         {
-            bgfx::TransientVertexBuffer tvb;
-            bgfx::allocTransientVertexBuffer(&tvb, numVertices, PosNormalVertex::ms_decl);
+            Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
+            Ibl::IVertexBuffer* vb = uiRenderer->vertexBuffer(PosNormalVertex::ms_decl);
+            PosNormalVertex* vertex = (PosNormalVertex*)vb->lock(numVertices * sizeof(PosNormalVertex));
 
-            bgfx::TransientIndexBuffer tib;
-            bgfx::allocTransientIndexBuffer(&tib, numIndices);
-
-            PosNormalVertex* vertex = (PosNormalVertex*)tvb.data;
-            uint16_t* indices = (uint16_t*)tib.data;
+            Ibl::IIndexBuffer * ib = uiRenderer->indexBuffer();
+            uint32_t* indices = (uint32_t*)ib->lock(numIndices * sizeof(uint32_t));
 
             if (_cross)
             {
@@ -1785,6 +1757,8 @@ struct Imgui
                 indices += addQuad(indices,  7, 10, 11,  8);
                 indices += addQuad(indices, 10, 12, 13, 11);
             }
+            vb->unlock();
+            uiRenderer->indexBuffer()->unlock();
 
             const uint32_t id = getId();
 
@@ -1820,26 +1794,43 @@ struct Imgui
             const float scale = float(width/2)+0.25f;
 
             float mtx[16];
-            bx::mtxSRT(mtx, scale, scale, 1.0f, 0.0f, 0.0f, 0.0f, float(xx), float(yy), 0.0f);
+
+            // TODO: SRT Transform setup. Premultiply by viewProj
+            // bx::mtxSRT(mtx, scale, scale, 1.0f, 0.0f, 0.0f, 0.0f, float(xx), float(yy), 0.0f);
+            // bgfx::setTransform(mtx);
 
             const float lodEnabled[4] = { _lod, float(enabled), 0.0f, 0.0f };
-            bgfx::setUniform(u_imageLodEnabled, lodEnabled);
+            const Ibl::GpuVariable* imageLodEnabledVariable = nullptr;
+            if (m_cubeMapProgram->getParameterByName("u_imageLodEnabled", imageLodEnabledVariable))
+            {
+                imageLodEnabledVariable->setVector(lodEnabled);
+            }
 
-            bgfx::setTransform(mtx);
-            bgfx::setTexture(0, s_texColor, _cubemap);
-            bgfx::setProgram(m_cubeMapProgram);
-            bgfx::setVertexBuffer(&tvb);
-            bgfx::setIndexBuffer(&tib);
-            bgfx::setState(BGFX_STATE_RGB_WRITE
-                          |BGFX_STATE_ALPHA_WRITE
-                          |BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
-                          );
+
+            const Ibl::GpuVariable* textureVariable = nullptr;
+            if (m_cubeMapProgram->getParameterByName("s_tex", textureVariable))
+            {
+                textureVariable->setTexture(_cubemap);
+            }
+
+
+
+            uiRenderer->setShader(m_cubeMapProgram);
+            uiRenderer->setVertexBuffer(vb);
+            uiRenderer->setDrawIndexed(true);
+            
+
+            uiRenderer->device()->enableAlphaBlending();
+            uiRenderer->device()->setupBlendPipeline(Ibl::BlendAlpha);
+
             setCurrentScissor();
-            bgfx::submit(m_view);
+            uiRenderer->render(numIndices, 0);
+            uiRenderer->setDrawIndexed(false);
+
+            uiRenderer->device()->disableAlphaBlending();
 
             return res;
         }
-#endif
         return false;
     }
 
@@ -2199,7 +2190,6 @@ struct Imgui
 
     void drawPolygon(const float* _coords, uint32_t _numCoords, float _r, uint32_t _abgr)
     {
-#if READY_TO_ROCK
         _numCoords = Ibl::minValue((uint32_t)_numCoords, (uint32_t)(MAX_TEMP_COORDS));
 
         for (uint32_t ii = 0, jj = _numCoords - 1; ii < _numCoords; jj = ii++)
@@ -2246,13 +2236,12 @@ struct Imgui
         }
 
         uint32_t numVertices = _numCoords*6 + (_numCoords-2)*3;
-        if (bgfx::checkAvailTransientVertexBuffer(numVertices, PosColorVertex::ms_decl) )
         {
-            bgfx::TransientVertexBuffer tvb;
-            bgfx::allocTransientVertexBuffer(&tvb, numVertices, PosColorVertex::ms_decl);
+            Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
+            Ibl::IVertexBuffer* vb = uiRenderer->vertexBuffer(PosColorVertex::ms_decl);
+            PosColorVertex* vertex = (PosColorVertex*)vb->lock(numVertices * sizeof(PosColorVertex));
             uint32_t trans = _abgr&0xffffff;
 
-            PosColorVertex* vertex = (PosColorVertex*)tvb.data;
             for (uint32_t ii = 0, jj = _numCoords-1; ii < _numCoords; jj = ii++)
             {
                 vertex->m_x = _coords[ii*2+0];
@@ -2303,18 +2292,17 @@ struct Imgui
                 vertex->m_abgr = _abgr;
                 ++vertex;
             }
+            vb->unlock();
 
-            bgfx::setVertexBuffer(&tvb);
-            bgfx::setState(0
-                | BGFX_STATE_RGB_WRITE
-                | BGFX_STATE_ALPHA_WRITE
-                | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
-                );
-            bgfx::setProgram(m_colorProgram);
+            uiRenderer->setVertexBuffer(vb);
+            uiRenderer->device()->enableAlphaBlending();
+            uiRenderer->device()->setupBlendPipeline(Ibl::BlendAlpha);
+
+            uiRenderer->setShader(m_colorProgram);
             setCurrentScissor();
-            bgfx::submit(m_view);
+            uiRenderer->render(numVertices, 0);
+            uiRenderer->device()->disableAlphaBlending();
         }
-#endif
     }
 
     void drawRect(float _x, float _y, float _w, float _h, uint32_t _argb, float _fth = 1.0f)
@@ -2500,7 +2488,6 @@ struct Imgui
 
     void drawText(float _x, float _y, const char* _text, ImguiTextAlign::Enum _align, uint32_t _abgr)
     {
-#if READY_TO_ROCK
         if (NULL == _text
         ||  '\0' == _text[0])
         {
@@ -2511,23 +2498,21 @@ struct Imgui
         uint32_t numVertices = 0;
         if (_align == ImguiTextAlign::Center)
         {
-            _x -= getTextLength(m_fonts[m_currentFontIdx].m_cdata, _text, numVertices) / 2;
+            _x -= getTextLength(m_fonts[m_currentFontIdx-1].m_cdata, _text, numVertices) / 2;
         }
         else if (_align == ImguiTextAlign::Right)
         {
-            _x -= getTextLength(m_fonts[m_currentFontIdx].m_cdata, _text, numVertices);
+            _x -= getTextLength(m_fonts[m_currentFontIdx - 1].m_cdata, _text, numVertices);
         }
         else // just count vertices
         {
-            getTextLength(m_fonts[m_currentFontIdx].m_cdata, _text, numVertices);
+            getTextLength(m_fonts[m_currentFontIdx - 1].m_cdata, _text, numVertices);
         }
 
-        if (bgfx::checkAvailTransientVertexBuffer(numVertices, PosColorUvVertex::ms_decl) )
         {
-            bgfx::TransientVertexBuffer tvb;
-            bgfx::allocTransientVertexBuffer(&tvb, numVertices, PosColorUvVertex::ms_decl);
-
-            PosColorUvVertex* vertex = (PosColorUvVertex*)tvb.data;
+            Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
+            Ibl::IVertexBuffer* vb = uiRenderer->vertexBuffer(PosColorUvVertex::ms_decl);
+            PosColorUvVertex* vertex = (PosColorUvVertex*)vb->lock(numVertices * sizeof(PosColorUvVertex));
 
             const float ox = _x;
 
@@ -2549,7 +2534,7 @@ struct Imgui
                      &&  ch < 128)
                 {
                     stbtt_aligned_quad quad;
-                    getBakedQuad(m_fonts[m_currentFontIdx].m_cdata, ch - 32, &_x, &_y, &quad);
+                    getBakedQuad(m_fonts[m_currentFontIdx-1].m_cdata, ch - 32, &_x, &_y, &quad);
 
                     vertex->m_x = quad.x0;
                     vertex->m_y = quad.y0;
@@ -2596,29 +2581,30 @@ struct Imgui
 
                 ++_text;
             }
+            vb->unlock();
 
-            bgfx::setTexture(0, s_texColor, m_fonts[m_currentFontIdx].m_texture);
-            bgfx::setVertexBuffer(&tvb);
-            bgfx::setState(0
-                | BGFX_STATE_RGB_WRITE
-                | BGFX_STATE_ALPHA_WRITE
-                | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
-                );
-            bgfx::setProgram(m_textureProgram);
+            const Ibl::GpuVariable* textureVariable = nullptr;
+            if (m_textureProgram->getParameterByName("s_tex", textureVariable))
+            {
+                textureVariable->setTexture(m_fonts[m_currentFontIdx-1].m_texture);
+            }
+
+            uiRenderer->setVertexBuffer(vb);
+            uiRenderer->device()->enableAlphaBlending();
+            uiRenderer->device()->setupBlendPipeline(Ibl::BlendAlpha);
+            uiRenderer->setShader(m_textureProgram);
             setCurrentScissor();
-            bgfx::submit(m_view);
+            uiRenderer->render(numVertices, 0);
+            uiRenderer->device()->disableAlphaBlending();
         }
-#endif
     }
 
     void screenQuad(int32_t _x, int32_t _y, int32_t _width, uint32_t _height, bool _originBottomLeft = false)
     {
-#if READY_TO_ROCK
-        if (bgfx::checkAvailTransientVertexBuffer(6, PosUvVertex::ms_decl) )
         {
-            bgfx::TransientVertexBuffer vb;
-            bgfx::allocTransientVertexBuffer(&vb, 6, PosUvVertex::ms_decl);
-            PosUvVertex* vertex = (PosUvVertex*)vb.data;
+            Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
+            Ibl::IVertexBuffer* vb = uiRenderer->vertexBuffer(PosUvVertex::ms_decl);            
+            PosUvVertex* vertex = (PosUvVertex*)vb->lock(6 * sizeof(PosUvVertex));
 
             const float widthf  = float(_width);
             const float heightf = float(_height);
@@ -2665,9 +2651,9 @@ struct Imgui
             vertex[5].m_u = minu;
             vertex[5].m_v = minv;
 
-            bgfx::setVertexBuffer(&vb);
+            vb->unlock();
+            uiRenderer->setVertexBuffer(vb);
         }
-#endif
     }
 
     void colorWheelWidget(float _rgb[3], bool _respectIndentation, float _size, bool _enabled)
@@ -2947,11 +2933,11 @@ struct Imgui
 
     inline void setCurrentScissor()
     {
-#if READY_TO_ROCK
         const Area& area = getCurrentArea();
         if (area.m_scissorEnabled)
         {
-            bgfx::setScissor(uint16_t(IMGUI_MAX(0, area.m_scissorX) )
+            m_Device->setScissorEnabled(true);
+            m_Device->setScissorRect(uint16_t(IMGUI_MAX(0, area.m_scissorX))
                            , uint16_t(IMGUI_MAX(0, area.m_scissorY-1) )
                            , area.m_scissorWidth
                            , area.m_scissorHeight+1
@@ -2959,9 +2945,9 @@ struct Imgui
         }
         else
         {
-            bgfx::setScissor(UINT16_MAX);
+            m_Device->setScissorEnabled(false);
+            m_Device->setScissorRect(0, 0, m_Device->backbuffer()->width(), m_Device->backbuffer()->height());
         }
-#endif
     }
 
     template <typename Ty, uint16_t Max=64>
@@ -3050,8 +3036,9 @@ struct Imgui
     struct Font
     {
         stbtt_bakedchar m_cdata[96]; // ASCII 32..126 is 95 glyphs
-        Ibl::ITexture* m_texture;
-        float m_size;
+        Ibl::ITexture*  m_texture;
+        float           m_size;
+        uint32_t        m_id;
     };
 
     ImguiFontReference m_currentFontIdx;
@@ -3061,14 +3048,14 @@ struct Imgui
     Ibl::GpuVariable* u_imageLodEnabled;
     Ibl::GpuVariable* u_imageSwizzle;
     Ibl::GpuVariable* s_texColor;
-    Ibl::IShader* m_colorProgram;
-    Ibl::IShader* m_textureProgram;
-    Ibl::IShader* m_cubeMapProgram;
-    Ibl::IShader* m_imageProgram;
-    Ibl::IShader* m_imageSwizzProgram;
-    Ibl::ITexture* m_missingTexture;
+    const Ibl::IShader* m_colorProgram;
+    const Ibl::IShader* m_textureProgram;
+    const Ibl::IShader* m_cubeMapProgram;
+    const Ibl::IShader* m_imageProgram;
+    const Ibl::IShader* m_imageSwizzProgram;
+    Ibl::ITexture*      m_missingTexture;
 
-    Ibl::IDevice* m_Device;
+    Ibl::IDevice*       m_Device;
 };
 
 static Imgui s_imgui;
@@ -3099,14 +3086,15 @@ ImguiFontReference imguiGetCurrentFont()
     return handle;
 }
 
-void imguiBeginFrame(int32_t _mx, int32_t _my, uint8_t _button, int32_t _scroll, uint16_t _width, uint16_t _height, char _inputChar, uint8_t _view)
+void imguiBeginFrame(Ibl::InputState* inputState, int32_t _mx, int32_t _my, uint8_t _button, int32_t _scroll, uint16_t _width, uint16_t _height, char _inputChar, uint8_t _view)
 {
-    s_imgui.beginFrame(_mx, _my, _button, _scroll, _width, _height, _inputChar, _view);
+    s_imgui.beginFrame(inputState, _mx, _my, _button, _scroll, _width, _height, _inputChar, _view);
 }
 
 void imguiEndFrame()
 {
     s_imgui.endFrame();
+
 }
 
 void imguiDrawText(int32_t _x, int32_t _y, ImguiTextAlign::Enum _align, const char* _text, uint32_t _argb)

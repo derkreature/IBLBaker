@@ -141,6 +141,8 @@ typeToFormat (Ibl::DeclarationType type)
             return DXGI_FORMAT_R32G32_FLOAT;
         case Ibl::FLOAT1: 
             return DXGI_FORMAT_R32_FLOAT;
+        case Ibl::UBYTE4:
+            return DXGI_FORMAT_R8G8B8A8_UNORM;
         case Ibl::UINT8:
             return DXGI_FORMAT_R8_UINT;
         case Ibl::UINT32:

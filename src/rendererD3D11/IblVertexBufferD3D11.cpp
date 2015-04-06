@@ -350,7 +350,7 @@ bool VertexBufferD3D11::unlock()
 
 bool VertexBufferD3D11::bind(uint32_t bufferOffset) const
 {
-    uint32_t offset = _bufferCursor+bufferOffset;
+    uint32_t offset = uint32_t(_bufferCursor+bufferOffset);
     uint32_t stride = _vertexDeclaration->vertexStride();
     _immediateCtx->IASetVertexBuffers(0, 1, &_vertexBuffer, &stride, &offset);
     return true;

@@ -73,6 +73,8 @@ class  IVertexDeclaration : public IRenderResource
                 return 3 * sizeof(float);
             case FLOAT4:   
                 return 4 * sizeof(float);
+            case UBYTE4:
+                return 4 * sizeof(uint8_t);
         }
         return 0;
     }
