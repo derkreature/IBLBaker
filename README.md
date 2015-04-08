@@ -65,6 +65,14 @@ http://blog.selfshadow.com/publications/s2012-shading-course/gotanda/s2012_pbs_b
 
 http://www.pbrt.org/
 
+Similar projects
+------------
+
+- [CubeMapGen](http://developer.amd.com/tools-and-sdks/archive/legacy-cpu-gpu-tools/cubemapgen/) - A well known tool for cubemap filtering from AMD.<br \>
+- [CmftStudio](https://github.com/dariomanesku/cmftStudio) - A similar open-source project.
+- [Marmoset Skyshop](http://www.marmoset.co/skyshop) - Commercial plugin for Unity3D Game engine.
+- [Knald Lys](https://www.knaldtech.com/lys-open-beta/) - Commercial tool from KnaldTech.
+
 Why release?
 --------------
 The tool was developed in a vacuum.
@@ -115,8 +123,6 @@ Left Control key down + mouse move will rotate the visualized object.
 W and S keys zoom the camera in and out from the origin.
 
 Mouse scroll zooms the camera in and out from the origin.
-
-
 
 Buttons
 --------------
