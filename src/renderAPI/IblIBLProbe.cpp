@@ -58,7 +58,7 @@ ImguiEnumVal IblFormatEnum[] =
     { Ibl::PF_FLOAT16_RGBA, "RGBA 16" },
     { Ibl::PF_FLOAT32_RGBA, "RGBA 32" }
 };
-static const EnumTweakType IblFormatType(&IblFormatEnum[0], 6, "ProbeFormat");
+static const EnumTweakType IblFormatType(&IblFormatEnum[0], 2, "ProbeFormat");
 
 ImguiEnumVal IblSourceResolutionEnum[] =
 {
