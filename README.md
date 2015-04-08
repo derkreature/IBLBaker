@@ -1,25 +1,21 @@
-                                                                                  
-    ._____________.____   __________         __                                    
-    |   \______   \    |  \______   \_____  |  | __ ___________                     
-    |   ||    |  _/    |   |    |  _/\__  \ |  |/ // __ \_  __ \                    
-    |   ||    |   \    |___|    |   \ / __ \|    <\  ___/|  | \/                    
-    |___||______  /_______ \______  /(____  /__|_ \\___  >__|                       
-                \/        \/      \/      \/     \/    \/                                                         
-
-    IBLBaker is provided under the MIT License(MIT)
-
-    IBLBaker uses portions of other open source software.
-    Please review the LICENSE file for further details.
-
-    Copyright(c) 2015 Matt Davidson.
+IBLBaker
+--------------
 
 ![IblBakerCover](https://github.com/derkreature/IBLBaker/blob/master/images/IBLBaker.jpg)
 
-Contact
+
+About
 --------------
+IBLBaker is provided under the MIT License(MIT)
+Copyright(c) 2015 Matt Davidson.
+Please see the LICENSE file for full details.
+
 Feel free to contact me with questions, corrections or ideas.
 https://github.com/derkreature/
 http://www.derkreature.com/
+
+Quick download link:
+https://github.com/derkreature/IBLBaker/archive/master.zip
 
 What does it do?
 --------------
