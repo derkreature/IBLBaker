@@ -13,11 +13,7 @@
 
     Copyright(c) 2015 Matt Davidson.
 
-![IblBakerCover](https://github.com/derkreature/IBLBaker/blob/master/images/IblBaker.jpg)
-
-A Special thanks must be given to Munkyfun (www.munkyfun.com) who sponsored 
-much of the work in preparing this work for an open source release.
-Thank you so very much guys!
+![IblBakerCover](https://github.com/derkreature/IBLBaker/blob/master/images/IBLBaker.jpg)
 
 Contact
 --------------
@@ -41,6 +37,9 @@ The full purpose of this tool can be found in the following videos:
 https://vimeo.com/100285383
 https://vimeo.com/96235208
 
+A Special thanks must be given to Munkyfun (www.munkyfun.com) who sponsored 
+much of the work in preparing this work for an open source release.
+Thank you so very much guys!
 
 Codebase notes:
 --------------
