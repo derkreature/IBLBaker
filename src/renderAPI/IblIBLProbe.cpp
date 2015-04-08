@@ -47,35 +47,30 @@
 #include <IblScene.h>
 #include <IblMatrixAlgo.h>
 #include <MurmurHash.h>
-
-
+#include <Iblimgui.h>
 
 
 namespace Ibl
 {
 
-TwEnumVal IblFormatEnum[] =
+ImguiEnumVal IblFormatEnum[] =
 {
     { Ibl::PF_FLOAT16_RGBA, "RGBA 16" },
     { Ibl::PF_FLOAT32_RGBA, "RGBA 32" }
 };
-static const EnumTweakType IblFormatType(&IblFormatEnum[0], 2, "ProbeFormat");
+static const EnumTweakType IblFormatType(&IblFormatEnum[0], 6, "ProbeFormat");
 
-TwEnumVal IblSourceResolutionEnum[] =
+ImguiEnumVal IblSourceResolutionEnum[] =
 {
-    { 8, "8" },
-    { 16, "16" },
-    { 32, "32" },
     { 64, "64" },
     { 128, "128" },
 	{ 256, "256" },
     { 512, "512" },
     { 1024, "1024" },
-    { 2048, "2048" },
-	{ 4096, "4096" }
+    { 2048, "2048" }
 };
 
-static const EnumTweakType IblSourceResolutionType(&IblSourceResolutionEnum[0], 10, "SourceResolution");
+static const EnumTweakType IblSourceResolutionType(&IblSourceResolutionEnum[0], 6, "SourceResolution");
 
 IBLProbe::IBLProbe(Ibl::IDevice * device) : 
     Ibl::TransformNode(device),

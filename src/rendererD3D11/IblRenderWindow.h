@@ -61,6 +61,7 @@ public:
                                       
 
     bool                       rendererHasFocus() const;
+
   protected:
     virtual LRESULT            callback (WindowHandle window, 
                                          uint32_t msg, 

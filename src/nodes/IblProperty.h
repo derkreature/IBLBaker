@@ -44,28 +44,29 @@
 #include <IblPlatform.h>
 #include <IblNode.h>
 #include <IblNonCopyable.h>
-#include <AntTweakBar.h>
 #include <functional>
+
+struct ImguiEnumVal;
 
 namespace Ibl
 {
+
 class EnumTweakType
 {
   private:
     NON_COPYABLE(EnumTweakType)
 
   public:
-    EnumTweakType(TwEnumVal* enumVal, uint32_t enumCount, const std::string& typeName);
+    EnumTweakType(ImguiEnumVal* enumNames, uint32_t enumCount, const std::string& typeName);
     virtual ~EnumTweakType();
 
-    TwType                     type() const;
-    const std::string &        typeName() const;
-
+    const ImguiEnumVal*        enumValues() const;
+    const std::string&         typeName() const;
+    uint32_t                   enumCount() const;
   protected:
-    TwEnumVal*                 _enumValues;
+    ImguiEnumVal*              _enumValues;
     uint32_t                   _enumCount;
     std::string                _typeName;
-    mutable TwType             _type;
 };
 
 class TweakFlags

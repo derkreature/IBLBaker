@@ -41,109 +41,57 @@
 
 
 #include <IblRenderHUD.h>
-#include <IblWidgetDialog.h>
 #include <IblRenderWindow.h>
-#include <IblControl.h>
-#include <IblEditBox.h>
-#include <IblListBox.h>
-#include <IblImageWidget.h>
 #include <IblLog.h>
 #include <IblApplication.h>
 #include <IblRegion.h>
-#include <IblFontMgr.h>
-#include <IblFont.h>
-#include <IblButton.h>
 #include <IblISurface.h>
 #include <IblPostEffectsMgr.h>
-#include <AntTweakBar.h>
 #include <IblRenderDeviceD3D11.h>
-#include <IblDialogResourceManager.h>
+#include <IblImageWidget.h>
 
 namespace Ibl
 {
-namespace
-{
 RenderHUD* _renderHUD = 0;
 #define Logo          1024
-void CALLBACK OnGUIEvent (UINT nEvent, 
-                          int nControlID, 
-                          Ibl::Control*);
-}
 
 RenderHUD::RenderHUD (Ibl::Application* application,
                       Ibl::IDevice* device,
                       Ibl::InputState* inputState,
                       const std::string& logoPath) :
-_dialog (0),
-_fpsFont (0),
 _drawFps (false),
 _inputState (inputState),
 _logoPath (logoPath),
 _application (application),
-_deviceInterface(device)
+_deviceInterface(device),
+_logo(nullptr)
 {
     _scriptControlsVisible = false;
     _renderHUD = this;
     _uiVisible = false;
     _renderWindow = dynamic_cast<Ibl::RenderWindow*>(application->window());
-
-    if (Ibl::FontMgr * fontMgr = _deviceInterface->fontMgr())
-    {
-        if (_fpsFont = dynamic_cast <Ibl::Font*>
-            (fontMgr->createFont ("Arial", 14)))
-        {
-            LOG ("Hud font created");
-        }
-        else
-        {
-            LOG ("Hud font failed...\n");
-        }
-    }
-
     const Ibl::ISurface* backbuffer = _deviceInterface->backbuffer();
-
-    if (_dialog = new Ibl::Dialog (_renderWindow,_deviceInterface ))
-    {        
-        _dialog->SetCallback (OnGUIEvent);
-        _dialog->setLocation (0, 0);
-        _dialog->SetFont(0, "Arial", 14, FW_SEMIBOLD );
-
-        
-        float aspect = 1.0f;
-        Ibl::Vector2f min; 
-        Ibl::Vector2f max; 
-        if (backbuffer->width() > backbuffer->height())
-        {
-           float xaspect  = ((float)backbuffer->width() / (float)backbuffer->height());
-           float yaspect  = ((float)backbuffer->height() / (float)backbuffer->width());
-           float yoffset = (0.45f*xaspect);
-           float whiteSpaceYOffset = yoffset * 0.25f;
-           min = Vector2f ((0.985f-(0.45f)), -1.05f -  whiteSpaceYOffset);
-           max = Vector2f (0.985f, (-1.05f+yoffset)- whiteSpaceYOffset);
-        }
-        else
-        {
-          aspect  = ((float)backbuffer->height() / (float)backbuffer->width());            
-          min = Vector2f (0.37f, -1.1f);
-          max = Vector2f (1.00f, -1.1f + (0.21f * aspect));
-        }
-
-        _dialog->addImageWidget (Logo, _logoPath, Region2f (min, max));
-        _logo = dynamic_cast<Ibl::ImageWidget *>
-            (_dialog->getControl(Logo));
-    }
     
-
-    if (Ibl::DeviceD3D11* device11 = dynamic_cast<Ibl::DeviceD3D11*>(_deviceInterface))
+    float aspect = 1.0f;
+    Ibl::Vector2f min;
+    Ibl::Vector2f max;
+    if (backbuffer->width() > backbuffer->height())
     {
-        if (!TwInit(TW_DIRECT3D11, *device11))
-        {
-            LOG ("Failed to init device\n");
-        }
+        float xaspect = ((float)backbuffer->width() / (float)backbuffer->height());
+        float yaspect = ((float)backbuffer->height() / (float)backbuffer->width());
+        float yoffset = (0.45f*xaspect);
+        float whiteSpaceYOffset = yoffset * 0.25f;
+        min = Vector2f((0.985f - (0.45f)), -1.05f - whiteSpaceYOffset);
+        max = Vector2f(0.985f, (-1.05f + yoffset) - whiteSpaceYOffset);
     }
-    // Else GL, etc...
+    else
+    {
+        aspect = ((float)backbuffer->height() / (float)backbuffer->width());
+        min = Vector2f(0.37f, -1.1f);
+        max = Vector2f(1.00f, -1.1f + (0.21f * aspect));
+    }
 
-
+    _logo = new Ibl::ImageWidget(_deviceInterface, _logoPath, Region2f(min, max));
     _logoVisible = true;
 }
 
@@ -151,34 +99,16 @@ RenderHUD::~RenderHUD()
 {
     _renderHUD = 0;
 
-    for (size_t i = 0; i <_tweakBars.size(); i++)
-    {
-        TwDeleteBar(_tweakBars[i]);
-    }
-    TwTerminate();
+    // TODO: Move to Imgui.
+    if (_logo)
+        safedelete(_logo);
 
-    safedelete (_dialog);
-    DestoryDialogResourceManager();
-}
-
-
-TwBar*
-RenderHUD::addTweakBar(const std::string& name, const Ibl::Region2i& bounds)
-{
-    TwBar *bar = TwNewBar(name.c_str());
-    TwDefine(" GLOBAL help='This is an example of the default kreature options.' "); // Message added to the help bar.
-    int barSize[2] = {bounds.size().x, bounds.size().y};
-    int barLoc[2] = {bounds.minExtent.x, bounds.minExtent.y};
-    TwSetParam(bar, nullptr, "position", TW_PARAM_INT32, 2, barLoc);
-    TwSetParam(bar, nullptr, "size", TW_PARAM_INT32, 2, barSize);
-
-    _tweakBars.push_back(bar);
-    return bar;
 }
 
 Ibl::ImageWidget*
 RenderHUD::logo()
 {
+    // You touched my logo!
     return _logo;
 }
 
@@ -209,8 +139,7 @@ RenderHUD::uiVisible(void) const
 bool
 RenderHUD::update(double elapsedTime)
 {
-    _inputState->setHasGUIFocus (_dialog->dialogHasFocus() || !_renderWindow->rendererHasFocus());
-
+    _elapsedTime = float(elapsedTime);
     if (_inputState->getKeyState(DIK_F7))
     {
         static int index = 0;
@@ -241,37 +170,9 @@ RenderHUD::render(const Ibl::Camera* camera)
     Ibl::DrawMode drawMode = _deviceInterface->getDrawMode ();
     _deviceInterface->setDrawMode (Ibl::Filled);
 
-    if (_dialog)
+    if (_logo->visible())
     {
-        _dialog->resetZ();
-        _dialog->render ((float)_application->timer().elapsedTime(), camera);
-    }
-
-    if (_fpsFont && _drawFps)
-    {
-        std::ostringstream stream;
-        static const std::string msg = "Framerate: ";
-        static const std::string unit = " fps";
-
-        stream << msg << _application->timer().frameRate() << unit;
-        Ibl::Vector2f location (0, 0);
-
-        _fpsFont->render (camera, stream.str().c_str(),
-                          location,
-                          Ibl::Vector4f (1.0f, 1.0f, 1.0f, 1.0f));
-    
-        Ibl::Vector2f cameraLocation (0, 24);
-        std::ostringstream  cameraStream;
-        cameraStream << "Camera t = " << camera->translation().x << " " << camera->translation().y << " " << camera->translation().z  << " : rotation = " << camera->rotation().x << " " << camera->rotation().y << " " << camera->rotation().z;
-        _fpsFont->render (camera, cameraStream.str().c_str(),
-                          cameraLocation,
-                          Ibl::Vector4f (1.0f, 1.0f, 1.0f, 1.0f));
-    }
-
-
-    if (_uiVisible)
-    {
-        TwDraw();
+        _logo->render(_elapsedTime);
     }
 
     _deviceInterface->setDrawMode (drawMode);
@@ -286,17 +187,4 @@ RenderHUD::toggleScriptControlVisibility()
     _scriptControlsVisible = !_scriptControlsVisible;
 }
 
-void
-RenderHUD::handleEvent (UINT nEvent, int nControlID, Ibl::Control* pControl)
-{
-}
-
-namespace
-{
-void CALLBACK 
-OnGUIEvent (UINT eventId, int controlId, Ibl::Control* control)
-{
-    _renderHUD->handleEvent (eventId, controlId, control);
-}
-}
 }

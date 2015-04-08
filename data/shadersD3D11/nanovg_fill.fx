@@ -92,7 +92,7 @@ PSOutput ps(VSOutput input)
     else if (u_params.w == 1.0) // Image
     {
         // Calculate color from texture
-        float2 pt = mul((float3x3)u_paintMat, float3(input.v_position.x, input.v_position.y, 1.0)).xy / u_extentRadius.xy;
+        float2 pt = mul((float3x3)transpose(u_paintMat), float3(input.v_position.x, input.v_position.y, 1.0)).xy / u_extentRadius.xy;
         float4 color = s_tex.Sample(linearSampler, pt); 
         color = u_params.z == 0.0 ? color : float4(1.0, 1.0, 1.0, color.x);
         // Combine alpha
@@ -110,9 +110,6 @@ PSOutput ps(VSOutput input)
         color.w *= scissor;
         result = color * u_innerCol;
     }
-
-    if (strokeAlpha < u_params.y)
-            discard;
 
     output.output0 = result;
     return output;

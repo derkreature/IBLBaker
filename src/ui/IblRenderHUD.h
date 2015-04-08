@@ -44,11 +44,9 @@
 #define INCLUDED_BB_RENDERHUD
 
 #include <IblPlatform.h>
-#include <IblControl.h>
 #include <IblIRenderResource.h>
 //#include <IblFrameCounter.h>
 #include <IblInputState.h>
-#include <AntTweakBar.h>
 
 namespace Ibl
 {
@@ -83,7 +81,6 @@ class RenderHUD
     virtual bool               update(double elapsedTime);
     virtual void               render(const Ibl::Camera* camera);
     virtual void               showApplicationUI()=0;
-    virtual void               handleEvent(UINT eventId, int controlId, Ibl::Control* control);
     void                       toggleScriptControlVisibility();
 
     bool                       logoVisible() const;
@@ -92,14 +89,10 @@ class RenderHUD
     void                       setUIVisible(bool);
     bool                       uiVisible() const;
 
-    TwBar*                     addTweakBar(const std::string& name, const Ibl::Region2i& bounds);
-
 
     Ibl::ImageWidget*           logo();
 
   protected:
-    Ibl::Dialog*                dialog();
-    Ibl::Dialog*                _dialog;
 
     Ibl::Font*                  _fpsFont;
     Ibl::RenderWindow*          _renderWindow;
@@ -112,10 +105,9 @@ class RenderHUD
     Ibl::ImageWidget *          _logo;
     Ibl::InputState*            _inputState;
 
-    std::vector<TwBar*>        _tweakBars;
-
     bool                       _drawFps;
     std::string                _logoPath;
+    float                      _elapsedTime;
 };
 }
 #endif

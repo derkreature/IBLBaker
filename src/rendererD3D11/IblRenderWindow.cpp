@@ -45,7 +45,6 @@
 
 #include <../resources/resource.h>
 
-#include <AntTweakBar.h>
 #if HAS_RESOURCES
 #include "resource.h"
 #endif
@@ -173,19 +172,6 @@ RenderWindow::callback (HWND window,
 {
     if (windowHandle() == nullptr)
         return Window::callback (window, msg, wParam, lParam);
-    // Send event message to AntTweakBar
-    if (TwEventWin(window, msg, wParam, lParam))
-    {
-        _rendererHasFocus = false;
-        return 0; // Event has been handled by AntTweakBar
-    }
-
-
-    if (msg >= WM_MOUSEFIRST &&
-        msg <= WM_MBUTTONDBLCLK)
-    {
-        _rendererHasFocus = true;
-    }
 
     switch (msg)
     {

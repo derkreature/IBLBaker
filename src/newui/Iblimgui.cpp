@@ -37,7 +37,6 @@
 #include <IblGpuVariable.h>
 #include <IblShaderMgr.h>
 #include <IblTextureMgr.h>
-#include <IblDynamicRenderer.h>
 #include <IblVertexDeclarationMgr.h>
 #include <IblIVertexBuffer.h>
 #include <IblIIndexBuffer.h>
@@ -782,13 +781,24 @@ struct Imgui
         m_view = _view;
         m_viewWidth = _width;
         m_viewHeight = _height;
-        //bgfx::setViewName(_view, "IMGUI");
-        //bgfx::setViewSeq(_view, true);
         {
-            Ibl::Matrix44f matrix;
-            matrix.makeOrthoOffCenterLH(0, m_viewWidth, 0, m_viewHeight, 0, 1000);
+            Ibl::Matrix44f ortho;            
+            float L = 0;
+            float R = float(m_Device->backbuffer()->width());
+            float T = 0;
+            float B = float(m_Device->backbuffer()->height());
+
+            const float mvp[4][4] =
+            {
+                { 2.0f / (R - L), 0.0f, 0.0f, 0.0f },
+                { 0.0f, 2.0f / (T - B), 0.0f, 0.0f, },
+                { 0.0f, 0.0f, 0.5f, 0.0f },
+                { (R + L) / (L - R), (T + B) / (B - T), 0.5f, 1.0f },
+            };
+            memcpy(&ortho._m[0][0], &mvp[0][0], sizeof(ortho._m));
+
             Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
-            uiRenderer->setViewProj(matrix);
+            uiRenderer->setViewProj(ortho);
             Ibl::Viewport viewport(0.0f, 0.0f, float(_width), float(_height), 0.0f, 1.0f);
             m_Device->setViewport(&viewport);
         }
@@ -836,7 +846,6 @@ struct Imgui
 
         m_areaId.next();
         const uint32_t scrollId = getId();
-
         Area& area = getCurrentArea();
 
         const uint16_t parentBottom = parentArea.m_scissorY + parentArea.m_scissorHeight;
@@ -1406,40 +1415,27 @@ struct Imgui
         }
     }
 
-    uint8_t tabs(uint8_t _selected, bool _enabled, ImguiAlign::Enum _align, int32_t _height, int32_t _r, uint8_t _nTabs, uint8_t _nEnabled, va_list _argList)
+    uint8_t tabs(uint8_t _selected, bool _enabled, ImguiAlign::Enum _align, int32_t _height, int32_t _r, uint8_t _nTabs, const ImguiEnumVal* values)
     {
         const char* titles[16];
         bool tabEnabled[16];
         const uint8_t tabCount = IMGUI_MIN(_nTabs, 16);
-        const uint8_t enabledCount = IMGUI_MIN(_nEnabled, 16);
+        const uint8_t enabledCount = 0;
 
         // Read titles.
         {
             uint8_t ii = 0;
             for (; ii < tabCount; ++ii)
             {
-                const char* str = va_arg(_argList, const char*);
+                const char* str = values[ii].label;
                 titles[ii] = str;
-            }
-            for (; ii < _nTabs; ++ii)
-            {
-                const char* str = va_arg(_argList, const char*);
             }
         }
 
-        // Read enabled tabs.
+        // *Set* enabled tabs o_O.
         {
-            uint8_t ii = 0;
-            for (; ii < enabledCount; ++ii)
-            {
-                const bool enabled = (0 != va_arg(_argList, int) );
-                tabEnabled[ii] = enabled;
-            }
-            for (; ii < _nEnabled; ++ii)
-            {
-                const int enabled = va_arg(_argList, int);
-            }
-            for (; ii < _nTabs; ++ii)
+            uint8_t ii = 0;          
+            for (ii = 0; ii < _nTabs; ++ii)
             {
                 tabEnabled[ii] = true;
             }
@@ -1457,36 +1453,36 @@ struct Imgui
             width = area.m_widgetW;
         }
         else if (ImguiAlign::LeftIndented == _align
-             ||  ImguiAlign::Right        == _align)
+            || ImguiAlign::Right == _align)
         {
             xx = area.m_widgetX;
-            width = area.m_widgetW-1; //TODO: -1 !
+            width = area.m_widgetW - 1; //TODO: -1 !
         }
         else //if (ImguiAlign::Center         == _align
-             //||  ImguiAlign::CenterIndented == _align).
+            //||  ImguiAlign::CenterIndented == _align).
         {
             xx = area.m_widgetX;
-            width = area.m_widgetW - (area.m_widgetX-area.m_scissorX);
+            width = area.m_widgetW - (area.m_widgetX - area.m_scissorX);
         }
 
         uint8_t selected = _selected;
-        const int32_t tabWidth     = width / tabCount;
-        const int32_t tabWidthHalf = width / (tabCount*2);
-        const int32_t textY = yy + _height/2 + int32_t(m_fonts[m_currentFontIdx-1].m_size)/2 - 2;
+        const int32_t tabWidth = width / tabCount;
+        const int32_t tabWidthHalf = width / (tabCount * 2);
+        const int32_t textY = yy + _height / 2 + int32_t(m_fonts[m_currentFontIdx - 1].m_size) / 2 - 2;
 
-        drawRoundedRect( (float)xx
-                       , (float)yy
-                       , (float)width
-                       , (float)_height
-                       , (float)_r
-                       , _enabled?imguiRGBA(128,128,128,96):imguiRGBA(128,128,128,64)
-                       );
+        drawRoundedRect((float)xx
+            , (float)yy
+            , (float)width
+            , (float)_height
+            , (float)_r
+            , _enabled ? imguiRGBA(128, 128, 128, 96) : imguiRGBA(128, 128, 128, 64)
+            );
 
         for (uint8_t ii = 0; ii < tabCount; ++ii)
         {
             const uint32_t id = getId();
 
-            int32_t buttonX = xx + ii*width/tabCount;
+            int32_t buttonX = xx + ii*width / tabCount;
             int32_t textX = buttonX + tabWidthHalf;
 
             const bool enabled = _enabled && tabEnabled[ii] && isEnabled(m_areaId);
@@ -1494,37 +1490,37 @@ struct Imgui
             const bool res = buttonLogic(id, over);
 
             const uint32_t textColor = (ii == selected)
-                                     ? (enabled   ? imguiRGBA(0,0,0,255)                 : imguiRGBA(255,255,255,100)             )
-                                     : (isHot(id) ? imguiRGBA(255,196,0,enabled?255:100) : imguiRGBA(255,255,255,enabled?200:100) )
-                                     ;
+                ? (enabled ? imguiRGBA(0, 0, 0, 255) : imguiRGBA(255, 255, 255, 100))
+                : (isHot(id) ? imguiRGBA(255, 196, 0, enabled ? 255 : 100) : imguiRGBA(255, 255, 255, enabled ? 200 : 100))
+                ;
 
             if (ii == selected)
             {
-                drawRoundedRect( (float)buttonX
-                               , (float)yy
-                               , (float)tabWidth
-                               , (float)_height
-                               , (float)_r
-                               , enabled?imguiRGBA(255,196,0,200):imguiRGBA(128,128,128,32)
-                               );
+                drawRoundedRect((float)buttonX
+                    , (float)yy
+                    , (float)tabWidth
+                    , (float)_height
+                    , (float)_r
+                    , enabled ? imguiRGBA(255, 196, 0, 200) : imguiRGBA(128, 128, 128, 32)
+                    );
             }
             else if (isActive(id))
             {
-                drawRoundedRect( (float)buttonX
-                               , (float)yy
-                               , (float)tabWidth
-                               , (float)_height
-                               , (float)_r
-                               , imguiRGBA(128,128,128,196)
-                               );
+                drawRoundedRect((float)buttonX
+                    , (float)yy
+                    , (float)tabWidth
+                    , (float)_height
+                    , (float)_r
+                    , imguiRGBA(128, 128, 128, 196)
+                    );
             }
 
             drawText(textX
-                   , textY
-                   , ImguiTextAlign::Center
-                   , titles[ii]
-                   , textColor
-                   );
+                , textY
+                , ImguiTextAlign::Center
+                , titles[ii]
+                , textColor
+                );
 
             if (res)
             {
@@ -1535,7 +1531,9 @@ struct Imgui
         return selected;
     }
 
-    bool image(Ibl::ITexture* _image, float _lod, int32_t _width, int32_t _height, ImguiAlign::Enum _align, bool _enabled, bool _originBottomLeft)
+
+
+    bool image(const Ibl::ITexture* _image, float _lod, int32_t _width, int32_t _height, ImguiAlign::Enum _align, bool _enabled, bool _originBottomLeft)
     {
         const uint32_t id = getId();
         Area& area = getCurrentArea();
@@ -1598,7 +1596,7 @@ struct Imgui
         return res;
     }
 
-    bool image(Ibl::ITexture* _image, float _lod, float _width, float _aspect, ImguiAlign::Enum _align, bool _enabled, bool _originBottomLeft)
+    bool image(const Ibl::ITexture* _image, float _lod, float _width, float _aspect, ImguiAlign::Enum _align, bool _enabled, bool _originBottomLeft)
     {
         const float width = _width*float(getCurrentArea().m_widgetW);
         const float height = width/_aspect;
@@ -1606,7 +1604,7 @@ struct Imgui
         return image(_image, _lod, int32_t(width), int32_t(height), _align, _enabled, _originBottomLeft);
     }
 
-    bool imageChannel(Ibl::ITexture* _image, uint8_t _channel, float _lod, int32_t _width, int32_t _height, ImguiAlign::Enum _align, bool _enabled)
+    bool imageChannel(const Ibl::ITexture* _image, uint8_t _channel, float _lod, int32_t _width, int32_t _height, ImguiAlign::Enum _align, bool _enabled)
     {
 //        BX_CHECK(_channel < 4, "Channel param must be from 0 to 3!");
         const uint32_t id = getId();
@@ -1679,7 +1677,7 @@ struct Imgui
         return res;
     }
 
-    bool imageChannel(Ibl::ITexture*_image, uint8_t _channel, float _lod, float _width, float _aspect, ImguiAlign::Enum _align, bool _enabled)
+    bool imageChannel(const Ibl::ITexture*_image, uint8_t _channel, float _lod, float _width, float _aspect, ImguiAlign::Enum _align, bool _enabled)
     {
         const float width = _width*float(getCurrentArea().m_widgetW);
         const float height = width/_aspect;
@@ -1687,7 +1685,7 @@ struct Imgui
         return imageChannel(_image, _channel, _lod, int32_t(width), int32_t(height), _align, _enabled);
     }
 
-    bool cubeMap(Ibl::ITexture* _cubemap, float _lod, bool _cross, ImguiAlign::Enum _align, bool _enabled)
+    bool cubeMap(const Ibl::ITexture* _cubemap, float _lod, bool _cross, ImguiAlign::Enum _align, bool _enabled)
     {
         const uint32_t numVertices = 14;
         const uint32_t numIndices  = 36;
@@ -1793,11 +1791,32 @@ struct Imgui
 
             const float scale = float(width/2)+0.25f;
 
-            float mtx[16];
+            Ibl::Matrix44f srt;
+            Ibl::Matrix44f projection;
+            Ibl::Matrix44f transform;
 
-            // TODO: SRT Transform setup. Premultiply by viewProj
-            // bx::mtxSRT(mtx, scale, scale, 1.0f, 0.0f, 0.0f, 0.0f, float(xx), float(yy), 0.0f);
-            // bgfx::setTransform(mtx);
+            const float L = 0.0f;
+            const float R = float(m_Device->backbuffer()->width());
+            const float B = float(m_Device->backbuffer()->height());
+            const float T = 0.0f;
+            const float ortho[4][4] =
+            {
+                { 2.0f / (R - L), 0.0f, 0.0f, 0.0f },
+                { 0.0f, 2.0f / (T - B), 0.0f, 0.0f, },
+                { 0.0f, 0.0f, 0.5f, 0.0f },
+                { (R + L) / (L - R), (T + B) / (B - T), 0.5f, 1.0f },
+            };
+            memcpy(&projection._m[0][0], &ortho[0][0], sizeof(float) * 16); 
+
+            Ibl::Matrix44f t;
+            Ibl::Matrix44f s;
+
+            s.scaling(Ibl::Vector3f(scale, scale, 1.0f));
+            t.setTranslation(Ibl::Vector3f(float(xx),float(yy),0));
+            transform = s * t * projection;
+
+            uiRenderer->setViewProj(transform);
+
 
             const float lodEnabled[4] = { _lod, float(enabled), 0.0f, 0.0f };
             const Ibl::GpuVariable* imageLodEnabledVariable = nullptr;
@@ -1828,6 +1847,7 @@ struct Imgui
             uiRenderer->setDrawIndexed(false);
 
             uiRenderer->device()->disableAlphaBlending();
+            uiRenderer->setViewProj(projection);
 
             return res;
         }
@@ -3264,25 +3284,12 @@ void imguiInput(const char* _label, char* _str, uint32_t _len, bool _enabled, Im
     s_imgui.input(_label, _str, _len, _enabled, _align, _r);
 }
 
-uint8_t imguiTabs(uint8_t _selected, bool _enabled, ImguiAlign::Enum _align, int32_t _height, int32_t _r, uint8_t _nTabs, uint8_t _nEnabled, ...)
+uint8_t imguiTabsForEnum(uint8_t _selected, bool _enabled, ImguiAlign::Enum _align, int32_t _height, int32_t _r, uint8_t _nTabs, const ImguiEnumVal* labels)
 {
-    va_list argList;
-    va_start(argList, _nEnabled);
-    const uint8_t result = s_imgui.tabs(_selected, _enabled, _align, _height, _r, _nTabs, _nEnabled, argList);
-    va_end(argList);
-
+    const uint8_t result = s_imgui.tabs(_selected, _enabled, _align, _height, _r, _nTabs, labels);
     return result;
 }
 
-uint8_t imguiTabs(uint8_t _selected, bool _enabled, ImguiAlign::Enum _align, int32_t _height, int32_t _r, uint8_t _nTabs, ...)
-{
-    va_list argList;
-    va_start(argList, _nTabs);
-    const uint8_t result = s_imgui.tabs(_selected, _enabled, _align, _height, _r, _nTabs, 0, argList);
-    va_end(argList);
-
-    return result;
-}
 
 uint32_t imguiChooseUseMacroInstead(uint32_t _selected, ...)
 {
@@ -3299,6 +3306,20 @@ uint32_t imguiChooseUseMacroInstead(uint32_t _selected, ...)
     }
 
     va_end(argList);
+
+    return _selected;
+}
+
+uint32_t imguiChooseFromArrayInstead(uint32_t _selected, const ImguiEnumVal* chooseFrom, uint32_t enumCount)
+{
+    for (uint32_t ii = 0; ii < enumCount; ii++)
+    {
+        const char* str = chooseFrom[ii].label;
+        if (imguiCheck(str, ii == _selected))
+        {
+            _selected = ii;
+        }
+    }
 
     return _selected;
 }
@@ -3328,27 +3349,27 @@ void imguiColorWheel(const char* _text, float _rgb[3], bool& _activated, float _
     }
 }
 
-bool imguiImage(Ibl::ITexture* _image, float _lod, int32_t _width, int32_t _height, ImguiAlign::Enum _align, bool _enabled, bool _originBottomLeft)
+bool imguiImage(const Ibl::ITexture* _image, float _lod, int32_t _width, int32_t _height, ImguiAlign::Enum _align, bool _enabled, bool _originBottomLeft)
 {
     return s_imgui.image(_image, _lod, _width, _height, _align, _enabled, _originBottomLeft);
 }
 
-bool imguiImage(Ibl::ITexture* _image, float _lod, float _width, float _aspect, ImguiAlign::Enum _align, bool _enabled, bool _originBottomLeft)
+bool imguiImage(const Ibl::ITexture* _image, float _lod, float _width, float _aspect, ImguiAlign::Enum _align, bool _enabled, bool _originBottomLeft)
 {
     return s_imgui.image(_image, _lod, _width, _aspect, _align, _enabled, _originBottomLeft);
 }
 
-bool imguiImageChannel(Ibl::ITexture* _image, uint8_t _channel, float _lod, int32_t _width, int32_t _height, ImguiAlign::Enum _align, bool _enabled)
+bool imguiImageChannel(const Ibl::ITexture* _image, uint8_t _channel, float _lod, int32_t _width, int32_t _height, ImguiAlign::Enum _align, bool _enabled)
 {
     return s_imgui.imageChannel(_image, _channel, _lod, _width, _height, _align, _enabled);
 }
 
-bool imguiImageChannel(Ibl::ITexture* _image, uint8_t _channel, float _lod, float _width, float _aspect, ImguiAlign::Enum _align, bool _enabled)
+bool imguiImageChannel(const Ibl::ITexture* _image, uint8_t _channel, float _lod, float _width, float _aspect, ImguiAlign::Enum _align, bool _enabled)
 {
     return s_imgui.imageChannel(_image, _channel, _lod, _width, _aspect, _align, _enabled);
 }
 
-bool imguiCube(Ibl::ITexture* _cubemap, float _lod, bool _cross, ImguiAlign::Enum _align, bool _enabled)
+bool imguiCube(const Ibl::ITexture* _cubemap, float _lod, bool _cross, ImguiAlign::Enum _align, bool _enabled)
 {
     return s_imgui.cubeMap(_cubemap, _lod, _cross, _align, _enabled);
 }

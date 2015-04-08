@@ -48,6 +48,7 @@
 #include <IblIBLProbe.h>
 #include <IblCamera.h>
 #include <IblBrdf.h>
+#include <Iblimgui.h>
 
 #if IBL_USE_ASS_IMP_AND_FREEIMAGE
 // Assimp
@@ -267,7 +268,6 @@ Scene::~Scene()
         safedelete(brdf);
     }
     _brdfCache.clear();
-    safedelete(_brdfType);
 }
 
 bool
@@ -292,12 +292,15 @@ Scene::loadBrdfs()
 
     // Build the enum for display
     uint32_t brdfId = 0;
+    std::vector<ImguiEnumVal> _brdfEnumValues;
+    _brdfEnumValues.reserve(_brdfCache.size());
     for (auto it = _brdfCache.begin(); it != _brdfCache.end(); it++, brdfId++)
     {
-        CTwEnumVal enumValue;
-        enumValue.Value = brdfId;
-        enumValue.Label = (*it)->name().c_str();
+        ImguiEnumVal enumValue;
+        enumValue.value = brdfId;
+        enumValue.label = (*it)->name().c_str();
         _brdfEnumValues.push_back(enumValue);
+
     }
     _brdfType = new EnumTweakType(&_brdfEnumValues[0], (uint32_t)(_brdfEnumValues.size()), "BrdfType");
     _activeBrdfProperty = new IntProperty(this, "Brdf", new TweakFlags(_brdfType, "Brdf"));

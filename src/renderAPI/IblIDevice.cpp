@@ -42,7 +42,6 @@
 #include <IblITexture.h>
 #include <IblLog.h>
 #include <IblShaderMgr.h>
-#include <IblFontMgr.h>
 #include <IblTextureMgr.h>
 #include <IblShaderParameterValueFactory.h>
 #include <IblVertexDeclarationMgr.h>
@@ -128,7 +127,6 @@ IDevice::IDevice () :
     _vertexDeclarationMgr(nullptr),
     _textureMgr(nullptr),
     _shaderValueFactory(nullptr),
-    _fontMgr(nullptr),
     _shaderMgr(nullptr),
     _postEffectsMgr(nullptr)
 {
@@ -154,7 +152,6 @@ IDevice::postInitialize(const Ibl::ApplicationRenderParameters& deviceParameters
     _textureMgr = new TextureMgr(_application, this);
     _shaderValueFactory = new ShaderParameterValueFactory(this);
     _shaderMgr = new Ibl::ShaderMgr(this);
-    _fontMgr = new FontMgr(_application, this);
     _postEffectsMgr = new PostEffectsMgr(_application, this);
 
     {
@@ -192,7 +189,6 @@ IDevice::free()
     safedelete(_colorResolveEffect);
     safedelete(_depthResolveEffect);
 
-    safedelete(_fontMgr);
     safedelete(_vertexDeclarationMgr);
     safedelete(_shaderMgr);
     safedelete(_shaderValueFactory);
@@ -268,12 +264,6 @@ TextureMgr*
 IDevice::textureMgr()
 {
     return _textureMgr;
-}
-
-FontMgr*
-IDevice::fontMgr()
-{
-    return _fontMgr;
 }
 
 ShaderParameterValueFactory* 

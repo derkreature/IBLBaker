@@ -80,6 +80,7 @@ Window::Window(const Application* application)
 Window::~Window()
 {
     destroy();
+
 }
 
 

@@ -71,7 +71,6 @@ class RenderResourceParameters;
 class ShaderMgr;
 class VertexDeclarationMgr;
 class TextureMgr;
-class FontMgr;
 class PostEffectsMgr;
 class ShaderParameterValueFactory;
 class DepthResolve;
@@ -290,7 +289,6 @@ class IDevice
     ShaderMgr*                   shaderMgr();
     VertexDeclarationMgr*        vertexDeclarationMgr();
     TextureMgr*                  textureMgr();
-    FontMgr*                     fontMgr();
     ShaderParameterValueFactory* shaderValueFactory();
     PostEffectsMgr *             postEffectsMgr();
 
@@ -307,7 +305,6 @@ class IDevice
     Ibl::ShaderMgr*               _shaderMgr;
     Ibl::VertexDeclarationMgr*    _vertexDeclarationMgr;
     TextureMgr*                  _textureMgr;
-    FontMgr*                     _fontMgr;
     ShaderParameterValueFactory* _shaderValueFactory;
     PostEffectsMgr *             _postEffectsMgr;
     DepthResolve*                _depthResolveEffect;

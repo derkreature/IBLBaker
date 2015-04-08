@@ -197,15 +197,15 @@ IBLRenderPass::refineDiffuse(Ibl::Scene* scene,
         _deviceInterface->setViewport(&mipViewport);
         _deviceInterface->clearSurfaces (0, Ibl::CLEAR_TARGET, 0, 0, 0, 1);
 
-        const Ibl::GpuTechnique*     importanceSamplingDiffuseTechnique = nullptr;
-        const Ibl::GpuVariable*      convolutionSrcDiffuseVariable = nullptr;
-        const Ibl::GpuVariable*      convolutionMipDiffuseVariable = nullptr;
-        const Ibl::GpuVariable*      convolutionRoughnessDiffuseVariable = nullptr;
-        const Ibl::GpuVariable*      convolutionSamplesOffsetDiffuseVariable = nullptr;
-        const Ibl::GpuVariable*      convolutionViewsDiffuseVariable = nullptr;
-        const Ibl::GpuVariable*      convolutionSampleCountDiffuseVariable = nullptr;
-        const Ibl::GpuVariable*      convolutionMaxSamplesDiffuseVariable = nullptr;
-        const Ibl::GpuVariable*      convolutionSrcLastResultDiffuseVariable = nullptr;
+        const Ibl::GpuTechnique* importanceSamplingDiffuseTechnique = nullptr;
+        const Ibl::GpuVariable*  convolutionSrcDiffuseVariable = nullptr;
+        const Ibl::GpuVariable*  convolutionMipDiffuseVariable = nullptr;
+        const Ibl::GpuVariable*  convolutionRoughnessDiffuseVariable = nullptr;
+        const Ibl::GpuVariable*  convolutionSamplesOffsetDiffuseVariable = nullptr;
+        const Ibl::GpuVariable*  convolutionViewsDiffuseVariable = nullptr;
+        const Ibl::GpuVariable*  convolutionSampleCountDiffuseVariable = nullptr;
+        const Ibl::GpuVariable*  convolutionMaxSamplesDiffuseVariable = nullptr;
+        const Ibl::GpuVariable*  convolutionSrcLastResultDiffuseVariable = nullptr;
 
         importanceSamplingShaderDiffuse->getTechniqueByName(std::string("basic"), importanceSamplingDiffuseTechnique);
         importanceSamplingShaderDiffuse->getParameterByName("ConvolutionSrc", convolutionSrcDiffuseVariable);

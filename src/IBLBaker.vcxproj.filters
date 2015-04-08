@@ -396,67 +396,7 @@
     <ClCompile Include="rendererD3D11\IblVertexDeclarationD3D11.cpp">
       <Filter>rendererD3D11</Filter>
     </ClCompile>
-    <ClCompile Include="ui\IblButton.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblCheckBox.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblComboBox.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblControl.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblDialogBase.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblDialogResourceManager.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblDynamicRenderer.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblEditBox.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblFont.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblFontMgr.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblImageWidget.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblListBox.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblRadioButton.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
     <ClCompile Include="ui\IblRenderHUD.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblScrollBar.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblSlider.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblSprite.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblStatic.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblWidgetDialog.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblWidgetTypes.cpp">
-      <Filter>oldui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\IblWidgetUIElement.cpp">
       <Filter>oldui</Filter>
     </ClCompile>
     <ClCompile Include="nodes\IblBrdf.cpp">
@@ -483,6 +423,9 @@
     </ClCompile>
     <ClCompile Include="dependencies\nanovg\nanovg.c">
       <Filter>ui\nanosvg</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\IblImageWidget.cpp">
+      <Filter>ui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -886,70 +829,7 @@
     <ClInclude Include="rendererD3D11\IblVertexDeclarationD3D11.h">
       <Filter>rendererD3D11</Filter>
     </ClInclude>
-    <ClInclude Include="ui\IblButton.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblCheckBox.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblComboBox.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblControl.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblDialogBase.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblDialogResourceManager.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblDynamicRenderer.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblEditBox.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblFont.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblFontMgr.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblImageWidget.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblListBox.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblRadioButton.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
     <ClInclude Include="ui\IblRenderHUD.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblScrollBar.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblSlider.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblSprite.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblStatic.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblWidgetAPI.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblWidgetDialog.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblWidgetTypes.h">
-      <Filter>oldui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\IblWidgetUIElement.h">
       <Filter>oldui</Filter>
     </ClInclude>
     <ClInclude Include="nodes\IblBrdf.h">
@@ -987,6 +867,9 @@
       <Filter>ui</Filter>
     </ClInclude>
     <ClInclude Include="newui\IblUIRenderer.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\IblImageWidget.h">
       <Filter>ui</Filter>
     </ClInclude>
   </ItemGroup>

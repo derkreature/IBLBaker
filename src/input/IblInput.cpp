@@ -52,7 +52,10 @@
 namespace Ibl
 {
 Input::Input() : 
-    _x360Controller(nullptr)
+    _x360Controller(nullptr),
+    _dinput(nullptr),
+    _keyboard(nullptr),
+    _mouse(nullptr)
 {
     _bufferSize = 16;
     _hasFocus = false;
@@ -61,12 +64,16 @@ Input::Input() :
 
 Input::~Input()
 {
-    if(keyboard)
-        keyboard->Unacquire();
-    if (mouse)
-        mouse->Unacquire();
+
+    _keyboard->Unacquire();
+    saferelease(_keyboard)
+
+    _mouse->Unacquire();
+    saferelease(_mouse);
 
     safedelete(_x360Controller);
+
+    saferelease(_dinput);
 }
 
 
@@ -87,7 +94,7 @@ bool Input::create(const Ibl::Application* application)
         GetModuleHandle(NULL), 
         DIRECTINPUT_VERSION, 
         IID_IDirectInput8, 
-        reinterpret_cast<void**>(&dinput), 
+        reinterpret_cast<void**>(&_dinput), 
         0)))
     {
         LOG ("Input::Create(): Create InputDevice failed");
@@ -95,7 +102,7 @@ bool Input::create(const Ibl::Application* application)
     }
     
     // create a keyboard device
-    if (FAILED (dinput->CreateDevice (GUID_SysKeyboard, &keyboard, 0)))
+    if (FAILED (_dinput->CreateDevice (GUID_SysKeyboard, &_keyboard, 0)))
     {
         LOG ("Input::Create(): CreateDevice failed");
         return false;
@@ -108,7 +115,7 @@ bool Input::create(const Ibl::Application* application)
     }
 
     // set the keyboard cooperative level
-    HRESULT hr = keyboard->SetCooperativeLevel(window, DISCL_BACKGROUND | DISCL_NONEXCLUSIVE);
+    HRESULT hr = _keyboard->SetCooperativeLevel(window, DISCL_BACKGROUND | DISCL_NONEXCLUSIVE);
     if (FAILED(hr))
     {
         if (hr == DIERR_INVALIDPARAM)
@@ -129,28 +136,28 @@ bool Input::create(const Ibl::Application* application)
     dipkdw.diph.dwHow        = DIPH_DEVICE;
     dipkdw.dwData            = _bufferSize;
 
-    if (FAILED (keyboard->SetProperty (DIPROP_BUFFERSIZE, &dipkdw.diph)))
+    if (FAILED (_keyboard->SetProperty (DIPROP_BUFFERSIZE, &dipkdw.diph)))
     {
         LOG ("Input::Create(): SetProperty keyboard failed");    
         return false;
     }
 
     //set the keyboard data format
-    if (FAILED (keyboard->SetDataFormat (&c_dfDIKeyboard)))
+    if (FAILED (_keyboard->SetDataFormat (&c_dfDIKeyboard)))
     {
         LOG ("Input::Create(): SetDataFormat failed");    
         return false;
     }
     // attempt to aquire the keyboard
-    keyboard->Acquire();
+    _keyboard->Acquire();
 
-    if (FAILED (dinput->CreateDevice (GUID_SysMouse, &mouse, 0)))
+    if (FAILED(_dinput->CreateDevice(GUID_SysMouse, &_mouse, 0)))
     {
         LOG ("Input::Create(): Create Mouse failed");    
         return false;
     }
 
-    if (FAILED (mouse->SetCooperativeLevel (window, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND)))
+    if (FAILED(_mouse->SetCooperativeLevel(window, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND)))
     {
         LOG ("Input::Create(): mouse Set Cooperative Level failed"); // DXGetErrorDescription (hr)    
         return false;
@@ -163,19 +170,19 @@ bool Input::create(const Ibl::Application* application)
     dipdw.diph.dwHow        = DIPH_DEVICE;
     dipdw.dwData            = _bufferSize; // Arbitary buffer size
 
-    if(FAILED (mouse->SetProperty (DIPROP_BUFFERSIZE, &dipdw.diph)))
+    if (FAILED(_mouse->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph)))
     {
         LOG ("Input::Create(): set property for mouse failed");    
         return false;
     }
 
-    if (FAILED ( mouse->SetDataFormat (&c_dfDIMouse)))
+    if (FAILED(_mouse->SetDataFormat(&c_dfDIMouse)))
     {        
         LOG ("Input::Create(): mouse SetDataFormat failed");    
         return false;
     }
 
-    mouse->Acquire();
+    _mouse->Acquire();
 
     LOG ("Direct Input Systems Created Successfully");
     return true;
@@ -183,12 +190,12 @@ bool Input::create(const Ibl::Application* application)
 
 bool Input::readMouseInputBuffer()
 {         
-    if(keyboard == 0)
+    if (_mouse == nullptr)
     {
         THROW (std::string ("There is also no Mouse"));
     }
     _inputState._mouseElements = 32;
-    return SUCCEEDED (mouse->GetDeviceData (sizeof (DIDEVICEOBJECTDATA),
+    return SUCCEEDED (_mouse->GetDeviceData (sizeof (DIDEVICEOBJECTDATA),
                                  _inputState._didodms, 
                                  &_inputState._mouseElements, 
                                  0));
@@ -196,22 +203,22 @@ bool Input::readMouseInputBuffer()
 
 bool Input::readKeyBoardInputBuffer()
 {
-    if (mouse == 0) 
+    if (_keyboard == nullptr)
     {
         THROW (std::string ("There is no Keyboard"));
     }
     _inputState._keyboardElements = 32;
-    return SUCCEEDED (keyboard->GetDeviceData (sizeof(DIDEVICEOBJECTDATA),
-                                               _inputState._didodkb, 
-                                               &_inputState._keyboardElements, 
-                                               0));
+    return SUCCEEDED (_keyboard->GetDeviceData (sizeof(DIDEVICEOBJECTDATA),
+                                                _inputState._didodkb, 
+                                                &_inputState._keyboardElements, 
+                                                0));
 }
 
 bool Input::update()
 {    
     bool result = false;
-    if ((keyboard->Acquire() == DIERR_OTHERAPPHASPRIO ) ||
-        (mouse->Acquire() == DIERR_OTHERAPPHASPRIO)) 
+    if ((_keyboard->Acquire() == DIERR_OTHERAPPHASPRIO ) ||
+        (_mouse->Acquire() == DIERR_OTHERAPPHASPRIO))
     {
         _hasFocus = false;
         result = false;
@@ -221,8 +228,8 @@ bool Input::update()
     GetCursorPos(&cursorPosition);
     ScreenToClient(_application->window()->windowHandle(), &cursorPosition);
     
-    _inputState._cursorPositionX = (float)cursorPosition.x;
-    _inputState._cursorPositionY = (float)cursorPosition.y;
+    _inputState._cursorPositionX = (int32_t)cursorPosition.x;
+    _inputState._cursorPositionY = (int32_t)cursorPosition.y;
 
     if (readKeyBoardInputBuffer() && 
         readMouseInputBuffer())

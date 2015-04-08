@@ -99,9 +99,9 @@ bool IndexBufferD3D11::create()
     _dynamic = _resource.dynamic();
     _isRingBuffer = _resource.ringBuffered();
 
-    // No overwrite buffer for 3 frames.
+    // No overwrite buffer for 5 frames.
     if (_isRingBuffer)
-        _sizeInBytes *= 3;
+        _sizeInBytes *= 5;
 
 
     bd.Usage = _dynamic ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;

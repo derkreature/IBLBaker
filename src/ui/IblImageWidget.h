@@ -42,28 +42,25 @@
 #ifndef INCLUDED_IMAGE_WIDGET
 #define INCLUDED_IMAGE_WIDGET
 
-#include <IblControl.h>
 #include <IblRegion.h>
 
 namespace Ibl
 {
+class IDevice;
 class ScreenOrientedQuad;
 class ITexture;
 class IShader;
 class Material;
 class GpuTechnique;
 
-class Dialog;
-class ImageWidget : public Control
+class ImageWidget
 {
-public: 
-    ImageWidget(Dialog* dialog, 
-                Ibl::IDevice* renderMgr,
+  public: 
+    ImageWidget(Ibl::IDevice* device,
                 const std::string& texturePath,
                 const Region2f& bounds);
 
-    ImageWidget(Dialog* dialog, 
-                Ibl::IDevice* renderMgr,
+    ImageWidget(Ibl::IDevice* device,
                 const Ibl::ITexture* texture,
                 const Region2f& bounds);
 
@@ -77,17 +74,22 @@ public:
 
     void                       setBlendIn(float);
 
-protected:
-    std::string                             _texturePath;
+    void                       setVisible(bool);
+    bool                       visible() const;
+
+  protected:
+    IDevice*                          _device;
+    std::string                       _texturePath;
     Ibl::ScreenOrientedQuad*          _quad;
     const Ibl::ITexture*              _image;    
     Ibl::Material*                    _material;
     const Ibl::GpuTechnique*          _technique;
     const Ibl::IShader*               _shader;
-    Region2f                                   _bounds;
-    bool                                    _blendingIn;
-    float                                   _blendInTime;
-    float                                   _totalBlendInTime;
+    Region2f                          _bounds;
+    bool                              _blendingIn;
+    float                             _blendInTime;
+    float                             _totalBlendInTime;
+    bool                              _visible;
 };
 }
 #endif

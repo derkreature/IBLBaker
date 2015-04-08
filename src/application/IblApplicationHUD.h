@@ -70,6 +70,7 @@ class ImageWidget;
 #define LoadAsset 16004
 #define BrdfViewer 16005
 
+
 class ApplicationHUD : public RenderHUD
 {
   public:
@@ -83,32 +84,30 @@ class ApplicationHUD : public RenderHUD
     virtual bool               create();
     virtual bool               update(double elapsedTime);
     virtual void               render(const Ibl::Camera* camera);
-    virtual void               handleEvent (UINT eventId, int controlId, Ibl::Control* control);
 
     void                       showApplicationUI();
     void                       setupMeshUI();
     void                       cleanupMeshUI();
-
-    static  void TW_CALL       setCB(const void *value, void * /*clientData*/);
-    static  void TW_CALL       getCB(void *value, void * /*clientData*/);
-
-    void                       addToBundle(Property* key, Property* value);
 
   private:
     Scene*                     _scene;
 
     static ApplicationHUD*     _applicationHud;
     bool                       _controlsVisible;
+    Ibl::ITexture*             _munkyfunTexture;
 
-    Button*                    _loadEnvironmentMapButton;
-    Button*                    _saveEnvironmentMapButton;
-    Button*                    _computeEnvironmentMapButton;
-    Button*                    _cancelComputeEnvironmentButton;
-    Button*                    _loadAsset;
-    ImageWidget*               _brdfViewer;
+    bool                       _showRendering;
+    bool                       _renderingEnabled;
+    bool                       _showAbout;
+    bool                       _aboutEnabled;
+    bool                       _showEnvironment;
+    bool                       _environmentEnabled;
+    bool                       _showBrdf;
+    bool                       _brdfEnabled;
+    bool                       _showFiltering;
+    bool                       _filteringEnabled;
 
-    std::map<Ibl::Property*, ETwType>         _tweakProperties;
-    std::map<Property*, std::set<Property*> > _tweakBundles;
+    int32_t                    _scrollArea;
 };
 }
 

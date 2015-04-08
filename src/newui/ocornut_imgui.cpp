@@ -14,7 +14,6 @@
 #include <IblGpuVariable.h>
 #include <IblGpuTechnique.h>
 #include <IblIVertexDeclaration.h>
-#include <IblDynamicRenderer.h>
 #include <IblIVertexBuffer.h>
 #include <IblITexture.h>
 #include <IblTextureMgr.h>
@@ -22,6 +21,7 @@
 #include <IblUIRenderer.h>
 #include <IblVertexDeclarationMgr.h>
 #include <IblInputState.h>
+#include <IblApplication.h>
 
 static void imguiRender(ImDrawList** const _lists, int cmd_lists_count);
 
@@ -35,9 +35,20 @@ struct OcornutImguiContext
         Ibl::UIRenderer * uiRenderer = Ibl::UIRenderer::renderer();
         Ibl::IDevice* device = uiRenderer->device();
 
-        Ibl::Matrix44f ortho;
-        ortho.makeOrthoOffCenterLH(0, width, 0, height, -1, 1.0);
+        float L = 0;
+        float R = float(device->backbuffer()->width());
+        float T = 0;
+        float B = float(device->backbuffer()->height());
 
+        Ibl::Matrix44f ortho;
+        const float mvp[4][4] =
+        {
+            { 2.0f / (R - L), 0.0f, 0.0f, 0.0f },
+            { 0.0f, 2.0f / (T - B), 0.0f, 0.0f, },
+            { 0.0f, 0.0f, 0.5f, 0.0f },
+            { (R + L) / (L - R), (T + B) / (B - T), 0.5f, 1.0f },
+        };
+        memcpy(&ortho._m[0][0], &mvp[0][0], sizeof(ortho._m));
         uiRenderer->setViewProj(ortho);
 
         // Render command lists
@@ -99,11 +110,31 @@ struct OcornutImguiContext
 
         Ibl::UIRenderer * uiRenderer = Ibl::UIRenderer::renderer();
         Ibl::IDevice* device = uiRenderer->device();
-
+        memset(m_KeyRepeatTimes, 0, sizeof(float) * 512);
 
         ImGuiIO& io = ImGui::GetIO();
         io.DisplaySize = ImVec2(1280.0f, 720.0f);
         io.DeltaTime = 1.0f / 60.0f;
+
+        // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array that we will update during the application lifetime.
+        io.KeyMap[ImGuiKey_Tab] = DIK_TAB;                              
+        io.KeyMap[ImGuiKey_LeftArrow] = DIK_LEFT;
+        io.KeyMap[ImGuiKey_RightArrow] = DIK_RIGHT;
+        io.KeyMap[ImGuiKey_UpArrow] = DIK_UP;
+        io.KeyMap[ImGuiKey_DownArrow] = DIK_UP;
+        io.KeyMap[ImGuiKey_Home] = DIK_HOME;
+        io.KeyMap[ImGuiKey_End] = DIK_END;
+        io.KeyMap[ImGuiKey_Delete] = DIK_DELETE;
+        io.KeyMap[ImGuiKey_Backspace] = DIK_BACK;
+        io.KeyMap[ImGuiKey_Enter] = DIK_RETURN;
+        io.KeyMap[ImGuiKey_Escape] = DIK_ESCAPE;
+        io.KeyMap[ImGuiKey_A] = 'A';
+        io.KeyMap[ImGuiKey_C] = 'C';
+        io.KeyMap[ImGuiKey_V] = 'V';
+        io.KeyMap[ImGuiKey_X] = 'X';
+        io.KeyMap[ImGuiKey_Y] = 'Y';
+        io.KeyMap[ImGuiKey_Z] = 'Z';
+
 
         if (Ibl::ShaderMgr* shaderMgr = device->shaderMgr())
         {
@@ -155,12 +186,63 @@ struct OcornutImguiContext
     {
     }
 
+
+    bool scanCodeToAscii(HKL keyboardLayout, uint8_t* keyboardState, uint32_t scancode, uint8_t& result)
+    {
+        UINT vk = MapVirtualKeyEx(scancode, 1, keyboardLayout);
+        uint16_t converted[4];
+        if (ToAsciiEx(vk, scancode, keyboardState, converted, 0, keyboardLayout) == 1)
+        {
+            result = converted[0] & 0x7f;
+            return true;
+        }
+        return false;
+    }
+
     // TODO: Fix this quick hack for keyboard input.
     void beginFrame(Ibl::InputState* inputState, int32_t _mx, int32_t _my, uint8_t _button, int _width, int _height, char _inputChar, uint8_t _viewId)
     {
         m_viewId = _viewId;
         ImGuiIO& io = ImGui::GetIO();
-        io.AddInputCharacter(_inputChar & 0x7f); // ASCII or GTFO! :)
+
+        static HKL keyboardLayout = GetKeyboardLayout(0);
+        static uint8_t keyboardState[256];
+        GetKeyboardState(keyboardState);
+
+        for (uint32_t scanCode = 0; scanCode < 512; scanCode++)
+        { 
+            io.KeysDown[scanCode] = inputState->getKeyState(scanCode);
+
+            if (!io.KeysDown[scanCode])
+            {
+                m_KeyRepeatTimes[scanCode] = 0.0f;
+            }
+
+            // If keycode and key state converts to ascii, add it as an input character.
+            if (io.KeysDown[scanCode])
+            {   
+                if (m_KeyRepeatTimes[scanCode] > 0.2)
+                {
+                    m_KeyRepeatTimes[scanCode] = 0.0f;
+                }
+
+                if (m_KeyRepeatTimes[scanCode] == 0.0f)
+                {
+                    uint8_t asciiInput = (uint8_t)(0);
+                    if (scanCodeToAscii(keyboardLayout, keyboardState, scanCode, asciiInput))
+                    {
+                        io.AddInputCharacter(asciiInput);
+                    }
+                }
+
+                m_KeyRepeatTimes[scanCode] += 1.0f / 60.0f;
+            }
+        }
+         
+        io.MouseWheel = inputState->_z / 100.0f;
+        io.KeyCtrl = (inputState->getKeyState(DIK_LCONTROL) || inputState->getKeyState(DIK_RCONTROL)) ? 1 : 0;
+        io.KeyShift = (inputState->getKeyState(DIK_LSHIFT) || inputState->getKeyState(DIK_RSHIFT)) ? 1 : 0;
+
         io.DisplaySize = ImVec2((float)_width, (float)_height);
         io.DeltaTime = 1.0f / 60.0f;
         io.MousePos = ImVec2((float)_mx, (float)_my);
@@ -168,7 +250,7 @@ struct OcornutImguiContext
 
         ImGui::NewFrame();
 
-		ImGui::ShowTestWindow();
+        //ImGui::ShowTestWindow();
     }
 
     void endFrame()
@@ -181,6 +263,8 @@ struct OcornutImguiContext
     Ibl::ITexture*              m_texture;
     Ibl::GpuVariable*           s_tex;
     uint8_t                     m_viewId;
+
+    float                       m_KeyRepeatTimes[512];
 };
 
 static OcornutImguiContext s_ctx;

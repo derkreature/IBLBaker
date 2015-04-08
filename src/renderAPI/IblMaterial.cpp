@@ -42,12 +42,13 @@
 #include <IblAssetManager.h>
 #include <IblTextureMgr.h>
 #include <pugixml.hpp>
+#include <Iblimgui.h>
 
 namespace Ibl
 {
 namespace
 {
-TwEnumVal DebugAOVEnum[] =
+ImguiEnumVal DebugAOVEnum[] =
 {
     { Ibl::NoDebugTerm, "No Debug Term" },
     { Ibl::NormalTerm, "Normals" },
@@ -61,13 +62,14 @@ TwEnumVal DebugAOVEnum[] =
 };
 static const EnumTweakType DebugAOVType(&DebugAOVEnum[0], 9, "debugAOV");
 
-TwEnumVal SpecularWorkflowEnum[] =
+ImguiEnumVal SpecularWorkflowEnum[] =
 {
     { RoughnessMetal, "Roughness/Metal" },
     { GlossMetal, "Gloss/Metal" },
     { RoughnessInverseMetal, "Roughness/Inverse Metal" },
     { GlossInverseMetal, "Gloss/Inverse Metal" },
 };
+
 static const EnumTweakType SpecularWorkflowType(&SpecularWorkflowEnum[0], 4, "specularWorkflow");
 
 bool stringToBool(const std::string& value)

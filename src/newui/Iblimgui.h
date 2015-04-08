@@ -27,6 +27,7 @@
 #define IMGUI_H_HEADER_GUARD
 
 #include <ocornut_imgui.h>
+#include <vector>
 
 namespace Ibl
 {
@@ -111,6 +112,12 @@ struct ImguiBorder
 	};
 };
 
+struct ImguiEnumVal
+{
+    int32_t value;
+    const char* label;
+};
+
 inline uint32_t imguiRGBA(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a = 255)
 {
 	return 0
@@ -171,6 +178,8 @@ bool imguiSlider(const char* _text, float& _val, float _vmin, float _vmax, float
 bool imguiSlider(const char* _text, int32_t& _val, int32_t _vmin, int32_t _vmax, bool _enabled = true, ImguiAlign::Enum _align = ImguiAlign::LeftIndented);
 void imguiInput(const char* _label, char* _str, uint32_t _len, bool _enabled = true, ImguiAlign::Enum _align = ImguiAlign::LeftIndented, int32_t _r = IMGUI_INPUT_R);
 
+uint32_t imguiChooseFromArrayInstead(uint32_t _selected, const ImguiEnumVal* labels, uint32_t enumCount);
+
 /// Usage example:
 ///     imguiTabs(0, true, ImguiAlign::CenterIndented, 20, 0, 3, 2, "Tab0", "Tab1", "Tab2", true, false);
 /// _nTabs    - Number of tabs (in the above example, 3, and their labes are 'Tab0', 'Tab1' and 'Tab2'.
@@ -180,17 +189,21 @@ void imguiInput(const char* _label, char* _str, uint32_t _len, bool _enabled = t
 uint8_t imguiTabs(uint8_t _selected, bool _enabled, ImguiAlign::Enum _align, int32_t _height, int32_t _r, uint8_t _nTabs, uint8_t _nEnabled, ...);
 uint8_t imguiTabs(uint8_t _selected, bool _enabled, ImguiAlign::Enum _align, int32_t _height, int32_t _r, uint8_t _nTabs, ...);
 
+uint8_t imguiTabsForEnum(uint8_t _selected, bool _enabled, ImguiAlign::Enum _align, int32_t _height, int32_t _r, uint8_t _nTabs, const ImguiEnumVal* labels);
+
+
 uint32_t imguiChooseUseMacroInstead(uint32_t _selected, ...);
 #define imguiChoose(...) imguiChooseUseMacroInstead(__VA_ARGS__, NULL)
+
 
 void imguiColorWheel(float _rgb[3], bool _respectIndentation = false, float _size = 0.8f, bool _enabled = true);
 void imguiColorWheel(const char* _str, float _rgb[3], bool& _activated, float _size = 0.8f, bool _enabled = true);
 
-bool imguiImage(Ibl::ITexture* _image, float _lod, int32_t _width, int32_t _height, ImguiAlign::Enum _align = ImguiAlign::LeftIndented, bool _enabled = true, bool _originBottomLeft = false);
-bool imguiImage(Ibl::ITexture* _image, float _lod, float _scale, float _aspect, ImguiAlign::Enum _align = ImguiAlign::LeftIndented, bool _enabled = true, bool _originBottomLeft = false);
-bool imguiImageChannel(Ibl::ITexture* _image, uint8_t _channel, float _lod, int32_t _width, int32_t _height, ImguiAlign::Enum _align = ImguiAlign::LeftIndented, bool _enabled = true);
-bool imguiImageChannel(Ibl::ITexture* _image, uint8_t _channel, float _lod, float _scale, float _aspect, ImguiAlign::Enum _align = ImguiAlign::LeftIndented, bool _enabled = true);
-bool imguiCube(Ibl::ITexture* _cubemap, float _lod = 0.0f, bool _cross = true, ImguiAlign::Enum _align = ImguiAlign::LeftIndented, bool _enabled = true);
+bool imguiImage(const Ibl::ITexture* _image, float _lod, int32_t _width, int32_t _height, ImguiAlign::Enum _align = ImguiAlign::LeftIndented, bool _enabled = true, bool _originBottomLeft = false);
+bool imguiImage(const Ibl::ITexture* _image, float _lod, float _scale, float _aspect, ImguiAlign::Enum _align = ImguiAlign::LeftIndented, bool _enabled = true, bool _originBottomLeft = false);
+bool imguiImageChannel(const Ibl::ITexture* _image, uint8_t _channel, float _lod, int32_t _width, int32_t _height, ImguiAlign::Enum _align = ImguiAlign::LeftIndented, bool _enabled = true);
+bool imguiImageChannel(const Ibl::ITexture* _image, uint8_t _channel, float _lod, float _scale, float _aspect, ImguiAlign::Enum _align = ImguiAlign::LeftIndented, bool _enabled = true);
+bool imguiCube(const Ibl::ITexture* _cubemap, float _lod = 0.0f, bool _cross = true, ImguiAlign::Enum _align = ImguiAlign::LeftIndented, bool _enabled = true);
 
 float imguiGetTextLength(const char* _text, ImguiFontReference _handle);
 bool imguiMouseOverArea();

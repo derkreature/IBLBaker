@@ -45,7 +45,6 @@
 #include <IblPlatform.h>
 #include <IblInputState.h>
 #include <IblWindow.h>
-#include <IblComPtr.h>
 
 namespace Ibl
 {
@@ -78,9 +77,10 @@ public:
     InputState                 _inputState;
     bool                       _hasFocus;
 
-    Ibl::ComPtr <IDirectInput8>::Type dinput;
-    Ibl::ComPtr <IDirectInputDevice8>::Type keyboard;
-    Ibl::ComPtr <IDirectInputDevice8>::Type mouse;
+    IDirectInput8 *            _dinput;
+    IDirectInputDevice8 *      _keyboard;
+    IDirectInputDevice8 *      _mouse;
+
     Ibl::X360Controller*        _x360Controller;
     const Ibl::Application*     _application;
 };

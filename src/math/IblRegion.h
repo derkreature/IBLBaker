@@ -85,6 +85,15 @@ class Region
         return maxExtent - minExtent;
     }
 
+    bool            intersects(const T & test) const
+    {
+        uint32_t d = T::dimensions();
+        for (uint32_t i = 0; i < d; i++)
+            if (test[i] < minExtent[i] || test[i] > maxExtent[i])
+                return false;
+        return true;
+    }
+
     T               center() const
     {
         return (max + min)*0.5;

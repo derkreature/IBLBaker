@@ -45,6 +45,8 @@
 #include <IblNode.h>
 #include <IblRenderNode.h>
 
+
+
 namespace Ibl
 {
 class Entity;
@@ -94,7 +96,6 @@ class Scene : public Ibl::RenderNode
     Camera*                    _camera;
     IntProperty*               _activeBrdfProperty;
     EnumTweakType *            _brdfType;
-    std::vector<TwEnumVal>     _brdfEnumValues;
     typedef std::vector<Brdf*> BrdfCache;
     BrdfCache                  _brdfCache;
 

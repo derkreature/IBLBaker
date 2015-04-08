@@ -132,27 +132,8 @@
     <ClCompile Include="rendererD3D11\IblTextureD3D11.cpp" />
     <ClCompile Include="rendererD3D11\IblVertexBufferD3D11.cpp" />
     <ClCompile Include="rendererD3D11\IblVertexDeclarationD3D11.cpp" />
-    <ClCompile Include="ui\IblButton.cpp" />
-    <ClCompile Include="ui\IblCheckBox.cpp" />
-    <ClCompile Include="ui\IblComboBox.cpp" />
-    <ClCompile Include="ui\IblControl.cpp" />
-    <ClCompile Include="ui\IblDialogBase.cpp" />
-    <ClCompile Include="ui\IblDialogResourceManager.cpp" />
-    <ClCompile Include="ui\IblDynamicRenderer.cpp" />
-    <ClCompile Include="ui\IblEditBox.cpp" />
-    <ClCompile Include="ui\IblFont.cpp" />
-    <ClCompile Include="ui\IblFontMgr.cpp" />
     <ClCompile Include="ui\IblImageWidget.cpp" />
-    <ClCompile Include="ui\IblListBox.cpp" />
-    <ClCompile Include="ui\IblRadioButton.cpp" />
     <ClCompile Include="ui\IblRenderHUD.cpp" />
-    <ClCompile Include="ui\IblScrollBar.cpp" />
-    <ClCompile Include="ui\IblSlider.cpp" />
-    <ClCompile Include="ui\IblSprite.cpp" />
-    <ClCompile Include="ui\IblStatic.cpp" />
-    <ClCompile Include="ui\IblWidgetDialog.cpp" />
-    <ClCompile Include="ui\IblWidgetTypes.cpp" />
-    <ClCompile Include="ui\IblWidgetUIElement.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\IblApplication.h" />
@@ -302,28 +283,8 @@
     <ClInclude Include="rendererD3D11\IblVertexBufferD3D11.h" />
     <ClInclude Include="rendererD3D11\IblVertexDeclarationD3D11.h" />
     <ClInclude Include="resources\resource.h" />
-    <ClInclude Include="ui\IblButton.h" />
-    <ClInclude Include="ui\IblCheckBox.h" />
-    <ClInclude Include="ui\IblComboBox.h" />
-    <ClInclude Include="ui\IblControl.h" />
-    <ClInclude Include="ui\IblDialogBase.h" />
-    <ClInclude Include="ui\IblDialogResourceManager.h" />
-    <ClInclude Include="ui\IblDynamicRenderer.h" />
-    <ClInclude Include="ui\IblEditBox.h" />
-    <ClInclude Include="ui\IblFont.h" />
-    <ClInclude Include="ui\IblFontMgr.h" />
     <ClInclude Include="ui\IblImageWidget.h" />
-    <ClInclude Include="ui\IblListBox.h" />
-    <ClInclude Include="ui\IblRadioButton.h" />
     <ClInclude Include="ui\IblRenderHUD.h" />
-    <ClInclude Include="ui\IblScrollBar.h" />
-    <ClInclude Include="ui\IblSlider.h" />
-    <ClInclude Include="ui\IblSprite.h" />
-    <ClInclude Include="ui\IblStatic.h" />
-    <ClInclude Include="ui\IblWidgetAPI.h" />
-    <ClInclude Include="ui\IblWidgetDialog.h" />
-    <ClInclude Include="ui\IblWidgetTypes.h" />
-    <ClInclude Include="ui\IblWidgetUIElement.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE" />
@@ -400,7 +361,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Comctl32.lib;dependencies\AntTweakBar\lib64\debug\AntTweakBar64.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dinput8.lib;dxgi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Comctl32.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dinput8.lib;dxgi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)../bin64/$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
@@ -422,7 +383,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Comctl32.lib;dependencies\AntTweakBar\lib64\release\AntTweakBar64.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dxgi.lib;dinput8.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Comctl32.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dxgi.lib;dinput8.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>../../bin64/$(TargetName)$(TargetExt)</OutputFile>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>

@@ -41,11 +41,6 @@
 
 #include <IblApplicationHUD.h>
 #include <IblApplication.h>
-#include <IblWidgetDialog.h>
-#include <IblSlider.h>
-#include <IblStatic.h>
-#include <IblCheckBox.h>
-#include <IblComboBox.h>
 #include <IblCamera.h>
 #include <IblScene.h>
 #include <IblEntity.h>
@@ -57,7 +52,7 @@
 #include <IblMaterial.h>
 #include <IblIBLProbe.h>
 #include <IblBrdf.h>
-#include <IblImageWidget.h>
+#include <IblTextureMgr.h>
 #include <Iblimgui.h>
 #include <CommDlg.h>
 
@@ -67,193 +62,53 @@ namespace Ibl
 
 ApplicationHUD* ApplicationHUD::_applicationHud = 0;
 
-
-template <typename T>
-void
-removeTweakProperty(TwBar* bar, T* propertyT, 
-                    std::map<Ibl::Property*, ETwType>& trackedProperties, 
-                    std::map<Property*, std::set<Property*> >& bundles)
+BOOL selectFilenameLoad(LPWSTR filename, 
+    LPWSTR filter)
 {
-    TwRemoveVar(bar, propertyT->name().c_str());
-     auto bundleIt = bundles.find(propertyT);
-     if (bundleIt != bundles.end())
-     {
-         bundles.erase(bundleIt);
-     }
-     auto propertyIt = trackedProperties.find(propertyT);
-     if (propertyIt != trackedProperties.end())
-     {
-         trackedProperties.erase(propertyIt);
-     }
+    OPENFILENAME ofn;       // common dialog box structure
+    WCHAR dirName[MAX_FILE_PATH_NAME];
+
+    BOOL fileOpenStatus;
+
+    // Initialize OPENFILENAME structure
+    memset(&ofn, 0, sizeof(OPENFILENAME));
+    ofn.lStructSize = sizeof(OPENFILENAME);
+    ofn.hwndOwner = nullptr;
+    ofn.lpstrFile = filename;
+    ofn.nMaxFile = MAX_FILE_PATH_NAME;
+    ofn.lpstrFilter = filter; 
+    ofn.nFilterIndex = 1;
+    ofn.lpstrFileTitle = nullptr;
+    ofn.nMaxFileTitle = 0;
+    ofn.lpstrInitialDir = nullptr;
+    ofn.lpstrFileTitle = L"Open File";
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+    _wgetcwd(dirName, MAX_FILE_PATH_NAME);
+    fileOpenStatus = ::GetOpenFileName(&ofn);
+    _wchdir(dirName);
+
+    return fileOpenStatus;
 }
 
-template <typename T>
-bool
-addTweakProperty(TwBar* bar, 
-                 T* propertyT, 
-                 std::map<Ibl::Property*, ETwType>& trackedProperties)
+BOOL selectFilenameSave(WindowHandle windowHandle, 
+    LPWSTR filename, 
+    LPWSTR filter)
 {
-    ETwType type = (ETwType)(0);
-    std::ostringstream settings;
-    Ibl::Property* property = propertyT;
+    OPENFILENAME ofn = { sizeof(OPENFILENAME), windowHandle, NULL,
+        filter, NULL, 0, 1,
+        filename, MAX_FILE_PATH_NAME, NULL, 0,
+        NULL, L"Save As", NULL,
+        0, 0, NULL,
+        0, NULL, NULL };
+    BOOL fileSaveStatus;
+    WCHAR dirName[MAX_FILE_PATH_NAME];
 
-    if (typeid(T) == typeid(Ibl::VectorProperty))
-    {
-        type = TW_TYPE_DIR3F;
-    }
-    else if (typeid(T) == typeid(Ibl::FloatProperty))
-    {
-        type = TW_TYPE_FLOAT;
-    }
-    else if (typeid(T) == typeid(Ibl::BoolProperty))
-    {
-        type = TW_TYPE_BOOLCPP;
-    }
-    else if (typeid(T) == typeid(Ibl::IntProperty) ||
-             typeid(T) == typeid(Ibl::PixelFormatProperty))
-    {
-        type = TW_TYPE_INT32;
-        if (property->tweakFlags())
-        {
-            if (property->tweakFlags()->enumType)
-            {
-                type = property->tweakFlags()->enumType->type();
-            }
-        }
-    }
-    else
-    {
-        LOG("Unknown T : " << typeid(T).name() << " property " << propertyT->name())
-        return false;
-    }
+    _wgetcwd(dirName, MAX_FILE_PATH_NAME);
+    fileSaveStatus = ::GetSaveFileName(&ofn);
+    _wchdir(dirName);
 
-    if (const Ibl::TweakFlags* tweakFlags = property->tweakFlags())
-    {
-        if (type != TW_TYPE_BOOLCPP && type != TW_TYPE_DIR3F  && type <= TW_TYPE_DIR3D)
-        {
-            settings << " min=" << tweakFlags->minValue << " max=" << tweakFlags->maxValue << 
-                        " step=" << tweakFlags->step;
-        }
-        settings << " group=" << tweakFlags->category;
-    }
-
-    LOG("Creating attribute " << propertyT->name() << " with settings: " << settings.str());
-
-    TwAddVarCB(bar, propertyT->name().c_str(), type, &ApplicationHUD::setCB, &ApplicationHUD::getCB, property, settings.str().c_str());
-    trackedProperties.insert(std::make_pair(property, type));
-
-    return true;
-}
-
-void
-getProperty(void*& twPtr, void* propertyPtr, 
-            std::map<Ibl::Property*, ETwType>& trackedProperties)
-{
-    auto it = trackedProperties.find((Ibl::Property*)(propertyPtr));
-    if (it != trackedProperties.end())
-    {
-        if (it->second == TW_TYPE_DIR3F)
-        {
-            if (Ibl::VectorProperty* property = dynamic_cast<Ibl::VectorProperty*>(it->first))
-            {
-                Ibl::Vector3f& value = property->get();
-                for (uint32_t channel = 0; channel < 3; channel++)
-                    ((float*)(twPtr))[channel] = value[channel];
-            }
-        }
-        else if (it->second == TW_TYPE_FLOAT)
-        {
-            if (Ibl::FloatProperty* property = dynamic_cast<Ibl::FloatProperty*>(it->first))
-            {
-                float value = property->get();
-                *(float*)(twPtr) = value;
-            }
-        }
-        else if (it->second == TW_TYPE_BOOLCPP)
-        {
-            if (Ibl::BoolProperty* property = dynamic_cast<Ibl::BoolProperty*>(it->first))
-            {
-                *(bool*)(twPtr) = property->get();
-            }
-        }
-        else if (it->second == TW_TYPE_INT32 ||
-                 it->second > TW_TYPE_DIR3D)
-        {
-            if (Ibl::IntProperty* property = dynamic_cast<Ibl::IntProperty*>(it->first))
-            {
-                *(int32_t*)(twPtr) = property->get();
-            }
-            else if (Ibl::PixelFormatProperty* property = dynamic_cast<Ibl::PixelFormatProperty*>(it->first))
-            {
-                *(int32_t*)(twPtr) = property->get();
-            }
-        }
-    }
-}
-
-inline void
-setProperty(const void*& twPtr, TwType type, Property* p)
-{
-    if (type == TW_TYPE_DIR3F)
-    {
-        if (Ibl::VectorProperty* property = dynamic_cast<Ibl::VectorProperty*>(p))
-        {
-            Ibl::Vector3f value;
-            for (uint32_t channel = 0; channel < 3; channel++)
-                value[channel] = ((const float*)(twPtr))[channel];
-            property->set(value);
-        }
-    }
-    else if (type == TW_TYPE_FLOAT)
-    {
-        if (Ibl::FloatProperty* property = dynamic_cast<Ibl::FloatProperty*>(p))
-        {
-            property->set(*(const float*)(twPtr));
-        }
-    }
-    else if (type == TW_TYPE_BOOLCPP)
-    {
-        if (Ibl::BoolProperty* property = dynamic_cast<Ibl::BoolProperty*>(p))
-        {
-            property->set(*(const bool*)(twPtr));
-        }
-    }
-    else if (type == TW_TYPE_INT32 ||
-             type > TW_TYPE_DIR3D)
-    {
-        if (Ibl::IntProperty* property = dynamic_cast<Ibl::IntProperty*>(p))
-        {
-            property->set(*(const int32_t*)(twPtr));
-        }
-        else if (Ibl::PixelFormatProperty* property = dynamic_cast<Ibl::PixelFormatProperty*>(p))
-        {
-            property->set((Ibl::PixelFormat)*(int32_t*)(twPtr));
-        }
-    }
-}
-
-inline void
-setProperty(const void*& twPtr, void* propertyPtr, 
-            std::map<Ibl::Property*, ETwType>& trackedProperties, 
-            const std::map<Property*, std::set<Property*> >& bundles)
-{
-    {
-        auto it = trackedProperties.find((Ibl::Property*)(propertyPtr));
-        if (it != trackedProperties.end())
-        {
-            auto bundleIt = bundles.find(it->first);
-            if (bundleIt != bundles.end())
-            {
-                for (auto propertyIt = bundleIt->second.begin(); propertyIt != bundleIt->second.end(); propertyIt++)
-                {
-                    setProperty(twPtr, it->second, *propertyIt);
-                }
-            }
-
-            setProperty(twPtr, it->second, it->first);
-        }
-
-    }
+    return fileSaveStatus;
 }
 
 ApplicationHUD::ApplicationHUD (Ibl::Application* application,
@@ -262,163 +117,45 @@ ApplicationHUD::ApplicationHUD (Ibl::Application* application,
                                 Ibl::Scene* scene) : 
 RenderHUD (application, device, inputState),
 _scene (scene),
-_controlsVisible (false)
+_controlsVisible (false),
+_munkyfunTexture(nullptr),
+_showRendering(false),
+_renderingEnabled(true),
+_showAbout(false),
+_aboutEnabled(true),
+_showEnvironment(true),
+_environmentEnabled(true),
+_showBrdf(true),
+_brdfEnabled(true),
+_showFiltering(true),
+_filteringEnabled(true),
+_scrollArea(0)
 {
     _applicationHud = this;
     Ibl::Camera* camera = _scene->camera();
 
-    TwBar * bar = addTweakBar("IBLBaker", Ibl::Region2i(Ibl::Vector2i(5, 170), Ibl::Vector2i(250, 600)));
-    TwDefine("IBLBaker color='90 90 90' text=light "); // Change TweakBar color and use dark text
-    addTweakProperty(bar, _scene->camera()->exposureProperty(), _tweakProperties);
-    addTweakProperty(bar, _scene->camera()->gammaProperty(), _tweakProperties);
-
-    addToBundle(application->iblSphereEntity()->mesh(0)->material()->textureGammaProperty(), 
-                application->sphereEntity()->mesh(0)->material()->textureGammaProperty());
-
-    addTweakProperty(bar, application->iblSphereEntity()->mesh(0)->material()->textureGammaProperty(), _tweakProperties);
-
-    addTweakProperty(bar, _scene->activeBrdfProperty(), _tweakProperties);
-
-
-    addTweakProperty(bar, _scene->probes()[0]->hdrPixelFormatProperty(), _tweakProperties);
-    addTweakProperty(bar, _scene->probes()[0]->sourceResolutionProperty(), _tweakProperties);
-
-    addTweakProperty(bar, _scene->probes()[0]->diffuseResolutionProperty(), _tweakProperties);
-    addTweakProperty(bar, _scene->probes()[0]->specularResolutionProperty(), _tweakProperties);
-    addTweakProperty(bar, _scene->probes()[0]->sampleCountProperty(), _tweakProperties);
-    addTweakProperty(bar, _scene->probes()[0]->samplesPerFrameProperty(), _tweakProperties);
-    addTweakProperty(bar, _scene->probes()[0]->mipDropProperty(), _tweakProperties);
-    addTweakProperty(bar, _scene->probes()[0]->environmentScaleProperty(), _tweakProperties);
-    addTweakProperty(bar, _scene->probes()[0]->iblSaturationProperty(), _tweakProperties);
-    addTweakProperty(bar, _scene->probes()[0]->iblContrastProperty(), _tweakProperties);
-    addTweakProperty(bar, _scene->probes()[0]->iblHueProperty(), _tweakProperties);
-    addTweakProperty(bar, _scene->probes()[0]->maxPixelRProperty(), _tweakProperties);
-    addTweakProperty(bar, _scene->probes()[0]->maxPixelGProperty(), _tweakProperties);
-    addTweakProperty(bar, _scene->probes()[0]->maxPixelBProperty(), _tweakProperties);
-
-    setupMeshUI();
-
-    _dialog->addButton (LoadEnvironment, L"Load Environment", 5, 
-                        5, 125, 25, 0U, false, &_loadEnvironmentMapButton);
-    _dialog->addButton (SaveEnvironment, L"Save Environment", 5, 
-                        35, 125, 25, 0U, false, &_saveEnvironmentMapButton);    
-    _dialog->addButton (ComputeEnvironment, L"Compute", 5, 
-                        65, 125, 25, 0U, false, &_computeEnvironmentMapButton);    
-    _dialog->addButton (CancelComputeEnvironment, L"Cancel", 5, 
-                        95, 125, 25, 0U, false, &_cancelComputeEnvironmentButton);
-    _dialog->addButton(LoadAsset, L"Load Asset", 5,
-                        125, 125, 25, 0U, false, &_loadAsset);
-
-    _dialog->addImageWidget(BrdfViewer, _scene->activeBrdf()->brdfLut(), Region2f(Vector2f(0.80f, 0.8f), Vector2f(0.98f, 0.98f)), &_brdfViewer);
-
-    _loadEnvironmentMapButton->setEnabled(true);
-    _loadEnvironmentMapButton->setVisible(false);
-    _computeEnvironmentMapButton->setVisible(false);
-    _cancelComputeEnvironmentButton->setVisible(false);
-    _saveEnvironmentMapButton->setEnabled(true);
-    _saveEnvironmentMapButton->setVisible(false);
-    _brdfViewer->setVisible(false);
-
-    _loadAsset->setEnabled(true);
-    _loadAsset->setVisible(false);
-
-    _saveEnvironmentMapButton->setVisible(false);
-
-    TwDefine(" IBLBaker visible=false ");
-
-
     _controlsVisible = true;
     setUIVisible(true);
+
+    _munkyfunTexture = device->textureMgr()->loadTexture("data/textures/BbTitles/Title.dds");
+
+
 }
 
 void
 ApplicationHUD::setupMeshUI()
 {
-    if (_application->visualizedEntity()->meshes().size() > 0)
-    {
-        Material* baseMaterial = _application->visualizedEntity()->mesh(0)->material();
-        Mesh* baseMesh = _application->visualizedEntity()->mesh(0);
-
-        const std::vector<Mesh*>& meshes = _application->visualizedEntity()->meshes();
-        for (auto meshIt = ++meshes.begin(); meshIt != meshes.end(); meshIt++)
-        {
-            Material* currentMaterial = (*meshIt)->material();
-            Mesh* currentMesh = (*meshIt);
-            addToBundle(baseMaterial->debugTermProperty(), currentMaterial->debugTermProperty());
-            addToBundle(baseMaterial->specularWorkflowProperty(), currentMaterial->specularWorkflowProperty());
-            addToBundle(baseMaterial->specularIntensityProperty(), currentMaterial->specularIntensityProperty());
-            addToBundle(baseMaterial->roughnessScaleProperty(), currentMaterial->roughnessScaleProperty());
-        }
-
-        addTweakProperty(_tweakBars[0], baseMaterial->debugTermProperty(), _tweakProperties);
-        addTweakProperty(_tweakBars[0], baseMaterial->specularWorkflowProperty(), _tweakProperties);
-        addTweakProperty(_tweakBars[0], baseMaterial->specularIntensityProperty(), _tweakProperties);
-        addTweakProperty(_tweakBars[0], baseMaterial->roughnessScaleProperty(), _tweakProperties);
-    }
 }
 
 void
 ApplicationHUD::cleanupMeshUI()
 {
-    if (_application->visualizedEntity()->meshes().size() > 0)
-    {
-        Material* baseMaterial = _application->visualizedEntity()->mesh(0)->material();
-        Mesh* baseMesh = _application->visualizedEntity()->mesh(0);
-
-        removeTweakProperty(_tweakBars[0],
-            baseMaterial->debugTermProperty(),
-            _tweakProperties, _tweakBundles);
-        removeTweakProperty(_tweakBars[0],
-            baseMesh->rotationProperty(),
-            _tweakProperties, _tweakBundles);
-        removeTweakProperty(_tweakBars[0],
-            baseMaterial->specularWorkflowProperty(),
-            _tweakProperties, _tweakBundles);
-        removeTweakProperty(_tweakBars[0],
-            baseMaterial->specularIntensityProperty(),
-            _tweakProperties, _tweakBundles);
-        removeTweakProperty(_tweakBars[0],
-            baseMaterial->roughnessScaleProperty(),
-            _tweakProperties, _tweakBundles);
-    }
 }
 
 void
 ApplicationHUD::showApplicationUI()
 {
-    TwDefine(" IBLBaker visible=true");
 
-    _loadEnvironmentMapButton->setVisible(true);
-    _computeEnvironmentMapButton->setVisible(true);
-    _cancelComputeEnvironmentButton->setVisible(true);
-    _saveEnvironmentMapButton->setVisible(true);
-    _loadAsset->setVisible(true);
-    _brdfViewer->setVisible(true);
-}
-
-void
-ApplicationHUD::addToBundle(Property* key, Property* value)
-{
-    auto it = _tweakBundles.find(key);
-    if (it == _tweakBundles.end())
-    {
-        _tweakBundles.insert(std::make_pair(key, std::set<Property*>()));
-        it = _tweakBundles.find(key);
-        assert(it != _tweakBundles.end());
-    }
-    it->second.insert(value);
-}
-
-void 
-ApplicationHUD::setCB(const void *value, void * property)
-{
-    setProperty(value, property, _applicationHud->_tweakProperties, _applicationHud->_tweakBundles);
-}
-
-void 
-ApplicationHUD::getCB(void *value, void * /*clientData*/ property)
-{
-    getProperty(value, property, _applicationHud->_tweakProperties);
 }
 
 ApplicationHUD::~ApplicationHUD()
@@ -434,12 +171,6 @@ ApplicationHUD::create()
 bool
 ApplicationHUD::update(double elapsedTime)
 {
-
-    if (const Ibl::ITexture * texture = _scene->activeBrdf()->brdfLut())
-    {
-        _brdfViewer->setImage(texture);
-    }
-
     if (_inputState->getKeyState(DIK_F1))
     {
         _controlsVisible = true;
@@ -458,165 +189,318 @@ ApplicationHUD::update(double elapsedTime)
     return false;
 }
 
+uint32_t idFromVals(int32_t value, const ImguiEnumVal* values, uint32_t valueCount)
+{
+    for (uint32_t valueId = 0; valueId < valueCount; valueId++)
+    {
+        if (values[valueId].value == value)
+        {
+            return valueId;
+        }
+    }
+
+    LOG("Program error: No such value " << value << " in enum representation.");
+    return 0;
+}
+
+template <class T>
+void
+chooseForProperty(T* property)
+{
+    const ImguiEnumVal* enumVals = property->tweakFlags()->enumType->enumValues();
+    uint32_t currentValue = property->get();
+    uint32_t enumCount = property->tweakFlags()->enumType->enumCount();
+    uint32_t currentId = idFromVals(currentValue, enumVals, enumCount);
+
+    uint32_t newId = imguiChooseFromArrayInstead(currentId, enumVals, enumCount);
+    if (newId != currentId)
+    {
+        property->set(enumVals[newId].value);
+    }
+}
+
+template <class T>
+void
+chooseForProperties(T** properties, uint32_t numProperties)
+{
+    const ImguiEnumVal* enumVals = properties[0]->tweakFlags()->enumType->enumValues();
+    uint32_t currentValue = properties[0]->get();
+    uint32_t enumCount = properties[0]->tweakFlags()->enumType->enumCount();
+    uint32_t currentId = idFromVals(currentValue, enumVals, enumCount);
+
+    uint32_t newId = imguiChooseFromArrayInstead(currentId, enumVals, enumCount);
+    if (newId != currentId)
+    {
+        for (uint32_t propertyId = 0; propertyId < numProperties; propertyId++)
+            properties[propertyId]->set(enumVals[newId].value);
+    }
+}
+
+static void imguiRegion(const char* title, const char* strRight, bool& flag, bool enabled = true)
+{
+    if (imguiCollapse(title, strRight, flag, enabled))
+    {
+        flag = !flag;
+    }
+}
+
+void imguiRegionBorder(const char* title, const char* strRight, bool& flag, bool enabled = true)
+{
+    imguiSeparatorLine(1);
+    imguiRegion(title, strRight, flag, enabled);
+    imguiSeparatorLine(1);
+    imguiSeparator(4);
+}
+
+template <class T, class S>
+void
+imguiPropertySlider(const char* title, T* property, float min, float max, S step, bool enabled = true)
+{
+    float displayGamma = float(property->get());
+    if (imguiSlider(title, displayGamma, min, max, float(step), enabled))
+    {
+        property->set(S(displayGamma));
+    }
+}
+
+template <class T, typename S>
+void
+imguiPropertiesSlider(const char* title, T** properties, uint32_t propertyCount, float min, float max, S step, bool enabled = true)
+{
+    float displayGamma = float(properties[0]->get());
+    if (imguiSlider(title, displayGamma, min, max, float(step), enabled))
+    {
+        for (uint32_t propertyId = 0; propertyId < propertyCount; propertyId++)
+            properties[propertyId]->set(S(displayGamma));
+    }
+}
+
+template <class T>
+void
+imguiSelectionSliderForEnumProperty(const char* title, T* property)
+{
+    const ImguiEnumVal* enumVals = property->tweakFlags()->enumType->enumValues();
+    uint32_t currentValue = uint32_t(property->get());
+    uint32_t enumCount = property->tweakFlags()->enumType->enumCount();
+    uint32_t currentId = uint32_t(idFromVals(currentValue, enumVals, uint32_t(enumCount)));
+
+    float minValue = float(0);
+    float maxValue = float(enumCount-1);
+
+    std::vector <const char*> labels;
+    labels.reserve(enumCount);
+    for (uint32_t labelId = 0; labelId < enumCount; labelId++)
+        labels.push_back(enumVals[labelId].label);
+    imguiLabel(title);
+
+    const uint8_t tab = imguiTabsForEnum(uint8_t(currentId), true, ImguiAlign::CenterIndented, 16, 2, enumCount, enumVals);
+    if (uint32_t(tab) != currentId)
+    {
+        property->set(enumVals[tab].value);
+    }
+}
+
 void
 ApplicationHUD::render(const Ibl::Camera* camera)
 {
-    static int32_t scrollArea = 0;
     int32_t width = _deviceInterface->backbuffer()->width();
     int32_t height = _deviceInterface->backbuffer()->height();
-#define IMGUI_IMPL 0
-#if IMGUI_IMPL
-// Bgfx rip off code for testing :).
-    LOG("x = " << _inputState->_x << " y = " << _inputState->_y);
 
-    imguiBeginFrame(_inputState, _inputState->_cursorPositionX, _inputState->_cursorPositionY, _inputState->leftMouseDown() ? IMGUI_MBUT_LEFT : 0 | _inputState->rightMouseDown() ? IMGUI_MBUT_RIGHT : 0, 0, width, height);
-
-    float speed, middleGray, white, threshold;
-    speed = middleGray = white = threshold = 0;
-
-    imguiBeginScrollArea("Settings", 5, 10, width / 5, height / 3, &scrollArea);
-    imguiSeparatorLine();
-
-    imguiSlider("Speed", speed, 0.0f, 1.0f, 0.01f);
-    imguiSeparator();
-
-    imguiSlider("Middle gray", middleGray, 0.1f, 1.0f, 0.01f);
-    imguiSlider("White point", white, 0.1f, 2.0f, 0.01f);
-    imguiSlider("Threshold", threshold, 0.1f, 2.0f, 0.01f);
-    static float blah[3] = {0.0, 1.0, 1.0};
-    static bool activated = true;
-    imguiColorWheel("Diffuse color:", blah, activated);
-    imguiEndScrollArea();
-
-
-    imguiEndFrame();
-#endif
-
-    RenderHUD::render(camera);
-}
-
-BOOL selectFilenameLoad(HWND windowHandle, 
-                        LPWSTR filename, 
-                        LPWSTR filter)
-{
-   OPENFILENAME ofn;       // common dialog box structure
-   WCHAR dirName[MAX_FILE_PATH_NAME];
-
-   BOOL fileOpenStatus;
-
-   // Initialize OPENFILENAME structure
-   memset(&ofn, 0, sizeof(OPENFILENAME));
-   ofn.lStructSize = sizeof(OPENFILENAME);
-   ofn.hwndOwner = windowHandle;
-   ofn.lpstrFile = filename;
-   ofn.nMaxFile = MAX_FILE_PATH_NAME;
-   ofn.lpstrFilter = filter; 
-   ofn.nFilterIndex = 1;
-   ofn.lpstrFileTitle = nullptr;
-   ofn.nMaxFileTitle = 0;
-   ofn.lpstrInitialDir = nullptr;
-   ofn.lpstrFileTitle = L"Open File";
-   ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-   _wgetcwd(dirName, MAX_FILE_PATH_NAME);
-   fileOpenStatus = ::GetOpenFileName(&ofn);
-   _wchdir(dirName);
-
-   return fileOpenStatus;
-}
-
-BOOL selectFilenameSave(WindowHandle windowHandle, 
-                        LPWSTR filename, 
-                        LPWSTR filter)
-{
-   OPENFILENAME ofn = { sizeof(OPENFILENAME), windowHandle, NULL,
-      filter, NULL, 0, 1,
-      filename, MAX_FILE_PATH_NAME, NULL, 0,
-      NULL, L"Save As", NULL,
-      0, 0, NULL,
-      0, NULL, NULL };
-   BOOL fileSaveStatus;
-   WCHAR dirName[MAX_FILE_PATH_NAME];
-
-   _wgetcwd(dirName, MAX_FILE_PATH_NAME);
-   fileSaveStatus = ::GetSaveFileName(&ofn);
-   _wchdir(dirName);
-
-   return fileSaveStatus;
-}
-
-void
-ApplicationHUD::handleEvent (UINT eventId, int controlId, Ibl::Control* control)
-{
-    InitCommonControls();
-    switch (controlId)
+    if (_uiVisible)
     {
-        case LoadEnvironment:
+        Ibl::Vector2i imguiWindowMin(10, 10);
+        Ibl::Vector2i imguiWindowMax = imguiWindowMin + Ibl::Vector2i(width / 5, height - 50);
+        Ibl::Region2i imguiWindowBounds(imguiWindowMin, imguiWindowMax);
+        _inputState->setHasGUIFocus(imguiWindowBounds.intersects(Ibl::Vector2i(_inputState->_cursorPositionX, _inputState->_cursorPositionY)));
+
+        imguiBeginFrame(_inputState, _inputState->_cursorPositionX, _inputState->_cursorPositionY, _inputState->leftMouseDown() ? IMGUI_MBUT_LEFT : 0 | _inputState->rightMouseDown() ? IMGUI_MBUT_RIGHT : 0, int32_t(_inputState->_z / 25.5), width, height);
+
+        imguiBeginScrollArea("IBLBaker", imguiWindowBounds.minExtent.x, imguiWindowBounds.minExtent.y,
+                             imguiWindowBounds.maxExtent.x, imguiWindowBounds.maxExtent.y, &_scrollArea);
+        imguiSeparator();
+
+        if (imguiButton("Load Environment"))
         {
-            LOG ("Loading an environment");
+            LOG("Loading an environment");
             WCHAR selectedFilePathName[MAX_FILE_PATH_NAME];
             memset(selectedFilePathName, 0, MAX_FILE_PATH_NAME * sizeof(WCHAR));
             WCHAR * filter = L"All\0*.*\0Text\0*.TXT\0";
 
-            if(selectFilenameLoad (nullptr, selectedFilePathName, filter))
+            if (selectFilenameLoad(selectedFilePathName, filter))
             {
                 std::wstring inputString(selectedFilePathName);
                 std::string  filePathName(inputString.begin(), inputString.end());
 
                 _application->loadEnvironment(std::string(filePathName.c_str()));
             }
-            break;
         }
-        case SaveEnvironment:
+        if (imguiButton("Save Environment"))
         {
             WCHAR selectedFilePathName[MAX_FILE_PATH_NAME];
             memset(selectedFilePathName, 0, MAX_FILE_PATH_NAME * sizeof(WCHAR));
             WCHAR * filter = L"DirectDraw Surfaces(*.dds)\0*.dds\0\0";
             if (Ibl::selectFilenameSave(_application->window()->windowHandle(),
-                                    selectedFilePathName, filter))
+                selectedFilePathName, filter))
             {
                 std::wstring inputString(selectedFilePathName);
                 std::string  filePathName(inputString.begin(), inputString.end());
 
                 _application->saveImages(filePathName.c_str());
             }
-            break;
         }
-        case ComputeEnvironment:
+        if (imguiButton("Compute"))
         {
             _application->compute();
-            break;
         }
-        case CancelComputeEnvironment:
+        if (imguiButton("Cancel Compute"))
         {
             _application->cancel();
-            break;
         }
-        case LoadAsset:
+
+        imguiRegionBorder("Rendering:", NULL, _showRendering, _renderingEnabled);
+        if (_showRendering)
         {
-            LOG("Loading an asset");
-            WCHAR selectedFilePathName[MAX_FILE_PATH_NAME];
-            memset(selectedFilePathName, 0, MAX_FILE_PATH_NAME * sizeof(WCHAR));
-            WCHAR * filter = L"All\0*.*\0FBX\0*.fbx\0";
-            
-            if (selectFilenameLoad(nullptr, selectedFilePathName, filter))
+            imguiIndent();
+            imguiPropertySlider("Exposure", _scene->camera()->exposureProperty(), 0.0f, 10.0f, 0.01f);
+            imguiPropertySlider("Display Gamma", _scene->camera()->gammaProperty(), 0.0f, 5.0f, 0.01f);
+
+
+            Material* baseMaterial = _application->visualizedEntity()->mesh(0)->material();
+            Mesh* baseMesh = _application->visualizedEntity()->mesh(0);
+
+
+            const std::vector<Mesh*>& meshes = _application->visualizedEntity()->meshes();
+
+            std::vector<Ibl::IntProperty*> debugTermProperties;
+            std::vector<Ibl::IntProperty*> specularWorkflowProperties;
+            std::vector<Ibl::FloatProperty*> roughnessScaleProperties;
+            std::vector<Ibl::FloatProperty*> specularIntensityProperties;
+
+            for (auto meshIt = meshes.begin(); meshIt != meshes.end(); meshIt++)
             {
-                std::wstring inputString(selectedFilePathName);
-                std::string  filePathName(inputString.begin(), inputString.end());
-                
-                cleanupMeshUI();
-
-                _application->loadAsset(std::string(filePathName.c_str()));
-
-                _application->visualizedEntity()->mesh(0)->rotationProperty()->set(Ibl::Vector3f(0,0,360));
-
-                setupMeshUI();
-
+                Material* currentMaterial = (*meshIt)->material();
+                Mesh* currentMesh = (*meshIt);
+                debugTermProperties.push_back(currentMaterial->debugTermProperty());
+                specularWorkflowProperties.push_back(currentMaterial->specularWorkflowProperty());
+                specularIntensityProperties.push_back(currentMaterial->specularIntensityProperty());
+                roughnessScaleProperties.push_back(currentMaterial->roughnessScaleProperty());
             }
-            break;
+            
+            uint32_t meshCount = uint32_t(meshes.size());
+            imguiPropertiesSlider("Roughness Scale", &roughnessScaleProperties[0], meshCount, 0.0f, 1.0f, 0.05f);
+            imguiPropertiesSlider("Specular Intensity", &specularIntensityProperties[0], meshCount, 0.0f, 6.0f, 0.05f);
+            imguiLabel("Specular Workflow");
+            chooseForProperties(&specularWorkflowProperties[0], meshCount);
+            imguiLabel("Debug Channel");
+            chooseForProperties(&debugTermProperties[0], meshCount);
+
+            imguiUnindent();
         }
+
+        //static float blah[3] = {0.0, 1.0, 1.0};
+        //static bool activated = true;
+        //imguiColorWheel("Diffuse color:", blah, activated);
+
+        imguiRegionBorder("Filtering:", NULL, _showFiltering, _filteringEnabled);
+        if (_showFiltering)
+        {
+            imguiIndent();
+
+            FloatProperty* inputGammas[2] = { 
+                _application->sphereEntity()->mesh(0)->material()->textureGammaProperty(),
+                _application->iblSphereEntity()->mesh(0)->material()->textureGammaProperty()
+            };
+
+            imguiPropertiesSlider("Input Gamma", &inputGammas[0], 2, 0.0f, 5.0f, 0.01f);
+            imguiPropertySlider("Environment Scale", _scene->probes()[0]->environmentScaleProperty(), 0.0f, 10.0f, 0.1f);
+
+            // Lock sample counts for now.
+            IntProperty* inputSamples[2] = {
+                _scene->probes()[0]->sampleCountProperty(),
+                _scene->probes()[0]->samplesPerFrameProperty()
+            };
+
+            imguiPropertiesSlider("Sample Count", &inputSamples[0], 2, 0.0f, 2048.0f, 1);
+            imguiPropertySlider("Mip Drop", _scene->probes()[0]->mipDropProperty(), 0.0f, _scene->probes()[0]->specularCubeMap()->resource()->mipLevels() - 1.0f, 1);
+            imguiPropertySlider("Saturation", _scene->probes()[0]->iblSaturationProperty(), 0.0f, 1.0f, 0.05f);
+            //imguiPropertySlider("Contrast", _scene->probes()[0]->iblContrastProperty(), 0.0f, 1.0f, 0.05f);
+            imguiPropertySlider("Hue", _scene->probes()[0]->iblHueProperty(), 0.0f, 1.0f, 0.05f);
+            imguiPropertySlider("Max Pixel R", _scene->probes()[0]->maxPixelRProperty(), 0.0f, 1000.0f, 1.0f, false);
+            imguiPropertySlider("Max Pixel G", _scene->probes()[0]->maxPixelGProperty(), 0.0f, 1000.0f, 1.0f, false);
+            imguiPropertySlider("Max Pixel B", _scene->probes()[0]->maxPixelBProperty(), 0.0f, 1000.0f, 1.0f, false);
+
+            imguiSelectionSliderForEnumProperty("Source Resolution", _scene->probes()[0]->sourceResolutionProperty());
+            imguiSelectionSliderForEnumProperty("Specular Resolution", _scene->probes()[0]->specularResolutionProperty());
+            imguiSelectionSliderForEnumProperty("Diffuse Resolution", _scene->probes()[0]->diffuseResolutionProperty());
+
+            imguiUnindent();
+        }
+
+        imguiRegionBorder("Brdf:", NULL, _showBrdf, _brdfEnabled);
+        if (_showBrdf)
+        {
+            imguiIndent();
+
+            chooseForProperty(_scene->activeBrdfProperty());
+
+            imguiImage(const_cast<ITexture*>(_scene->activeBrdf()->brdfLut()), 0, 128, 128, ImguiAlign::Center);
+
+            imguiUnindent();
+        }
+
+        imguiRegionBorder("Environment:", NULL, _showEnvironment, _environmentEnabled);
+        if (_showEnvironment)
+        {
+            imguiIndent();
+            static float _lod = 0.0f;
+            static bool _crossCubemapPreview = false;
+            if (imguiCube(_scene->probes()[0]->environmentCubeMap(), _lod, _crossCubemapPreview))
+            {
+                _crossCubemapPreview = !_crossCubemapPreview;
+            }
+
+            imguiLabel("Specular IBL:");
+            static float _specularEnvLod = 0;
+            float maxSpecularMipLevels = _scene->probes()[0]->specularCubeMap()->resource()->mipLevels() - 1.0f - _scene->probes()[0]->mipDropProperty()->get();
+            if (_specularEnvLod > maxSpecularMipLevels)
+                maxSpecularMipLevels = maxSpecularMipLevels;
+            imguiSlider("IBL LOD", _specularEnvLod, 0.0f, maxSpecularMipLevels, 0.15f);
+        
+            static bool _specularCrossCubemapPreview = false;
+            if (imguiCube(_scene->probes()[0]->specularCubeMap(), _specularEnvLod, _specularCrossCubemapPreview))
+            {
+                _specularCrossCubemapPreview = !_specularCrossCubemapPreview;
+            }
+
+            imguiLabel("Irradiance IBL:");
+            static float _diffuseEnvLod = 0.0f;
+            static bool _diffuseCrossCubemapPreview = false;
+            if (imguiCube(_scene->probes()[0]->diffuseCubeMap(), _diffuseEnvLod, _diffuseCrossCubemapPreview))
+            {
+                _diffuseCrossCubemapPreview = !_diffuseCrossCubemapPreview;
+            }
+            imguiUnindent();
+        }
+
+        imguiRegionBorder("About:", NULL, _showAbout, _aboutEnabled);
+        if (_showAbout)
+        {
+            imguiIndent();
+            imguiLabel("Matt Davidson (2015)");
+            imguiLabel("Thankyou to Munkyfun:");
+            imguiImage(const_cast<ITexture*>(_munkyfunTexture), 0, 256, 128, ImguiAlign::Center);
+            imguiUnindent();
+        }
+
+        imguiEndScrollArea();
+
+
+        imguiEndFrame();
     }
-    RenderHUD::handleEvent (eventId, controlId, control);
+
+    RenderHUD::render(camera);
 }
+
+
 
 }

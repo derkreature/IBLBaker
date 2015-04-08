@@ -58,7 +58,6 @@ class ShaderMgr;
 class VertexDeclarationMgr;
 class InputManager;
 class PostEffectsMgr;
-class FontMgr;
 class TextureMgr;
 class ShaderParameterValueFactory;
 class Scene;
@@ -159,7 +158,6 @@ class Application : public Node
     Ibl::Timer                  _timer;
 
     bool                        _runTitles;
-    Ibl::Titles *               _titles; 
     SpecularWorkflow            _workflow;
     std::string                 _defaultAsset;
 };

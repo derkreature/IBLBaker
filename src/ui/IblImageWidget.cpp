@@ -43,7 +43,6 @@
 #include <IblScreenOrientedQuad.h> 
 #include <IblTextureMgr.h>
 #include <IblITexture.h>
-#include <IblDialogResourceManager.h>
 #include <IblShaderMgr.h>
 #include <IblLog.h>
 #include <IblIShader.h>
@@ -52,40 +51,40 @@
 
 namespace Ibl
 {
-ImageWidget::ImageWidget(Dialog* dialog, 
-                         Ibl::IDevice* renderMgr, 
+ImageWidget::ImageWidget(Ibl::IDevice* device, 
                          const std::string& texturePath,
-                         const Region2f& bounds) :
-    Control (dialog, renderMgr)
+                         const Region2f& bounds)
 {
     _image = nullptr;
-    _usesSpriteSystem = false;
     _shader = 0;
     _material = 0; 
     _image = 0;
     _quad = 0;
+    _device = device;
     _texturePath = texturePath;
     _bounds = bounds;
     _blendingIn = false;
     _blendInTime = 0;
     _totalBlendInTime = 0;
+
+    init();
 }
 
-ImageWidget::ImageWidget(Dialog* dialog, 
-                         Ibl::IDevice* renderMgr, 
+ImageWidget::ImageWidget(Ibl::IDevice* device, 
                          const Ibl::ITexture* image,
-                         const Region2f& bounds) :
-    Control (dialog, renderMgr)
+                         const Region2f& bounds)
 {
-    _usesSpriteSystem = false;
     _shader = 0;
     _material = 0;
+    _device = device;
     _image = image;
     _quad = 0;
     _bounds = bounds;
     _blendingIn = false;
     _blendInTime = 0;
     _totalBlendInTime = 0;
+
+    init();
 }
 
 ImageWidget::~ImageWidget()
@@ -116,17 +115,17 @@ ImageWidget::init()
     if (_texturePath.size() > 0 && _image == nullptr)
     {
         _image = dynamic_cast <const Ibl::ITexture*>
-            (_deviceInterface->textureMgr()->loadTexture (_texturePath));
+            (_device->textureMgr()->loadTexture (_texturePath));
     }
 
 
-    _material = new Material(_deviceInterface);
+    _material = new Material(_device);
     _material->setAlbedoMap(_image);
     _material->albedoColorProperty()->set(Ibl::Vector4f(1, 1, 1, 1));
 
     {
         // Load Shader
-        if (Ibl::ShaderMgr* shaderMgr = _deviceInterface->shaderMgr())
+        if (Ibl::ShaderMgr* shaderMgr = _device->shaderMgr())
         {
             if (!shaderMgr->addShader ("IblImageBlit.fx", _shader, true))
             {
@@ -136,7 +135,7 @@ ImageWidget::init()
     }                        
 
     // create the quad used to render this image to the screen
-    if (_quad = new Ibl::ScreenOrientedQuad(_deviceInterface))
+    if (_quad = new Ibl::ScreenOrientedQuad(_device))
     {
         if (_quad->initialize (_bounds))
         {
@@ -177,11 +176,11 @@ ImageWidget::render (float elapsed)
 
     if (_visible && _image && _quad)
     {
-        deviceInterface()->enableAlphaBlending();
-        deviceInterface()->setAlphaSrcFunction (Ibl::SourceAlpha);
-        deviceInterface()->setAlphaDestFunction (Ibl::InverseSourceAlpha);
-        deviceInterface()->setSrcFunction (Ibl::SourceAlpha);
-        deviceInterface()->setDestFunction (Ibl::InverseSourceAlpha);
+        _device->enableAlphaBlending();
+        _device->setAlphaSrcFunction(Ibl::SourceAlpha);
+        _device->setAlphaDestFunction(Ibl::InverseSourceAlpha);
+        _device->setSrcFunction(Ibl::SourceAlpha);
+        _device->setDestFunction(Ibl::InverseSourceAlpha);
 
         _shader->renderMesh (Ibl::RenderRequest(_technique, nullptr, nullptr, _quad));
     }
@@ -190,6 +189,18 @@ ImageWidget::render (float elapsed)
         _totalBlendInTime += elapsed;
     }
     
+}
+
+void
+ImageWidget::setVisible(bool visible)
+{
+    _visible = visible;
+}
+
+bool
+ImageWidget::visible() const
+{
+    return _visible;
 }
 
 }

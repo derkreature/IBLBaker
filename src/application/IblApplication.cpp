@@ -46,7 +46,6 @@
 #include <IblColorPass.h>
 #include <IblTextureMgr.h>
 #include <IblShaderMgr.h>
-#include <IblFontMgr.h>
 #include <IblRenderHUD.h>
 #include <IblCamera.h>
 #include <IblScene.h>
@@ -58,17 +57,18 @@
 #include <IblPostEffectsMgr.h>
 #include <IblIBLProbe.h>
 #include <IblTitles.h>
-#include <IblImageWidget.h>
 #include <IblBrdf.h>
+#include <IblImageWidget.h>
 #include <Iblimgui.h>
 #include <strstream>
+#include <Iblimgui.h>
 
 namespace Ibl
 {
 namespace
 {
 
-TwEnumVal IblEnum[] =
+ImguiEnumVal IblEnum[] =
 {
     { Application::HDR, "HDR" },
     { Application::MDR, "MDR" },
@@ -102,7 +102,6 @@ Application::Application(ApplicationHandle instance) :
     _hdrFormatProperty(new PixelFormatProperty(this, "Visualization Type", new TweakFlags(&IBLModeType, "Renderer"))),
     _probeResolutionProperty(new IntProperty(this, "Visualization Type", new TweakFlags(&IBLModeType, "Renderer"))),
     _workflow(RoughnessMetal),
-    _titles(nullptr),
     _defaultAsset("data\\meshes\\pistol\\pistol.obj"),
     _runTitles(false)
 {
@@ -123,6 +122,8 @@ Application::~Application()
     safedelete(_renderHUD);
     safedelete(_inputMgr);
     safedelete(_device);
+
+
 }
 
 bool
@@ -225,41 +226,6 @@ Application::initialize()
         _renderHUD = new Ibl::ApplicationHUD(this, _device, _inputMgr->inputState(), _scene);
         _renderHUD->create();
 
-        // Setup titles
-
-        // Credits are just a set of UI billboards that are written to the screen with a background.
-        // Start time, end time, blendIn start, blendIn end, blendOutStart, blendIn end.
-        // A transition post effect is enabled and is removed when the credits are completed.
-        if (_runTitles)
-        {
-            // Only run titles once for a user.
-            _runTitles = false;
-            _titles = new Ibl::Titles(_device);
-            _titles->initialize("IblTitles.fx");
-            _titles->setTitleLength(5.0f);
-
-            _device->postEffectsMgr()->addPostEffect(_titles);
-
-            Ibl::Title * background = new Ibl::Title(_device);
-            background->create(std::string("data/textures/BbTitles/Background.dds"),
-                Ibl::Region2f(Ibl::Vector2f(-1, -1), Ibl::Vector2f(1, 1)),
-                Ibl::Vector4f(0, 0.5f, 2.5f, 3.0f));
-            _titles->addTitle(background);
-
-             Ibl::Title * kreature = new Ibl::Title(_device);
-            kreature->create(std::string("data/textures/BbTitles/Kreature.dds"),
-                Ibl::Region2f(Ibl::Vector2f(-1, -1), Ibl::Vector2f(1, 1)),
-                Ibl::Vector4f(0, 0.5f, 2.5f, 2.8f));
-            _titles->addTitle(kreature);
- 
-             Ibl::Title * munky = new Ibl::Title(_device);
-            munky->create(std::string("data/textures/BbTitles/Title.dds"),
-                Ibl::Region2f(Ibl::Vector2f(-1, -1), Ibl::Vector2f(1, 1)),
-                Ibl::Vector4f(2.8f, 3.0f, 4.8f, 5.0f));
-            _titles->addTitle(munky);
-            _renderHUD->setLogoVisible(false);
-        }
-        else
         {
             _renderHUD->setLogoVisible(true);
             _renderHUD->logo()->setBlendIn(6.0f);
@@ -302,6 +268,7 @@ Application::purgeMessages() const
     {
         if(msg.message == WM_QUIT)
             return true;
+
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
@@ -491,20 +458,6 @@ Application::updateApplication()
             (*it)->rotationProperty()->set(rotation);
     }
 
-    // Title management thingy.
-    if (_titles)
-    {
-        _titles->update(elapsedTime);
-        if (_titles->isFinished())
-        {
-            _device->postEffectsMgr()->removePostEffect(_titles);
-            _titles = nullptr;
-            _renderHUD->setLogoVisible(true);
-            _renderHUD->logo()->setBlendIn(6.0f);
-            _renderHUD->showApplicationUI();
-        }
-    }
-
     if (_visualizationSpaceProperty->get() != _currentVisualizationSpaceProperty->get())
     {
         updateVisualizationType();
@@ -528,9 +481,6 @@ Application::updateApplication()
     
     _colorPass->render(_scene);
 
-
-    if (_titles)
-        _titles->render();
 	 // Finalize post effects.
     _device->postEffectsMgr()->render(camera);
 

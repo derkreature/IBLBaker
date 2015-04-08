@@ -128,7 +128,7 @@ bool VertexBufferD3D11::create()
         // Align to 16 bytes.
         if (_sizeInBytes % 16 != 0)
             _sizeInBytes += 16 - (_sizeInBytes % 16);
-        _sizeInBytes *= 4;
+        _sizeInBytes *= 5;
     }
 
     D3D11_BUFFER_DESC bd;

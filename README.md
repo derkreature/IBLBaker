@@ -11,32 +11,9 @@
     IBLBaker uses portions of other open source software.
     Please review the LICENSE file for further details.
 
-    Copyright(c) 2014 Matt Davidson.
+    Copyright(c) 2015 Matt Davidson.
 
-    Permission is hereby granted, free of charge, to any person obtaining a copy   
-    of this software and associated documentation files(the "Software"), to deal   
-    in the Software without restriction, including without limitation the rights   
-    to use, copy, modify, merge, publish, distribute, sublicense, and / or sell    
-    copies of the Software, and to permit persons to whom the Software is          
-    furnished to do so, subject to the following conditions :
-
-    1. Redistributions of source code must retain the above copyright notice, 
-       this list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright notice, 
-       this list of conditions and the following disclaimer in the 
-       documentation and/or other materials provided with the distribution.
-    3. Neither the name of the copyright holder nor the names of its 
-       contributors may be used to endorse or promote products derived 
-       from this software without specific prior written permission.
-                                                                               
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE     
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN      
-    THE SOFTWARE.
-
+![IblBakerCover](https://github.com/derkreature/IBLBaker/blob/master/images/IblBaker.jpg)
 
 A Special thanks must be given to Munkyfun (www.munkyfun.com) who sponsored 
 much of the work in preparing this work for an open source release.
@@ -60,7 +37,7 @@ I have provided example cgfx shaders for maya viewport 2.0 in the /maya director
 Please review the example maya workflow video at:
 https://vimeo.com/110805546
 
-If you are impatient and wish to see the full purpose of this lighting model, please review:
+The full purpose of this tool can be found in the following videos:
 https://vimeo.com/100285383
 https://vimeo.com/96235208
 
@@ -96,10 +73,11 @@ http://www.pbrt.org/
 Why release?
 --------------
 The tool was developed in a vacuum.
-Both I and Munkyfun would like to share our thoughts along with the implementation so that we may be certain that we have implemented the paper and ideas correctly.
-We would also like the industry as a whole to have a reference implementation of this technique to facilitate better inter operation of tools in pipelines that use "physically based" lighting models.
+I am still developing a complete understanding for next generation lighting pipelines using both iostropic and anisotropic BRDFs in the context of "roughness/metalness" inspired physically based lighting models.
 
-Building
+I am open to critique, suggestions, questions, and am actively maintaining this repository.
+
+Building:
 --------------
     1.) Install Visual Studio 2013 Express for Windows Desktop.
          The project builds fine under express if you don't have Visual Studio 2013 installed.
@@ -117,7 +95,7 @@ Building
 
 Known Leaks:
 --------------
-- D3D11Effects has some serious issues. I will be replacing this in the near future in any case.
+- D3D11Effects has some serious issues. I will be replacing this in the near future in any case. (Post D3D12).
 
 What about linux / osx / iris / bsd / ios / nextstep / rasberry pi / abacus support?
 --------------
@@ -197,7 +175,6 @@ Specular Intensity:A multiplier to the material specular term for the visualized
 Roughness Gloss Scale: An inverse multiplier to the roughness term for the visualized object.
 
 BRDF: 
-
 The brdf that is current being used to evaluate the IBLProbe and render the object.
 BRDFs can be found in data/shadersD3D11 in .brdf files.
 These files are hlsl that are concatenated with the core shaders IblImportanceSamplingDiffuse.hlsl, IblImportanceSamplingSpecular.hlsl and IblBrdf.hlsl.
@@ -496,13 +473,8 @@ from: http://www.flaticon.com/free-icon/cupcake-sugar_12348
 The author of this icon will be grateful if you use the following legal attribution
 "Icon made by Freepik from Flaticon.com"
 
-The IBLBaker is dependent on the following libraries:
+The IBLBaker is dependent on the following libraries and bits of code:
 ==============
-
-AntTweakBar 
---------------
-under the zlib/libpng license:
-http://anttweakbar.sourceforge.net/doc/
 
 FreeImage under the freeimage public license: (Optional).
 --------------
@@ -524,10 +496,21 @@ TinyObj (Replaced AssImp):
 (Domo Syoyo san).
 https://github.com/syoyo/tinyobjloader
 
-Simon Green
------------
-I still have some ComPtr wrappers that I added back in 2002 that came from Simon Green's BuggyDemo :p.
-http://www.sjbrown.co.uk/2002/08/01/the-buggy-demo/
+Imgui
+-----
+https://github.com/ocornut/imgui
+
+NanoVG
+------
+https://github.com/memononen/nanovg
+
+Instructive code for drawing both ImGUI and NanoVG from BgFx :).
+----------------------------------------------------------------
+The more I read Bgfx, the more I love it.
+https://github.com/bkaradzic/bgfx
+
+
+
 
  
 

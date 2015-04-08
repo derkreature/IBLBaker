@@ -71,7 +71,10 @@ UIRenderer::renderer()
 
 UIRenderer::UIRenderer(Ibl::IDevice* device) :
     Ibl::Mesh (device),
-    _vertexOffset(0)
+    _vertexOffset(0),
+    _indexBuffer(nullptr),
+    _currentShader(nullptr),
+    _currentVertexBuffer(nullptr)
 {
     setDynamic (true);
     setPrimitiveType(Ibl::TriangleList);
@@ -80,7 +83,7 @@ UIRenderer::UIRenderer(Ibl::IDevice* device) :
     setMaterial(new Material(device));
 
     // Setup Ringbuffered index buffer.
-    IndexBufferParameters ibResource = IndexBufferParameters(sizeof(uint32_t)*10000, true, true);
+    IndexBufferParameters ibResource = IndexBufferParameters(sizeof(uint32_t)*15000, true, true);
     _indexBuffer = _device->createIndexBuffer(&ibResource);
     if (!_indexBuffer)
     {
@@ -91,6 +94,12 @@ UIRenderer::UIRenderer(Ibl::IDevice* device) :
 
 UIRenderer::~UIRenderer()
 {
+    if (_indexBuffer)
+        delete _indexBuffer;
+    for (auto it = _vertexBuffers.begin(); it != _vertexBuffers.end(); it++)
+    {
+        delete it->second;
+    }
 }
 
 Ibl::IDevice*
@@ -120,9 +129,9 @@ UIRenderer::setShader(const Ibl::IShader* shader)
 }
 
 void
-UIRenderer::setViewProj(const Ibl::Matrix44f& ortho)
+UIRenderer::setViewProj(const Ibl::Matrix44f& viewProj)
 {
-    _viewProj = ortho;
+    _viewProj = viewProj;
 }
 
 IVertexBuffer*
@@ -198,28 +207,12 @@ UIRenderer::render(uint32_t count, uint32_t vertexOffset)
     }
     else if (primitiveType() == Ibl::TriangleStrip)
     {
-        _primitiveCount = (count-1) / 2;
+        _primitiveCount = (count-2);
     }
 
     const Ibl::GpuVariable* viewProjVariable = nullptr;
     if (shader->getParameterByName("u_viewProj", viewProjVariable))
-    {
-        const float L = 0.0f;
-        const float R = _device->backbuffer()->width();
-        const float B = _device->backbuffer()->height();
-        const float T = 0.0f;
-        const float mvp[4][4] =
-        {
-            { 2.0f / (R - L), 0.0f, 0.0f, 0.0f },
-            { 0.0f, 2.0f / (T - B), 0.0f, 0.0f, },
-            { 0.0f, 0.0f, 0.5f, 0.0f },
-            { (R + L) / (L - R), (T + B) / (B - T), 0.5f, 1.0f },
-        };
-
-        // TODO: Fix.
-        viewProjVariable->setMatrix(&mvp[0][0]);
-//        viewProjVariable->setMatrix(_viewProj._mat);
-    }
+        viewProjVariable->setMatrix(&_viewProj._m[0][0]);
 
     const Ibl::GpuVariable* viewTexelVariable = nullptr;
     if (shader->getParameterByName("u_viewTexel", viewTexelVariable))

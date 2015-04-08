@@ -28,7 +28,6 @@
 #include <math.h>
 #include "nanovg.h"
 #include <IblIVertexDeclaration.h>
-#include <IblDynamicRenderer.h>
 #include <IblIShader.h>
 #include <IblGpuVariable.h>
 #include <IblITexture.h>
@@ -400,8 +399,10 @@ namespace
 
         memset(frag, 0, sizeof(*frag));
 
-        frag->innerCol = glnvg__premulColor(paint->innerColor);
-        frag->outerCol = glnvg__premulColor(paint->outerColor);
+        //frag->innerCol = glnvg__premulColor(paint->innerColor);
+        //frag->outerCol = glnvg__premulColor(paint->outerColor);
+        frag->innerCol = (paint->innerColor);
+        frag->outerCol = (paint->outerColor);
 
 
         nvgTransformInverse(invxform, paint->xform);
@@ -426,7 +427,6 @@ namespace
             frag->scissorScale[1] = sqrtf(scissor->xform[1] * scissor->xform[1] + scissor->xform[3] * scissor->xform[3]) / fringe;
         }
         nvg_copyMatrix3to4(frag->scissorMat, scissorMat);
-
 
         memcpy(frag->extent, paint->extent, sizeof(frag->extent));
         frag->strokeMult = (width*0.5f + fringe*0.5f) / fringe;
@@ -559,18 +559,17 @@ namespace
             data[ii*3+2] = _start + ii + 2;
         }
         uiRenderer->indexBuffer()->unlock();
-
-        uiRenderer->setDrawIndexed(true);
     }
 
     void setupNanoVgBlending()
     {
         s_Device->setBlendProperty(Ibl::OpAdd);
-        s_Device->setSrcFunction(Ibl::BlendOne);
-        s_Device->setAlphaSrcFunction(Ibl::BlendOne);
+        s_Device->setSrcFunction(Ibl::SourceAlpha);
+        s_Device->setAlphaSrcFunction(Ibl::SourceAlpha);
         s_Device->setDestFunction(Ibl::InverseSourceAlpha);
         s_Device->setAlphaDestFunction(Ibl::InverseSourceAlpha);
         s_Device->setAlphaBlendProperty(Ibl::OpAdd);
+
     }
 
     static void glnvg__fill(struct GLNVGcontext* gl, struct GLNVGcall* call)
@@ -578,25 +577,20 @@ namespace
         struct GLNVGpath* paths = &gl->paths[call->pathOffset];
         int i, npaths = call->pathCount;
 
-        // set bindpoint for solid loc
-        s_Device->setZFunction(Ibl::LessEqual);
         nvgRenderSetUniforms(gl, call->uniformOffset, 0);
         s_Device->setCullMode(Ibl::CullNone);
         s_Device->enableStencilTest();
-        s_Device->disableZTest();
         s_Device->disableAlphaBlending();
         s_Device->setColorWriteState(false, false, false, false);
         Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
 
-        // TODO, need primitive types, culling and blend setup.
-        s_Device->disableDepthWrite();
         for (i = 0; i < npaths; i++)
         {
             if (2 < paths[i].fillCount)
             {
+                uiRenderer->setDrawIndexed(true);
                 uiRenderer->setPrimitiveType(Ibl::TriangleList);
                 uiRenderer->setShader(gl->prog);
-                //D3D11_DEPTH_STENCILOP_DESC
                 s_Device->setupStencil(0xff, 0xff, 
                                        Ibl::Always, Ibl::StencilKeep, Ibl::StencilIncrement, Ibl::StencilKeep, 
                                        Ibl::Always, Ibl::StencilKeep, Ibl::StencilDecrement, Ibl::StencilKeep);
@@ -605,7 +599,6 @@ namespace
                 //bgfx::setTexture(0, gl->s_tex, gl->th);
                 fan(paths[i].fillOffset, paths[i].fillCount);
 
-                // Input to render is the index count if an index buffer is bound.
                 uiRenderer->render((paths[i].fillCount-2)*3, 0);
                 uiRenderer->setDrawIndexed(false);
             }
@@ -613,51 +606,36 @@ namespace
 
         // Draw aliased off-pixels
         nvgRenderSetUniforms(gl, call->uniformOffset + gl->fragSize, call->image);
-
-        /*
-        s_Device->setSrcFunction(Ibl::BlendOne);
-        s_Device->setBlendProperty(Ibl::OpAdd);
-        s_Device->setAlphaSrcFunction(Ibl::BlendOne);
-        s_Device->setDestFunction(Ibl::InverseSourceAlpha);
-        s_Device->setAlphaDestFunction(Ibl::InverseSourceAlpha);
-        s_Device->setAlphaBlendProperty(Ibl::OpAdd);
-        */
-
-        setupNanoVgBlending();
-
+        s_Device->enableAlphaBlending();
         s_Device->setColorWriteState(true, true, true, true);
 
-        s_Device->enableAlphaBlending();
         s_Device->setCullMode(Ibl::CW);
+        s_Device->setupStencil(0xff, 0xff, Ibl::Equal, Ibl::StencilKeep, Ibl::StencilKeep, Ibl::StencilKeep);
         uiRenderer->setPrimitiveType(Ibl::TriangleStrip);
         if (gl->edgeAntiAlias)
         {
-            // Draw fringesD3D11_DEPTH_STENCILOP_DESC
             for (i = 0; i < npaths; i++)
             {
                 uiRenderer->setShader(gl->prog);
-
-                s_Device->setupStencil(0xff, 0xff, Ibl::Equal, Ibl::StencilKeep, Ibl::StencilKeep, Ibl::StencilKeep);
 
                 uiRenderer->setVertexBuffer(gl->tvb);
                 uiRenderer->render(paths[i].strokeCount, paths[i].strokeOffset);
             }
         }
 
-        // Draw fill
         s_Device->setCullMode(Ibl::CullNone);
-        s_Device->setupStencil(0xff, 0xff, Ibl::NotEqual, Ibl::StencilZero, Ibl::StencilZero, Ibl::StencilZero);
         uiRenderer->setPrimitiveType(Ibl::TriangleList);
+        // Draw fill
+
+        s_Device->setupStencil(0xff, 0xff, Ibl::NotEqual, Ibl::StencilZero, Ibl::StencilZero, Ibl::StencilZero);
 
         uiRenderer->setShader(gl->prog);        
         uiRenderer->setVertexBuffer(gl->tvb);
-
+        
 
         uiRenderer->render(call->vertexCount, call->vertexOffset);
 
         s_Device->disableStencilTest();
-        s_Device->enableDepthWrite();
-        s_Device->enableZTest();
         // New
     }
 
@@ -678,10 +656,14 @@ namespace
             //bgfx::setState(gl->state);
             uiRenderer->setVertexBuffer(gl->tvb);
             //bgfx::setTexture(0, gl->s_tex, gl->th);
+            uiRenderer->setDrawIndexed(true);
+
             fan(paths[i].fillOffset, paths[i].fillCount);
 
             // Index count. Offset is baked into the indices.
             uiRenderer->render((paths[i].fillCount - 2) * 3, 0);
+            uiRenderer->setDrawIndexed(false);
+
         }
 
         uiRenderer->setPrimitiveType(Ibl::TriangleStrip);
@@ -723,7 +705,7 @@ namespace
 
     static void glnvg__triangles(struct GLNVGcontext* gl, struct GLNVGcall* call)
     {
-        /*
+
         // TODO: State setup.
         Ibl::UIRenderer* uiRenderer = Ibl::UIRenderer::renderer();
         uiRenderer->setPrimitiveType(Ibl::TriangleList);
@@ -736,7 +718,6 @@ namespace
             //uiRenderer->setState(gl->state);
             uiRenderer->render(call->vertexCount, call->vertexOffset);
         }
-        */
     }
 
     static void nvgRenderFlush(void* _userPtr)
@@ -751,8 +732,12 @@ namespace
             memcpy(vertexBufferData, gl->verts, gl->nverts * sizeof(struct NVGvertex) );
             gl->tvb->unlock();
 
-            uiRenderer->device()->enableAlphaBlending();
-            uiRenderer->device()->setupBlendPipeline(Ibl::BlendAlpha);
+            Ibl::IDevice* device = uiRenderer->device();
+            device->enableAlphaBlending();
+            device->setZFunction(Ibl::LessEqual);
+            device->disableZTest();
+            device->disableDepthWrite();
+            setupNanoVgBlending();
 
             const Ibl::GpuVariable*      viewSizeVariable = nullptr;
             gl->prog->getParameterByName("u_viewSize", viewSizeVariable);
@@ -781,8 +766,13 @@ namespace
                     break;
                 }
             }
-            uiRenderer->device()->disableAlphaBlending();
+            device->disableAlphaBlending();
+            device->setupBlendPipeline(Ibl::BlendAlpha);
+            device->enableDepthWrite();
+            device->enableZTest();
         }
+
+
 
         // Reset calls
         gl->nverts    = 0;

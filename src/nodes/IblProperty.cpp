@@ -41,32 +41,38 @@
 #include <IblProperty.h>
 #include <IblNode.h>
 #include <IblLog.h>
+#include <Iblimgui.h>
 
 namespace Ibl
 {
-EnumTweakType::EnumTweakType(TwEnumVal* enumValues, 
+EnumTweakType::EnumTweakType(ImguiEnumVal* enumValues,
                              uint32_t enumCount, 
                              const std::string& typeName) :
-    _enumValues(enumValues),
     _enumCount(enumCount),
     _typeName(typeName),
-    _type(TW_TYPE_UNDEF)
+    _enumValues(nullptr)
 {
     assert(enumValues);
+    _enumValues = (ImguiEnumVal*)malloc(sizeof(ImguiEnumVal) * enumCount);
+    memcpy(_enumValues, enumValues, sizeof(ImguiEnumVal) * enumCount);
 }
 
 EnumTweakType::~EnumTweakType()
 {
+    if (_enumValues)
+        free(_enumValues);
 }
 
-TwType
-EnumTweakType::type() const
+uint32_t
+EnumTweakType::enumCount() const
 {
-    if (_type == TW_TYPE_UNDEF)
-    {
-        _type = TwDefineEnum(_typeName.c_str(), _enumValues, _enumCount);
-    }
-    return _type;
+    return _enumCount;
+}
+
+const ImguiEnumVal*
+EnumTweakType::enumValues() const
+{
+    return _enumValues;
 }
 
 const std::string& 
