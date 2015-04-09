@@ -145,7 +145,7 @@ namespace Ibl
         const float qz = lerp(pw, pz, s1);
         const float qw = lerp(rr, px, s1);
 
-        const float dd = qx - fmin(qw, qy);
+        const float dd = qx - minValue(qw, qy);
         const float ee = 1.0e-10f;
 
         _hsv[0] = fabsf(qz + (qw - qy) / (6.0f * dd + ee));
