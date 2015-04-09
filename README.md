@@ -17,9 +17,20 @@ http://www.derkreature.com/
 Quick download link:
 https://github.com/derkreature/IBLBaker/archive/master.zip
 
-What does it do?
+What on earth is this?
 --------------
-The IBLBaker is a small tool for baking diffuse irradiance and specular pre-convolved environment cubemaps evaluated over roughness over mips computed using a user specified brdf.
+
+The IBLBaker grew out of a quick implementation of the Siggraph Unreal presentations on Physically Based Rendering that I put together for a presentation at Pixar on an OpenSubDiv implementation that I had written for realtime rendering.
+
+The main reason that it is here is to provide aspiring rendering engineers a concise example of all the parts required to realtime evaluate light probes in realtime. 
+
+While this is *not* a complete implementation of the required rendering pipeline (I have ommited caviety, bloom, reflection occlusion and realtime ambient occlusion and IBL shadowing (Kreature does these, but I felt that they detracted from the core exercise), it should serve anyone looking to implement dynamic probes in good stead. (If it doesn't, email me, and I will rectify the problem).
+
+At the very least it can be used for baking diffuse irradiance and specular pre-convolved environment cubemaps evaluated over roughness over mips computed using a user specified brdf.
+
+Still Reading?
+--------------
+
 The baker uses importance sampling to evaluate the environment maps and visualize the results using the separable method proposed by Epic Games at Siggraph 2013.
 
 The tool allows the user to save the computed environment maps and the BRDF Lut to disk for use in other pipelines.
@@ -39,11 +50,13 @@ Thank you so very much guys!
 
 Codebase notes:
 --------------
-This codebase is based on an old version of my personal research framework. It was developed more as an exercise to learn new techniques, so parts of it are fundamentally flawed.
+This codebase is based on an old version (circa 2009) of my personal research framework. It was developed more as an exercise to learn new techniques, so parts of it are fundamentally flawed.
 One particular area is the use of abstract base types for render API abstraction. This is clearly a bad idea, and will go away before I release.
 Mainly, I don't want anyone to ever think that this is a good idea.
 
 If a class has an "I" in front of it, or D3D11 at the end, please hold your nose and ignore for the moment :).
+
+I am holding off on pulling from my current framework(Kreature) until I have implemented Vulkan. 
 
 Suggested prior reading:
 --------------
@@ -73,13 +86,6 @@ Similar projects
 - [Marmoset Skyshop](http://www.marmoset.co/skyshop) - Commercial plugin for Unity3D Game engine.
 - [Knald Lys](https://www.knaldtech.com/lys-open-beta/) - Commercial tool from KnaldTech.
 
-Why release?
---------------
-The tool was developed in a vacuum.
-I am still developing a complete understanding for next generation lighting pipelines using both iostropic and anisotropic BRDFs in the context of "roughness/metalness" inspired physically based lighting models.
-
-I am open to critique, suggestions, questions, and am actively maintaining this repository.
-
 Building:
 --------------
     1.) Install Visual Studio 2013 Express for Windows Desktop.
@@ -99,6 +105,7 @@ Building:
 Known Leaks:
 --------------
 - D3D11Effects has some serious issues. I will be replacing this in the near future in any case. (Post D3D12).
+- Shutdown leaks abound after the latest GUI port. I've been in a bit of a hurry, so, uhhh, please forgive.
 
 What about linux / osx / iris / bsd / ios / nextstep / rasberry pi / abacus support?
 --------------
