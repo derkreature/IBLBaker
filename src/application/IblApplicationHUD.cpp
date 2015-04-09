@@ -300,6 +300,31 @@ imguiSelectionSliderForEnumProperty(const char* title, T* property)
     }
 }
 
+template <class T>
+void
+imguiSelectionSliderForPixelFormatProperty(const char* title, T* property)
+{
+    const ImguiEnumVal* enumVals = property->tweakFlags()->enumType->enumValues();
+    uint32_t currentValue = uint32_t(property->get());
+    uint32_t enumCount = property->tweakFlags()->enumType->enumCount();
+    uint32_t currentId = uint32_t(idFromVals(currentValue, enumVals, uint32_t(enumCount)));
+
+    float minValue = float(0);
+    float maxValue = float(enumCount - 1);
+
+    std::vector <const char*> labels;
+    labels.reserve(enumCount);
+    for (uint32_t labelId = 0; labelId < enumCount; labelId++)
+        labels.push_back(enumVals[labelId].label);
+    imguiLabel(title);
+
+    const uint8_t tab = imguiTabsForEnum(uint8_t(currentId), true, ImguiAlign::CenterIndented, 16, 2, enumCount, enumVals);
+    if (uint32_t(tab) != currentId)
+    {
+        property->set((PixelFormat)enumVals[tab].value);
+    }
+}
+
 void
 ApplicationHUD::render(const Ibl::Camera* camera)
 {
@@ -429,6 +454,7 @@ ApplicationHUD::render(const Ibl::Camera* camera)
             imguiPropertySlider("Max Pixel G", _scene->probes()[0]->maxPixelGProperty(), 0.0f, 1000.0f, 1.0f, false);
             imguiPropertySlider("Max Pixel B", _scene->probes()[0]->maxPixelBProperty(), 0.0f, 1000.0f, 1.0f, false);
 
+            imguiSelectionSliderForPixelFormatProperty("Environment Format", _scene->probes()[0]->hdrPixelFormatProperty());
             imguiSelectionSliderForEnumProperty("Source Resolution", _scene->probes()[0]->sourceResolutionProperty());
             imguiSelectionSliderForEnumProperty("Specular Resolution", _scene->probes()[0]->specularResolutionProperty());
             imguiSelectionSliderForEnumProperty("Diffuse Resolution", _scene->probes()[0]->diffuseResolutionProperty());
