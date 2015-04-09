@@ -22,9 +22,9 @@ What on earth is this?
 
 The IBLBaker grew out of a quick implementation of the Siggraph Unreal presentations on Physically Based Rendering that I put together for a presentation at Pixar on an OpenSubDiv implementation that I had written for realtime rendering.
 
-The main reason that it is here is to provide aspiring rendering engineers a concise example of all the parts required to realtime evaluate light probes in realtime. 
+The main reason that it is here is to provide aspiring rendering engineers a concise example of all the parts required to realtime evaluate light probes for physically based rendering. 
 
-While this is *not* a complete implementation of the required rendering pipeline (I have ommited caviety, bloom, reflection occlusion and realtime ambient occlusion and IBL shadowing (Kreature does these, but I felt that they detracted from the core exercise), it should serve anyone looking to implement dynamic probes in good stead. (If it doesn't, email me, and I will rectify the problem).
+While this is *not* a complete implementation of the required rendering pipeline (I have omited caviety, bloom, reflection occlusion and realtime ambient occlusion and IBL shadowing (Kreature does these, but I felt that they detracted from the core exercise), it should serve anyone looking to implement dynamic probes in good stead. (If it doesn't, email me, and I will rectify the problem).
 
 At the very least it can be used for baking diffuse irradiance and specular pre-convolved environment cubemaps evaluated over roughness over mips computed using a user specified brdf.
 
