@@ -5,6 +5,8 @@ IBLBaker
 
 ![IblBakerCover1](https://github.com/derkreature/IBLBaker/blob/master/images/CoverShaderBall.jpg)
 
+![IblBakerCover1](https://github.com/derkreature/IBLBaker/blob/master/images/CoverShaderBallMod.jpg)
+
 
 About
 --------------
