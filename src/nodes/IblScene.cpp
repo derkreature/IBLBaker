@@ -145,6 +145,7 @@ void findFiles(std::wstring path, std::wstring pattern,
 
 std::string trimPathName(const std::string& filePath)
 {
+    // Fuck I hate windows pathing...
     size_t index = filePath.rfind('\\');
     if (index != std::string::npos)
     { 
@@ -375,11 +376,14 @@ const std::string& userMaterialPathName)
         else if (implicitlyGenerateMaterials)
         {
             // TODO: Setup default based on passed in material.
+            // Related to very, very old code (2003).
+            assert(0);
         }
         else
         {
             size_t materialId = scene->mMeshes[meshId]->mMaterialIndex;
             const aiMaterial& mat = *scene->mMaterials[materialId];
+
 
             // Setup material. This is a little braindead, but it
             // is good enough for the purposes of this demo.
@@ -387,6 +391,9 @@ const std::string& userMaterialPathName)
             material->setShaderName("PBRDebug");
             material->setTechniqueName("Default");
             material->addPass("color");
+
+            // Thank you DCC tool for this.
+            material->twoSidedProperty()->set(true);
 
             //
             // Load textures
@@ -398,6 +405,8 @@ const std::string& userMaterialPathName)
             {
                 std::string mapFilePathName = assetPath + trimFileName(std::string(textureFilePath.C_Str()));
                 material->setAlbedoMap(mapFilePathName);
+                // Retarded necessity. ArseImp doesn't load material or mesh names.
+                material->setName(mapFilePathName);
             }
             else
             {

@@ -48,29 +48,7 @@ namespace Ibl
 {
 namespace
 {
-ImguiEnumVal DebugAOVEnum[] =
-{
-    { Ibl::NoDebugTerm, "No Debug Term" },
-    { Ibl::NormalTerm, "Normals" },
-    { Ibl::AmbientOcclusionTerm, "Ambient Occlusion" },
-    { Ibl::AlbedoTerm, "Albedo" },
-    { Ibl::IBLDiffuseTerm, "IBL Diffuse Irradiance" },
-    { Ibl::IBLSpecularTerm, "IBL Specular" },
-    { Ibl::MetalTerm, "Metalness" },
-    { Ibl::RoughnessTerm, "Roughness" },
-    { Ibl::BrdfTerm, "Brdf" }
-};
-static const EnumTweakType DebugAOVType(&DebugAOVEnum[0], 9, "debugAOV");
 
-ImguiEnumVal SpecularWorkflowEnum[] =
-{
-    { RoughnessMetal, "Roughness/Metal" },
-    { GlossMetal, "Gloss/Metal" },
-    { RoughnessInverseMetal, "Roughness/Inverse Metal" },
-    { GlossInverseMetal, "Gloss/Inverse Metal" },
-};
-
-static const EnumTweakType SpecularWorkflowType(&SpecularWorkflowEnum[0], 4, "specularWorkflow");
 
 bool stringToBool(const std::string& value)
 {
@@ -94,13 +72,19 @@ Material::Material (IDevice* device,
     // Flags
     _twoSidedProperty(new Ibl::BoolProperty(this, "TwoSided", new TweakFlags(0, 1, 1, "Material"))),
     _textureGammaProperty(new Ibl::FloatProperty(this, "Input Gamma", new TweakFlags(1e-2f, 6, 1e-2f, "Material"))),
-    _debugTermProperty(new IntProperty(this, "Debug Visualization", new TweakFlags(&DebugAOVType, "Material"))),
+    _debugTermProperty(new IntProperty(this, "Debug Visualization")),
     _albedoColorProperty(new Ibl::Vector4fProperty(this, "Albedo Color", new TweakFlags(0, 6, 1e-2f, "Material"))),
-    _specularWorkflowProperty(new IntProperty(this, "Specular workflow", new TweakFlags(&SpecularWorkflowType, "Material"))),
+    _specularWorkflowProperty(new IntProperty(this, "Specular workflow")),
     _roughnessScaleProperty(new Ibl::FloatProperty(this, "Roughness/Gloss Scale", new TweakFlags(1e-2f, 6, 1e-2f, "Material"))),
     _specularIntensityProperty(new Ibl::FloatProperty(this, "Specular Intensity", new TweakFlags(1e-2f, 6, 1e-2f, "Material"))),
-    _detailTermsProperty(new Ibl::Vector4fProperty(this, "Specular Intensity", new TweakFlags(1e-2f, 6, 1e-2f, "Material")))
+    _userAlbedoProperty(new Ibl::Vector4fProperty(this, "userAlbedo", new TweakFlags(1e-2f, 6, 1e-2f, "Material"))),
+    _userRMProperty(new Ibl::Vector4fProperty(this, "userRMC", new TweakFlags(1e-2f, 6, 1e-2f, "Material"))),
+    _iblOcclProperty(new Ibl::Vector4fProperty(this, "iblOccl", new TweakFlags(1e-2f, 6, 1e-2f, "Material")))
 {
+    _userAlbedoProperty->set(Ibl::Vector4f(1, 1, 1, 0));
+    _userRMProperty->set(Ibl::Vector4f(1, 0, 1, 0));
+    _iblOcclProperty->set(Ibl::Vector4f(0,0,0,0));
+
     _twoSidedProperty->set(false);
     _textureGammaProperty->set(2.2f);
     _albedoColorProperty->set(Ibl::Vector4f(1,1,1,1));
@@ -108,7 +92,6 @@ Material::Material (IDevice* device,
     _specularWorkflowProperty->set(RoughnessMetal);
     _roughnessScaleProperty->set(1.0f);
     _specularIntensityProperty->set(1.0);
-    _detailTermsProperty->set(Vector4f(4,4,0.1f, 0.2f));
 
     if (filePathName.length() > 0)
     {
@@ -124,6 +107,42 @@ Material::~Material()
     _device->textureMgr()->recycle(_normalMap);
     _device->textureMgr()->recycle(_environmentMap);
     _device->textureMgr()->recycle(_specularRMCMap);
+}
+
+const Ibl::Vector4f&
+Material::userAlbedo() const
+{
+    return _userAlbedoProperty->get();
+}
+
+Ibl::Vector4fProperty*
+Material::userRMProperty()
+{
+    return _userRMProperty;
+}
+
+const Ibl::Vector4f&
+Material::userRM() const
+{
+    return _userRMProperty->get();
+}
+
+const Ibl::Vector4f& 
+Material::iblOccl() const
+{
+    return _iblOcclProperty->get();
+}
+
+Ibl::Vector4fProperty*
+Material::userAlbedoProperty()
+{
+    return _userAlbedoProperty;
+}
+
+Ibl::Vector4fProperty*
+Material::iblOcclProperty()
+{
+    return _iblOcclProperty;
 }
 
 Ibl::BoolProperty*
@@ -438,17 +457,6 @@ Material::specularIntensity() const
     return _specularIntensityProperty->get();
 }
 
-Ibl::Vector4fProperty*
-Material::detailTermsProperty()
-{
-    return _detailTermsProperty;
-}
-
-const Ibl::Vector4f&
-Material::detailTerms() const
-{
-    return _detailTermsProperty->get();
-}
 
 }
 

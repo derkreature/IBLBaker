@@ -3324,12 +3324,12 @@ uint32_t imguiChooseFromArrayInstead(uint32_t _selected, const ImguiEnumVal* cho
     return _selected;
 }
 
-void imguiColorWheel(float _rgb[3], bool _respectIndentation, float _size, bool _enabled)
+void imguiColorWheel(float* _rgb, bool _respectIndentation, float _size, bool _enabled)
 {
     s_imgui.colorWheelWidget(_rgb, _respectIndentation, _size, _enabled);
 }
 
-void imguiColorWheel(const char* _text, float _rgb[3], bool& _activated, float _size, bool _enabled)
+void imguiColorWheel(const char* _text, float* _rgb, bool& _activated, float _size, bool _enabled)
 {
     char buf[128];
     sprintf(buf,  "[RGB %-2.2f %-2.2f %-2.2f]"

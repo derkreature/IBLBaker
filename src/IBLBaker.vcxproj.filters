@@ -288,9 +288,6 @@
     <ClCompile Include="renderAPI\IblIVertexDeclaration.cpp">
       <Filter>render api</Filter>
     </ClCompile>
-    <ClCompile Include="renderAPI\IblMaterial.cpp">
-      <Filter>render api</Filter>
-    </ClCompile>
     <ClCompile Include="renderAPI\IblPostEffect.cpp">
       <Filter>render api</Filter>
     </ClCompile>
@@ -426,6 +423,9 @@
     </ClCompile>
     <ClCompile Include="ui\IblImageWidget.cpp">
       <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="renderAPI\IblMaterial.cpp">
+      <Filter>nodes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -718,9 +718,6 @@
     <ClInclude Include="renderAPI\IblIVertexDeclaration.h">
       <Filter>render api</Filter>
     </ClInclude>
-    <ClInclude Include="renderAPI\IblMaterial.h">
-      <Filter>render api</Filter>
-    </ClInclude>
     <ClInclude Include="renderAPI\IblPostEffect.h">
       <Filter>render api</Filter>
     </ClInclude>
@@ -871,6 +868,9 @@
     </ClInclude>
     <ClInclude Include="ui\IblImageWidget.h">
       <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="renderAPI\IblMaterial.h">
+      <Filter>nodes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

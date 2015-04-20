@@ -119,6 +119,7 @@ RenderHUD (application, device, inputState),
 _scene (scene),
 _controlsVisible (false),
 _munkyfunTexture(nullptr),
+_gameTexture(nullptr),
 _showRendering(false),
 _renderingEnabled(true),
 _showAbout(false),
@@ -138,8 +139,7 @@ _scrollArea(0)
     setUIVisible(true);
 
     _munkyfunTexture = device->textureMgr()->loadTexture("data/textures/BbTitles/Title.dds");
-
-
+    _gameTexture = device->textureMgr()->loadTexture("data/textures/BbTitles/gametextures_logo.dds");
 }
 
 void
@@ -267,11 +267,11 @@ template <class T, typename S>
 void
 imguiPropertiesSlider(const char* title, T** properties, uint32_t propertyCount, float min, float max, S step, bool enabled = true)
 {
-    float displayGamma = float(properties[0]->get());
-    if (imguiSlider(title, displayGamma, min, max, float(step), enabled))
+    float value = float(properties[0]->get());
+    if (imguiSlider(title, value, min, max, float(step), enabled))
     {
         for (uint32_t propertyId = 0; propertyId < propertyCount; propertyId++)
-            properties[propertyId]->set(S(displayGamma));
+            properties[propertyId]->set(S(value));
     }
 }
 
@@ -322,6 +322,69 @@ imguiSelectionSliderForPixelFormatProperty(const char* title, T* property)
     if (uint32_t(tab) != currentId)
     {
         property->set((PixelFormat)enumVals[tab].value);
+    }
+}
+
+template <class T>
+void
+imguiColorWheelForProperty(const char* title, T* property)
+{
+    // If I am drawing it, it is activated for now.
+    const static bool activated = true;
+    const T& color = property->get();
+    imguiColorWheel("Diffuse color:", &color.x, activated);
+}
+
+template <class T>
+void
+imguiColorWheelForProperties(const char* title, T* properties, uint32_t propertyCount)
+{
+    // If I am drawing it, it is activated for now.
+    static bool activated = true;
+    float* color = &properties[0]->get().x;
+    // TODO: Needs fixing. Performance drag due to floating point compare and no
+    // no invalidation mechanism. Add invalidation mechanism (bool return from imguiColorWheel if value changed).
+    imguiColorWheel(title, color, activated);
+
+    for (uint32_t propertyId = 1; propertyId < propertyCount; propertyId++)
+    {
+        properties[propertyId]->set(properties[0]->get());
+    }
+}
+
+template <class T, typename S>
+void
+imguiSliderForPropertyChannel(const char* title, T* property, uint32_t channel, float min, float max, float step)
+{
+    T& channels = property->get();
+    float value = float(channels[channel]);
+
+    if (imguiSlider(title, value, min, max, float(step), enabled))
+    {
+        // Could do with some validation.
+        channels[channelId] = channels;
+        property->set(S(value));
+    }
+}
+
+template <class T>
+void
+imguiSliderForPropertiesChannel(const char* title, T** properties, uint32_t channel, uint32_t propertyCount, float min, float max, float step)
+{
+    float* channels = &properties[0]->get().x;
+    float value = float(channels[channel]);
+
+    // If we draw it, it is activated.
+    static bool activated = true;
+
+    if (imguiSlider(title, value, min, max, float(step), activated))
+    {
+        // Yay, reference return... Invalidation doesn't work properly for this though.
+        properties[0]->get()[channel] = value;
+
+        // For all variants, set.
+        for (uint32_t propertyId = 1; propertyId < propertyCount; propertyId++)
+            properties[propertyId]->set(properties[0]->get());
     }
 }
 
@@ -382,6 +445,20 @@ ApplicationHUD::render(const Ibl::Camera* camera)
             _application->cancel();
         }
 
+        imguiRegionBorder("About:", NULL, _showAbout, _aboutEnabled);
+        if (_showAbout)
+        {
+            imguiIndent();
+            imguiLabel("Matt Davidson (2015)");
+            imguiLabel("Thankyou to:");
+            imguiLabel("www.munkyfun.com");
+            imguiImage(const_cast<ITexture*>(_munkyfunTexture), 0, 256, 128, ImguiAlign::Center);
+            imguiLabel("www.gametextures.com");
+            imguiImage(const_cast<ITexture*>(_gameTexture), 0, 256, 128, ImguiAlign::Center);
+
+            imguiUnindent();
+        }
+
         imguiRegionBorder("Rendering:", NULL, _showRendering, _renderingEnabled);
         if (_showRendering)
         {
@@ -389,17 +466,53 @@ ApplicationHUD::render(const Ibl::Camera* camera)
             imguiPropertySlider("Exposure", _scene->camera()->exposureProperty(), 0.0f, 10.0f, 0.01f);
             imguiPropertySlider("Display Gamma", _scene->camera()->gammaProperty(), 0.0f, 5.0f, 0.01f);
 
+            imguiSelectionSliderForEnumProperty("View Model", _application->modelVisualizationProperty());
+            _application->syncVisualization();
 
-            Material* baseMaterial = _application->visualizedEntity()->mesh(0)->material();
-            Mesh* baseMesh = _application->visualizedEntity()->mesh(0);
+            Ibl::Entity* entity = _application->visualizedEntity();
+            if (_application->modelVisualizationProperty()->get() == Ibl::Application::ShaderBallModel)
+                entity = _application->shaderBallEntity();
 
 
-            const std::vector<Mesh*>& meshes = _application->visualizedEntity()->meshes();
 
             std::vector<Ibl::IntProperty*> debugTermProperties;
             std::vector<Ibl::IntProperty*> specularWorkflowProperties;
             std::vector<Ibl::FloatProperty*> roughnessScaleProperties;
             std::vector<Ibl::FloatProperty*> specularIntensityProperties;
+            std::vector<Ibl::Vector4fProperty*> userAlbedoProperties;
+            std::vector<Ibl::Vector4fProperty*> userRMProperties;
+
+            const std::vector<Mesh*>& meshes = entity->meshes();
+
+            specularWorkflowProperties.push_back(_application->specularWorkflowProperty());
+            debugTermProperties.push_back(_application->debugTermProperty());
+
+            if (_application->modelVisualizationProperty()->get() == Ibl::Application::ShaderBallModel)
+            {
+                for (auto meshIt = meshes.begin(); meshIt != meshes.end(); meshIt++)
+                {
+
+                    // ArseImp doesn't load mat or mesh names (or I didn't turn on a preprocessor define to do so).
+                    // Need to rfind on Albedo for brick.
+                    // *Note to self, Port ArseImp Fbx implementation to standalone lightweight library*
+                    //
+                    Material* currentMaterial = (*meshIt)->material();
+                    if (currentMaterial->name().rfind("Brick") != std::string::npos)
+                    { 
+                        userAlbedoProperties.push_back(currentMaterial->userAlbedoProperty());
+                        userRMProperties.push_back(currentMaterial->userRMProperty());
+                    }
+                }
+            }
+            else
+            {            
+                for (auto meshIt = meshes.begin(); meshIt != meshes.end(); meshIt++)
+                {
+                    Material* currentMaterial = (*meshIt)->material();
+                    userAlbedoProperties.push_back(currentMaterial->userAlbedoProperty());
+                    userRMProperties.push_back(currentMaterial->userRMProperty());
+                }
+            }
 
             for (auto meshIt = meshes.begin(); meshIt != meshes.end(); meshIt++)
             {
@@ -410,17 +523,28 @@ ApplicationHUD::render(const Ibl::Camera* camera)
                 specularIntensityProperties.push_back(currentMaterial->specularIntensityProperty());
                 roughnessScaleProperties.push_back(currentMaterial->roughnessScaleProperty());
             }
-            
+
+            imguiSliderForPropertiesChannel("User Albedo", &userAlbedoProperties[0], 3, (uint32_t)userAlbedoProperties.size(), 0.0f, 1.0f, 0.05f);
+            imguiColorWheelForProperties("User Albedo Term", &userAlbedoProperties[0], (uint32_t)userAlbedoProperties.size());
+
+            // These are in whatever working space you have selected.
+            imguiSliderForPropertiesChannel("User Gloss/Roughness", &userRMProperties[0], 0, (uint32_t)userRMProperties.size(), 0.0f, 1.0f, 0.05f);
+            imguiSliderForPropertiesChannel("User Weight R/G", &userRMProperties[0], 1, (uint32_t)userRMProperties.size(), 0.0f, 1.0f, 0.05f);
+            imguiSliderForPropertiesChannel("User Metalness", &userRMProperties[0], 2, (uint32_t)userRMProperties.size(), 0.0f, 1.0f, 0.05f);
+            imguiSliderForPropertiesChannel("User Weight M", &userRMProperties[0], 3, (uint32_t)userRMProperties.size(), 0.0f, 1.0f, 0.05f);
+
             uint32_t meshCount = uint32_t(meshes.size());
-            imguiPropertiesSlider("Roughness Scale", &roughnessScaleProperties[0], meshCount, 0.0f, 1.0f, 0.05f);
-            imguiPropertiesSlider("Specular Intensity", &specularIntensityProperties[0], meshCount, 0.0f, 6.0f, 0.05f);
+            imguiPropertiesSlider("Roughness Scale", &roughnessScaleProperties[0], (uint32_t)roughnessScaleProperties.size(), 0.0f, 1.0f, 0.05f);
+            imguiPropertiesSlider("Specular Intensity", &specularIntensityProperties[0], (uint32_t)specularIntensityProperties.size(), 0.0f, 6.0f, 0.05f);
             imguiLabel("Specular Workflow");
-            chooseForProperties(&specularWorkflowProperties[0], meshCount);
+            chooseForProperties(&specularWorkflowProperties[0], (uint32_t)specularWorkflowProperties.size());
+
             imguiLabel("Debug Channel");
-            chooseForProperties(&debugTermProperties[0], meshCount);
+            chooseForProperties(&debugTermProperties[0], (uint32_t)debugTermProperties.size());
 
             imguiUnindent();
         }
+
 
         //static float blah[3] = {0.0, 1.0, 1.0};
         //static bool activated = true;
@@ -507,20 +631,7 @@ ApplicationHUD::render(const Ibl::Camera* camera)
             }
             imguiUnindent();
         }
-
-        imguiRegionBorder("About:", NULL, _showAbout, _aboutEnabled);
-        if (_showAbout)
-        {
-            imguiIndent();
-            imguiLabel("Matt Davidson (2015)");
-            imguiLabel("Thankyou to Munkyfun:");
-            imguiImage(const_cast<ITexture*>(_munkyfunTexture), 0, 256, 128, ImguiAlign::Center);
-            imguiUnindent();
-        }
-
         imguiEndScrollArea();
-
-
         imguiEndFrame();
     }
 

@@ -133,8 +133,14 @@ class Material : public RenderNode
     Ibl::FloatProperty*         specularIntensityProperty();
     float                       specularIntensity() const;
 
-    Ibl::Vector4fProperty*      detailTermsProperty();
-    const Ibl::Vector4f&        detailTerms() const;
+    Ibl::Vector4fProperty*      userAlbedoProperty();
+    const Ibl::Vector4f&        userAlbedo() const;
+
+    Ibl::Vector4fProperty*      userRMProperty();
+    const Ibl::Vector4f&        userRM() const;
+
+    Ibl::Vector4fProperty*      iblOcclProperty();
+    const Ibl::Vector4f&        iblOccl() const;
 
   private:
     // Shader and pass management
@@ -161,7 +167,10 @@ class Material : public RenderNode
     Ibl::FloatProperty*         _specularIntensityProperty;
     Ibl::Vector4fProperty*      _albedoColorProperty;
 
-    Ibl::Vector4fProperty*      _detailTermsProperty;
+
+    Ibl::Vector4fProperty*      _userAlbedoProperty;
+    Ibl::Vector4fProperty*      _userRMProperty;
+    Ibl::Vector4fProperty*      _iblOcclProperty;
 };
 }
 

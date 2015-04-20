@@ -65,6 +65,7 @@ float4 materialDiffuse : MATERIALDIFFUSE;
 Texture2D diffuseMap : DIFFUSEMAP;
 
 float4 specularFresnel : SPECULARFRESNEL;
+float4 userAlbedo : USERALBEDO;
 float debugTerm : RENDERDEBUGTERM; 
 Texture2D specularRMCMap : GLOSSMAP;
 Texture2D normalMap : NORMALMAP;
@@ -87,6 +88,7 @@ Texture2D specularIntegration : IBLBRDF;
 float EnvironmentScale : ENVIRONMENTSCALE = 1.0f;
 
 float RoughnessScale : IBLSPECULARMIPDELTAS;
+float4 UserRM : USERRM;
 
 SamplerState anisotropicSampler
 {
@@ -144,6 +146,7 @@ VertexShaderOut vs (VertexShaderIn vertexShaderIn)
     output.position = mul(vertexShaderIn.position, worldViewProjection);
     float3 position = vertexShaderIn.position.xyz;
     float2 texCoord = vertexShaderIn.uv;
+
     float3 normal = normalize(mul(vertexShaderIn.normal, (float3x3)worldMatrix));    
     float3 worldPos = mul(float4(position.xyz, 1), worldMatrix).xyz;    
     output.positionInWorld = worldPos;
@@ -159,6 +162,10 @@ resolveAlbedo(PixelShaderInput vertexShaderOut)
 {
     float4 texColor0 = diffuseMap.Sample(anisotropicSampler, vertexShaderOut.uv);
     float4 diffuseColor = float4(pow(texColor0.rgb*materialDiffuse.rgb, textureGamma).rgb, materialDiffuse.a);
+
+    float3 correctedUserAlbedo = pow(userAlbedo.rgb, textureGamma).rgb;
+    diffuseColor.rgb = lerp(diffuseColor.rgb, correctedUserAlbedo.rgb, userAlbedo.a);
+
     return diffuseColor;
 }
 
@@ -258,8 +265,9 @@ PixelShaderOut psHDR (PixelShaderInput vertexShaderOut)
 
     // Specular map parameters.
     float4 specularRMC = specularRMCMap.Sample(anisotropicSampler, vertexShaderOut.uv);
-    float metalness = specularRMC.g;
-    float roughness = specularRMC.r;
+    float roughness = lerp(specularRMC.x, UserRM.x, UserRM.y);
+    float metalness = lerp(specularRMC.y, UserRM.z, UserRM.w);
+
     roughness = lerp(roughness, 1.0 - roughness, specularWorkflow.x);
     metalness = lerp(metalness, 1.0 - metalness, specularWorkflow.y);
 

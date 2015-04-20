@@ -352,16 +352,16 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>IBL_USE_ASS_IMP_AND_FREEIMAGE=0;DIRECTINPUT_VERSION=0x0800;_SCL_SECURE_NO_WARNINGS=1;_CRT_SECURE_NO_WARNINGS=1;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IBL_USE_ASS_IMP_AND_FREEIMAGE=1;DIRECTINPUT_VERSION=0x0800;_SCL_SECURE_NO_WARNINGS=1;_CRT_SECURE_NO_WARNINGS=1;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>newui;../newui;dependencies\imgui;dependencies\nanovg;dependencies\tinyobjloader;dependencies\assimp\include\assimp;../dependencies\assimp\include\assimp;../dependencies;../../dependencies;dependencies\MurmerHash;../../dependencies\MurmerHash;../dependencies\MurmerHash;../dependencies\pugixml\src;dependencies\pugixml\src;dependencies\ois\includes;rendererD3D11\errorD3D11;dependencies\FreeImage\inc;dependencies\AntTweakBar\include;../IBLBaker;../;../RenderAPI;RenderAPI;../Codecs;../math;math;../application;application;input;../input;Codecs/;RendererD3D11;../RendererD3D11;RendererD3D11/;rendererD3D11\effectsD3D11;rendererD3D11\effectsD3D11\inc;rendererD3D11\effectsD3D11\binary;../nodes;nodes;../ui;ui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../dependencies\assimp\include\assimp;../dependencies\assimp\include\FreeImage\inc;newui;../newui;dependencies\imgui;dependencies\nanovg;dependencies\tinyobjloader;dependencies\assimp\include\assimp;../dependencies\assimp\include\assimp;../dependencies;../../dependencies;dependencies\MurmerHash;../../dependencies\MurmerHash;../dependencies\MurmerHash;../dependencies\pugixml\src;dependencies\pugixml\src;dependencies\ois\includes;rendererD3D11\errorD3D11;dependencies\FreeImage\inc;dependencies\AntTweakBar\include;../IBLBaker;../;../RenderAPI;RenderAPI;../Codecs;../math;math;../application;application;input;../input;Codecs/;RendererD3D11;../RendererD3D11;RendererD3D11/;rendererD3D11\effectsD3D11;rendererD3D11\effectsD3D11\inc;rendererD3D11\effectsD3D11\binary;../nodes;nodes;../ui;ui</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Comctl32.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dinput8.lib;dxgi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dependencies\assimp\lib64\assimpd.lib;dependencies\FreeImage\lib64\FreeImaged.lib;Comctl32.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dinput8.lib;dxgi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)../bin64/$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
@@ -372,9 +372,9 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>IBL_USE_ASS_IMP_AND_FREEIMAGE=0;DIRECTINPUT_VERSION=0x0800;_SCL_SECURE_NO_WARNINGS=1;_CRT_SECURE_NO_WARNINGS=1;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IBL_USE_ASS_IMP_AND_FREEIMAGE=1;DIRECTINPUT_VERSION=0x0800;_SCL_SECURE_NO_WARNINGS=1;_CRT_SECURE_NO_WARNINGS=1;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>newui;../newui;dependencies\imgui;dependencies\nanovg;dependencies\tinyobjloader;dependencies\assimp\include\assimp;../dependencies\murmerhash;;dependencies\murmerhash;../dependencies\murmerhash;dependencies\murmerhash;../dependencies\pugixml\src;dependencies\pugixml\src;dependencies\ois\includes;rendererD3D11\errorD3D11;dependencies\FreeImage\inc;dependencies\AntTweakBar\include;../IBLBaker;../;../RenderAPI;RenderAPI;../Codecs;../math;math;../application;application;input;../input;Codecs/;RendererD3D11;../RendererD3D11;RendererD3D11/;rendererD3D11\effectsD3D11;rendererD3D11\effectsD3D11\inc;rendererD3D11\effectsD3D11\binary;../nodes;nodes;../ui;ui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../dependencies\assimp\include\assimp;../dependencies\assimp\include\FreeImage\inc;newui;../newui;dependencies\imgui;dependencies\nanovg;dependencies\tinyobjloader;dependencies\assimp\include\assimp;../dependencies\murmerhash;;dependencies\murmerhash;../dependencies\murmerhash;dependencies\murmerhash;../dependencies\pugixml\src;dependencies\pugixml\src;dependencies\ois\includes;rendererD3D11\errorD3D11;dependencies\FreeImage\inc;dependencies\AntTweakBar\include;../IBLBaker;../;../RenderAPI;RenderAPI;../Codecs;../math;math;../application;application;input;../input;Codecs/;RendererD3D11;../RendererD3D11;RendererD3D11/;rendererD3D11\effectsD3D11;rendererD3D11\effectsD3D11\inc;rendererD3D11\effectsD3D11\binary;../nodes;nodes;../ui;ui</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <OpenMPSupport>false</OpenMPSupport>
     </ClCompile>
@@ -383,7 +383,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Comctl32.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dxgi.lib;dinput8.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dependencies\assimp\lib64\assimp.lib;dependencies\FreeImage\lib64\FreeImage.lib;Comctl32.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dxgi.lib;dinput8.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>../bin64/$(TargetName)$(TargetExt)</OutputFile>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>

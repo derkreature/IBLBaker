@@ -97,7 +97,10 @@ RenderPass::renderMeshes(const std::string& passName, const Ibl::Scene* scene)
         const Ibl::GpuTechnique* technique = material->technique();
     
         RenderRequest renderRequest (technique, scene, scene->camera(), mesh);
-        shader->renderMesh(renderRequest);
+        if (mesh->visible())
+        {
+            shader->renderMesh(renderRequest);
+        }
     }
 }
 

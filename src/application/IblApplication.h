@@ -93,8 +93,19 @@ class Application : public Node
     bool                       loadEnvironment(const std::string& filePathName);
     bool                       saveImages(const std::string& filePathName, bool gameOnly = false);
 
-    void                       loadAsset(const std::string& assetFilePathName,
-                                         const std::string& materialFilePathName = std::string(""));
+    void                       loadAsset(Entity*& targetEntity,
+                                         const std::string& assetPathName,
+                                         const std::string& materialPathName,
+                                         bool  userAsset);
+
+    IntProperty*               modelVisualizationProperty();
+    FloatProperty*             constantRoughnessProperty();
+    FloatProperty*             constantMetalnessProperty();
+    IntProperty*               specularWorkflowProperty();
+    IntProperty*               debugTermProperty();
+    FloatProperty*             specularIntensityProperty();
+    FloatProperty*             roughnessScaleProperty();
+
 
     enum VisualizationType
     {
@@ -103,16 +114,27 @@ class Application : public Node
         HDR = 4
     };
 
+    enum ModelVisualizationType
+    {
+        UserModel = 0,
+        ShaderBallModel = 1
+    };
+        
+
     void                       pause();
     void                       cancel();
     void                       compute();
 
 
     Entity*                    visualizedEntity();
+    Entity*                    shaderBallEntity();
     Entity*                    sphereEntity();
     Entity*                    iblSphereEntity();
 
     IntProperty*               visualizationSpaceProperty();
+
+    void                       setupModelVisibility(Ibl::Entity* entity, bool visibility);
+    void                       syncVisualization();
 
   protected:
     void                       updateApplication();
@@ -124,12 +146,14 @@ class Application : public Node
     IntProperty*               _visualizationSpaceProperty;
     IntProperty*               _currentVisualizationSpaceProperty;
 
-    PixelFormatProperty *    _hdrFormatProperty;
+    PixelFormatProperty *      _hdrFormatProperty;
     IntProperty*               _probeResolutionProperty;
 
+    IntProperty*               _modelVisualizationProperty;
+
     ApplicationHandle          _instance;
-    Ibl::Window*                _mainWindow;
-    Ibl::DeviceD3D11*           _device;
+    Ibl::Window*               _mainWindow;
+    Ibl::DeviceD3D11*          _device;
 
     // Management layer.
     InputManager*              _inputMgr;
@@ -146,6 +170,7 @@ class Application : public Node
 
     // Application entities for convenience.
     Entity*                    _visualizedEntity;
+    Entity*                    _shaderBallEntity;
     Entity*                    _sphereEntity;
     Entity*                    _iblSphereEntity;
 
@@ -154,12 +179,18 @@ class Application : public Node
     uint32_t                   _windowHeight;
     bool                       _windowed;
 
+    FloatProperty*             _constantRoughnessProperty;
+    FloatProperty*             _constantMetalnessProperty;
+
   protected:
     Ibl::Timer                  _timer;
-
     bool                        _runTitles;
-    SpecularWorkflow            _workflow;
     std::string                 _defaultAsset;
+
+    IntProperty*                _specularWorkflowProperty;
+    FloatProperty*              _specularIntensityProperty;
+    FloatProperty*              _roughnessScaleProperty;
+    IntProperty*                _debugTermProperty;
 };
 }
 

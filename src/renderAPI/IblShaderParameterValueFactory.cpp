@@ -151,29 +151,76 @@ class WorldViewProjectionValue :  public ShaderParameterValue
     }
 };
 
-
-
-class DetailTermsValue : public ShaderParameterValue
+class UserAlbedoValue : public ShaderParameterValue
 {
-  public:
-      DetailTermsValue(const GpuVariable* variable, Ibl::IEffect*effect) :
+public:
+    UserAlbedoValue(const GpuVariable* variable, Ibl::IEffect*effect) :
         ShaderParameterValue(variable, effect)
     {
-        setParameterType(DetailTerms);
+        setParameterType(UserAlbedo);
     }
 
     virtual void setParam(const Ibl::RenderRequest& request) const
     {
         if (const Material* material = request.material)
         {
-            const Vector4f& detailTerms = material->detailTerms();
-            _variable->setVector(&detailTerms.x);
+            const Vector4f& userAlbedo = material->userAlbedo();
+            _variable->setVector(&userAlbedo.x);
         }
     }
 
     static bool supports(GpuVariable* variable)
     {
-        return _strcmpi((char*)variable->semantic().c_str(), "DETAILTERMS") == 0;
+        return _strcmpi((char*)variable->semantic().c_str(), "USERALBEDO") == 0;
+    }
+};
+
+class UserRMValue : public ShaderParameterValue
+{
+public:
+    UserRMValue(const GpuVariable* variable, Ibl::IEffect*effect) :
+        ShaderParameterValue(variable, effect)
+    {
+        setParameterType(UserRM);
+    }
+
+    virtual void setParam(const Ibl::RenderRequest& request) const
+    {
+        if (const Material* material = request.material)
+        {
+            const Vector4f& userRM = material->userRM();
+            _variable->setVector(&userRM.x);
+        }
+    }
+
+    static bool supports(GpuVariable* variable)
+    {
+        return _strcmpi((char*)variable->semantic().c_str(), "USERRM") == 0;
+    }
+};
+
+
+class IblOcclValue : public ShaderParameterValue
+{
+public:
+    IblOcclValue(const GpuVariable* variable, Ibl::IEffect*effect) :
+        ShaderParameterValue(variable, effect)
+    {
+        setParameterType(IblOccl);
+    }
+
+    virtual void setParam(const Ibl::RenderRequest& request) const
+    {
+        if (const Material* material = request.material)
+        {
+            const Vector4f& iblOccl = material->iblOccl();
+            _variable->setVector(&iblOccl.x);
+        }
+    }
+
+    static bool supports(GpuVariable* variable)
+    {
+        return _strcmpi((char*)variable->semantic().c_str(), "IBLOCCL") == 0;
     }
 };
 
@@ -1563,12 +1610,16 @@ ShaderParameterValueFactory::createShaderParameterValue (Ibl::IDevice* device,
         _parameters.insert (new ShaderParameterFactory <MaterialDiffuseValue>());
         _parameters.insert(new ShaderParameterFactory <EyeLocationValue>());
 
-        _parameters.insert(new ShaderParameterFactory <DetailTermsValue>());
         _parameters.insert(new ShaderParameterFactory <DetailMapValue>());
 
         _parameters.insert(new ShaderParameterFactory <SpecularIntensityValue>());
         _parameters.insert(new ShaderParameterFactory <RoughnessScaleValue>());
         _parameters.insert(new ShaderParameterFactory <SpecularWorkflowValue>());
+
+        // Christ I hate this code, which is why it is all going to die very soon and be reborn.
+        _parameters.insert(new ShaderParameterFactory <UserAlbedoValue>());
+        _parameters.insert(new ShaderParameterFactory <UserRMValue>());
+        _parameters.insert(new ShaderParameterFactory <IblOcclValue>());
     }
 
     ShaderParameterValue* value = nullptr;

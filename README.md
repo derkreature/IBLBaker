@@ -44,12 +44,14 @@ The full purpose of this tool can be found in the following videos:
 https://vimeo.com/100285383
 https://vimeo.com/96235208
 
-A Special thanks must be given to Munkyfun (www.munkyfun.com) who sponsored 
-much of the work in preparing this work for an open source release.
-Thank you so very much guys!
+A Special thanks must be given to Munkyfun (www.munkyfun.com) who sponsored much of the work in preparing this work for an open source release. Thank you so very much guys!
+
+Thank you also to www.gametextures.com for allowing the use and publication of their "Brown Brick" PBR texture set. I will be releasing this set along with a revised shader ball in the near future.
 
 Codebase notes:
 --------------
+I'm not a huge fan of git subprojects, and I'm also not a fan of having to track down all of the dependencies for a project in order for it to build. I recently reenabled AssImp and FreeImage in the default build. For these reasons the repository has grown by a couple of hundred mb.
+
 This codebase is based on an old version (circa 2009) of my personal research framework. It was developed more as an exercise to learn new techniques, so parts of it are fundamentally flawed.
 One particular area is the use of abstract base types for render API abstraction. This is clearly a bad idea, and will go away before I release.
 Mainly, I don't want anyone to ever think that this is a good idea.
@@ -104,8 +106,9 @@ Building:
 
 Known Leaks:
 --------------
-- D3D11Effects has some serious issues. I will be replacing this in the near future in any case. (Post D3D12).
+- D3D11Effects has some serious issues. I will be replacing this in the near future in any case. (Post D3D12/Vulkan in Kreature).
 - Shutdown leaks abound after the latest GUI port. I've been in a bit of a hurry, so, uhhh, please forgive.
+- AssImp is leaky.
 
 What about linux / osx / iris / bsd / ios / nextstep / rasberry pi / abacus support?
 --------------

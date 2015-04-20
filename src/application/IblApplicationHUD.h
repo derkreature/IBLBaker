@@ -63,14 +63,6 @@ class PostEffect;
 class Material;
 class ImageWidget;
 
-#define LoadEnvironment 16000
-#define SaveEnvironment 16001
-#define ComputeEnvironment 16002
-#define CancelComputeEnvironment 16003
-#define LoadAsset 16004
-#define BrdfViewer 16005
-
-
 class ApplicationHUD : public RenderHUD
 {
   public:
@@ -95,6 +87,8 @@ class ApplicationHUD : public RenderHUD
     static ApplicationHUD*     _applicationHud;
     bool                       _controlsVisible;
     Ibl::ITexture*             _munkyfunTexture;
+    Ibl::ITexture*             _gameTexture;
+
 
     bool                       _showRendering;
     bool                       _renderingEnabled;

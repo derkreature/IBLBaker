@@ -616,6 +616,9 @@ ShaderD3D11::renderMesh (const Ibl::RenderRequest& request) const
     uint32_t cPasses = 0;
     uint32_t iPass = 0;
 
+    if (!request.mesh->visible())
+        return true;
+
     Ibl::CullMode cachedCullMode =
             _deviceInterface->cullMode();
     bool hasMaterial = request.mesh->material() != nullptr;

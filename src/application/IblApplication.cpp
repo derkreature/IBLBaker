@@ -77,6 +77,39 @@ ImguiEnumVal IblEnum[] =
 
 static const EnumTweakType IBLModeType(&IblEnum[0], 3, "IBLMode");
 
+
+ImguiEnumVal ModelEnum[] =
+{
+    { Application::UserModel, "User" },
+    { Application::ShaderBallModel, "Shader Ball" },
+};
+static const EnumTweakType ModelEnumType(&ModelEnum[0], 2, "Model");
+
+// Half arsed for demo.
+ImguiEnumVal AppSpecularWorkflowEnum[] =
+{
+    { RoughnessMetal, "Roughness/Metal" },
+    { GlossMetal, "Gloss/Metal" },
+    { RoughnessInverseMetal, "Roughness/Inverse Metal" },
+    { GlossInverseMetal, "Gloss/Inverse Metal" },
+};
+
+static const EnumTweakType WorkflowEnumType(&AppSpecularWorkflowEnum[0], 4, "Workflow");
+
+ImguiEnumVal DebugAOVEnum[] =
+{
+    { Ibl::NoDebugTerm, "No Debug Term" },
+    { Ibl::NormalTerm, "Normals" },
+    { Ibl::AmbientOcclusionTerm, "Ambient Occlusion" },
+    { Ibl::AlbedoTerm, "Albedo" },
+    { Ibl::IBLDiffuseTerm, "IBL Diffuse Radiance" },
+    { Ibl::IBLSpecularTerm, "IBL Specular" },
+    { Ibl::MetalTerm, "Metalness" },
+    { Ibl::RoughnessTerm, "Roughness" },
+    { Ibl::BrdfTerm, "Brdf" }
+};
+static const EnumTweakType DebugAOVType(&DebugAOVEnum[0], 9, "debugAOV");
+
 }
 
 Application::Application(ApplicationHandle instance) : 
@@ -97,16 +130,28 @@ Application::Application(ApplicationHandle instance) :
     _windowWidth (1280),
     _windowHeight(720),
     _windowed (true),
-    _visualizationSpaceProperty(new IntProperty(this, "Visualization Type", new TweakFlags(&IBLModeType, "Renderer"))),
-    _currentVisualizationSpaceProperty(new IntProperty(this, "Visualization Type", new TweakFlags(&IBLModeType, "Renderer"))),
-    _hdrFormatProperty(new PixelFormatProperty(this, "Visualization Type", new TweakFlags(&IBLModeType, "Renderer"))),
-    _probeResolutionProperty(new IntProperty(this, "Visualization Type", new TweakFlags(&IBLModeType, "Renderer"))),
-    _workflow(RoughnessMetal),
+    // TODO: Fix, not sure what th fuck happened here.
+    _visualizationSpaceProperty(new IntProperty(this, "Visualization Type")),
+    _currentVisualizationSpaceProperty(new IntProperty(this, "Visualization Space")),
+    _hdrFormatProperty(new PixelFormatProperty(this, "HDR Format")),
+    _probeResolutionProperty(new IntProperty(this, "Visualization Type")),
+    _modelVisualizationProperty(new IntProperty(this, "Model", new TweakFlags(&ModelEnumType, "Model"))),
+    _constantRoughnessProperty(new FloatProperty(this, "Constant Roughness")),
+    _constantMetalnessProperty(new FloatProperty(this, "Constant Metalness")),
+    _specularWorkflowProperty(new IntProperty(this, "Specular Workflow", new TweakFlags(&WorkflowEnumType, "Workflow"))),
+    _specularIntensityProperty(new FloatProperty(this, "Specular Intensity")),
+    _roughnessScaleProperty(new FloatProperty(this, "Roughness Scale")),
+    _debugTermProperty(new IntProperty(this, "Debug Visualization", new TweakFlags(&DebugAOVType, "Material"))),
     _defaultAsset("data\\meshes\\pistol\\pistol.obj"),
     _runTitles(false)
 {
+    _modelVisualizationProperty->set(0);
     _visualizationSpaceProperty->set(Ibl::Application::HDR);
     _currentVisualizationSpaceProperty->set(-1);
+    _specularIntensityProperty->set(1.0f);
+    _roughnessScaleProperty->set(1.0f);
+
+
 #ifdef _DEBUG
     assert (_instance);
 #endif
@@ -161,6 +206,48 @@ Application::timer()
     return _timer;
 }
 
+IntProperty*
+Application::modelVisualizationProperty()
+{
+    return _modelVisualizationProperty;
+}
+
+FloatProperty*
+Application::constantRoughnessProperty()
+{
+    return _constantRoughnessProperty;
+}
+
+FloatProperty*
+Application::constantMetalnessProperty()
+{
+    return _constantMetalnessProperty;
+}
+
+IntProperty*
+Application::specularWorkflowProperty()
+{
+    return _specularWorkflowProperty;
+}
+
+IntProperty*
+Application::debugTermProperty()
+{
+    return _debugTermProperty;
+}
+
+FloatProperty*
+Application::specularIntensityProperty()
+{
+    return _specularIntensityProperty;
+}
+
+FloatProperty*
+Application::roughnessScaleProperty()
+{
+    return _roughnessScaleProperty;
+}
+
 const Window*
 Application::window() const
 {
@@ -193,14 +280,16 @@ Application::initialize()
         _cameraManager->setTranslation(Ibl::Vector3f(0, -200, 0));
         _cameraManager->setRotation(Ibl::Vector3f(10, -15, -220));
 
-        loadAsset(_defaultAsset);
+        loadAsset(_visualizedEntity, _defaultAsset, "", true);
 
-        _sphereEntity = _scene->load("data/meshes/sphere/sphere.obj", 
-                                     "data/meshes/sphere/sphere.material");
+        loadAsset(_shaderBallEntity, "data\\meshes\\shaderBall\\shaderBall.fbx", "", false);
+
+        _sphereEntity = _scene->load("data\\meshes\\sphere\\sphere.obj", 
+                                     "data\\meshes\\sphere\\sphere.material");
         _sphereEntity->mesh(0)->scaleProperty()->set(Ibl::Vector3f(10,10,10));
 
-        _iblSphereEntity = _scene->load("data/meshes/sphere/sphere.obj", 
-                                        "data/meshes/sphere/iblsphere.material");
+        _iblSphereEntity = _scene->load("data\\meshes\\sphere\\sphere.obj", 
+                                        "data\\meshes\\sphere\\iblsphere.material");
 
         _iblSphereEntity->mesh(0)->scaleProperty()->set(Ibl::Vector3f(10,10,10));
 
@@ -231,11 +320,29 @@ Application::initialize()
             _renderHUD->logo()->setBlendIn(6.0f);
             _renderHUD->showApplicationUI();
         }
+        syncVisualization();
     }
     else
     {
         delete device;
         THROW ("Failed to create render device");
+    }
+}
+
+void
+Application::syncVisualization()
+{
+    setupModelVisibility(_visualizedEntity, _modelVisualizationProperty->get() == Ibl::Application::UserModel);
+    setupModelVisibility(_shaderBallEntity, _modelVisualizationProperty->get() != Ibl::Application::UserModel);
+}
+
+void
+Application::setupModelVisibility(Ibl::Entity* entity, bool visibility)
+{
+    const std::vector<Mesh*>& meshes = entity->meshes();
+    for (auto meshIt = meshes.begin(); meshIt != meshes.end(); meshIt++)
+    {
+        (*meshIt)->setVisible(visibility);
     }
 }
 
@@ -321,28 +428,31 @@ Application::loadParameters()
 
             if (const char* xpathValue = configNode.node().attribute("SpecularWorkflow").value())
             {
-                std::string workflow(xpathValue);
+                std::string workflowValue(xpathValue);
 
-                if (workflow == std::string("RoughnessMetal"))
+                SpecularWorkflow workflow;
+                if (workflowValue == std::string("RoughnessMetal"))
                 {
-                    _workflow = Ibl::RoughnessMetal;
+                    workflow = Ibl::RoughnessMetal;
                 }
-                else if (workflow == std::string("GlossMetal"))
+                else if (workflowValue == std::string("GlossMetal"))
                 {
-                    _workflow = Ibl::GlossMetal;
+                    workflow = Ibl::GlossMetal;
                 }
-                else if (workflow == std::string("RoughnessInverseMetal"))
+                else if (workflowValue == std::string("RoughnessInverseMetal"))
                 {
-                    _workflow = Ibl::RoughnessInverseMetal;
+                    workflow = Ibl::RoughnessInverseMetal;
                 }
-                else if (workflow == std::string("GlossInverseMetal"))
+                else if (workflowValue == std::string("GlossInverseMetal"))
                 {
-                    _workflow = Ibl::GlossInverseMetal;
+                    workflow = Ibl::GlossInverseMetal;
                 }
                 else
                 {
                     LOG("Could not find a valid preference for specular workflow, using RoughnessMetal.")
                 }
+
+                _specularWorkflowProperty->set(workflow);
             }
             else
             {
@@ -412,7 +522,7 @@ Application::saveParameters() const
 
 
         std::string workflow("RoughnessMetal");
-        switch (_workflow)
+        switch (_specularWorkflowProperty->get())
         {
             case Ibl::RoughnessMetal:
                 workflow = "RoughnessMetal";
@@ -449,11 +559,18 @@ Application::updateApplication()
     if (inputState->leftMouseDown() && !inputState->hasGUIFocus() && 
         inputState->getKeyState(DIK_LCONTROL))
     {
-        Vector3f rotation = _visualizedEntity->mesh(0)->rotation();
+        Vector3f rotation;
+        Ibl::Entity* entity = visualizedEntity();
 
-        // ((float)-inputState->_y)
+        if (modelVisualizationProperty()->get() == Ibl::Application::ShaderBallModel)
+            entity = _shaderBallEntity;
+        else
+            entity = _visualizedEntity;
+
+        rotation = entity->mesh(0)->rotation();
+
         rotation += Ibl::Vector3f(((float)inputState->_y),((float)inputState->_x), 0);
-        std::vector<Mesh*> meshes = _visualizedEntity->meshes();
+        std::vector<Mesh*> meshes = entity->meshes();
         for (auto it = meshes.begin(); it != meshes.end(); it++)
             (*it)->rotationProperty()->set(rotation);
     }
@@ -629,10 +746,6 @@ Application::saveImages(const std::string& filePathName, bool gameOnly)
             LOG ("Saving HDR specular to " << specularHDRPath);
             probe->specularCubeMap()->save(specularHDRPath, true, false);
 
-
-
-            
-
             return true;
         }
     }
@@ -699,6 +812,12 @@ Application::visualizedEntity()
 }
 
 Entity*
+Application::shaderBallEntity()
+{
+    return _shaderBallEntity;
+}
+
+Entity*
 Application::sphereEntity()
 {
     return _sphereEntity;
@@ -711,32 +830,28 @@ Application::iblSphereEntity()
 }
 
 void
-Application::loadAsset(const std::string& assetPathName, 
-                       const std::string& materialPathName)
+Application::loadAsset(Entity*& targetEntity,
+                       const std::string& assetPathName, 
+                       const std::string& materialPathName,
+                       bool userAsset)
 {
-    SpecularWorkflow workflow = _workflow;
-    float specularIntensity = 1.0f;
-    float roughnessScale = 1.0f;
 
-    if (_visualizedEntity)
+    if (targetEntity && userAsset)
     {
-        if (_visualizedEntity->meshes().size() > 0)
-        {
-            workflow = (SpecularWorkflow)_visualizedEntity->meshes()[0]->material()->specularWorkflow();
-            specularIntensity = _visualizedEntity->meshes()[0]->material()->specularIntensity();
-            roughnessScale = _visualizedEntity->meshes()[0]->material()->roughnessScale();
-        }
-        _scene->destroy(_visualizedEntity);
+        _scene->destroy(targetEntity);
     }
 
-    _visualizedEntity = _scene->load(assetPathName, materialPathName);
-    const std::vector<Mesh*>& meshes = _visualizedEntity->meshes();
-    for (auto meshIt = meshes.begin(); meshIt != meshes.end(); meshIt++)
-    {
-        // Copy over the last settings.
-        (*meshIt)->material()->specularWorkflowProperty()->set(workflow);
-        (*meshIt)->material()->specularIntensityProperty()->set(specularIntensity);
-        (*meshIt)->material()->roughnessScaleProperty()->set(roughnessScale);
+    targetEntity = _scene->load(assetPathName, materialPathName);
+    //if (userAsset)
+    { 
+        const std::vector<Mesh*>& meshes = targetEntity->meshes();
+        for (auto meshIt = meshes.begin(); meshIt != meshes.end(); meshIt++)
+        {
+            // Copy over the last settings.
+            (*meshIt)->material()->specularWorkflowProperty()->set(_specularWorkflowProperty->get());
+            (*meshIt)->material()->specularIntensityProperty()->set(_specularIntensityProperty->get());
+            (*meshIt)->material()->roughnessScaleProperty()->set(_roughnessScaleProperty->get());
+        }
     }
 }
 }

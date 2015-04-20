@@ -222,7 +222,6 @@ enum ShaderParameter
     RoughnessScale,
     
     DetailMap,
-    DetailTerms,
 
     LocalScale,
     UVTransformPrimary, // Main Transform for UV's
@@ -239,8 +238,12 @@ enum ShaderParameter
     IBLBRDFMap,
     IBLCorrection,
     IBLMaxValue,
+
     // Debug parameters
-    RenderDebugTermOut
+    RenderDebugTermOut,
+    UserAlbedo, 
+    UserRM,
+    IblOccl
 };
 
 enum ParameterScope
