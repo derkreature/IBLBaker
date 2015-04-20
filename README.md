@@ -3,6 +3,8 @@ IBLBaker
 
 ![IblBakerCover](https://github.com/derkreature/IBLBaker/blob/master/images/IBLBaker.jpg)
 
+![IblBakerCover1](https://github.com/derkreature/IBLBaker/blob/master/images/CoverShaderBall.jpg)
+
 
 About
 --------------
