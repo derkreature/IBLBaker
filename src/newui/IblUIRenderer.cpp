@@ -83,7 +83,7 @@ UIRenderer::UIRenderer(Ibl::IDevice* device) :
     setMaterial(new Material(device));
 
     // Setup Ringbuffered index buffer.
-    IndexBufferParameters ibResource = IndexBufferParameters(sizeof(uint32_t)*15000, true, true);
+    IndexBufferParameters ibResource = IndexBufferParameters(sizeof(uint32_t)*25000, true, true);
     _indexBuffer = _device->createIndexBuffer(&ibResource);
     if (!_indexBuffer)
     {
@@ -147,7 +147,7 @@ UIRenderer::vertexBuffer(IVertexDeclaration* declaration)
         // Create one.
         VertexBufferParameters vertexBufferParameters;
         vertexBufferParameters =
-            VertexBufferParameters((uint32_t)(10000 * (declaration->vertexStride())), true, false,
+            VertexBufferParameters((uint32_t)(25000 * (declaration->vertexStride())), true, false,
             declaration->vertexStride(),
             nullptr, false, true);
         if (IVertexBuffer* vertexBuffer = _device->createVertexBuffer(&vertexBufferParameters))

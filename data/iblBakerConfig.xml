@@ -1,2 +1,2 @@
 <?xml version="1.0"?>
-<Config DefaultAsset="data\\meshes\\pistol\\pistol.fbx" WindowWidth="1473" WindowHeight="794" Windowed="1" Titles="1" IBLFormat="32" SourceEnvironmentResolution="2048" SpecularWorkflow="GlossMetal" />
+<Config DefaultAsset="data\\meshes\\pistol\\pistol.fbx" WindowWidth="1280" WindowHeight="720" Windowed="1" Titles="1" IBLFormat="32" SourceEnvironmentResolution="2048" SpecularWorkflow="GlossMetal" />
