@@ -11,285 +11,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="application\IblApplication.cpp" />
-    <ClCompile Include="application\IblApplicationHUD.cpp" />
-    <ClCompile Include="application\IblHash.cpp" />
-    <ClCompile Include="application\IblLog.cpp" />
-    <ClCompile Include="application\IblTimer.cpp" />
-    <ClCompile Include="application\IblTitles.cpp" />
-    <ClCompile Include="application\IblWindow.cpp" />
-    <ClCompile Include="codecs\IblCodec.cpp" />
-    <ClCompile Include="codecs\IblColorValue.cpp" />
-    <ClCompile Include="codecs\IblDataStream.cpp" />
-    <ClCompile Include="codecs\IblDDSCodec.cpp" />
-    <ClCompile Include="codecs\IblFreeImageCodec.cpp" />
-    <ClCompile Include="codecs\IblPixelFormat.cpp" />
-    <ClCompile Include="codecs\IblStringUtilities.cpp" />
-    <ClCompile Include="codecs\IblTextureImage.cpp" />
-    <ClCompile Include="dependencies\imgui\imgui.cpp" />
-    <ClCompile Include="dependencies\imgui\stb_image.c" />
-    <ClCompile Include="dependencies\MurmerHash\MurmurHash.cpp" />
-    <ClCompile Include="dependencies\nanovg\nanovg.c" />
-    <ClCompile Include="dependencies\pugixml\src\pugixml.cpp" />
-    <ClCompile Include="dependencies\pugixml\src\pugixpath.cpp" />
-    <ClCompile Include="dependencies\tinyobjloader\tiny_obj_loader.cc" />
-    <ClCompile Include="input\IblCameraManager.cpp" />
-    <ClCompile Include="input\IblDampenedInput.cpp" />
-    <ClCompile Include="input\IblFocusedInput.cpp" />
-    <ClCompile Include="input\IblFocusedMovement.cpp" />
-    <ClCompile Include="input\IblInput.cpp" />
-    <ClCompile Include="input\IblInputManager.cpp" />
-    <ClCompile Include="input\IblInputState.cpp" />
-    <ClCompile Include="input\IblX360Controller.cpp" />
+    <ClCompile Include="IblApplication.cpp" />
+    <ClCompile Include="IblApplicationHUD.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="newui\Iblimgui.cpp" />
-    <ClCompile Include="newui\Iblnanovg.cpp" />
-    <ClCompile Include="newui\IblUIRenderer.cpp" />
-    <ClCompile Include="newui\ocornut_imgui.cpp" />
-    <ClCompile Include="nodes\IblBrdf.cpp" />
-    <ClCompile Include="nodes\IblCamera.cpp" />
-    <ClCompile Include="nodes\IblEntity.cpp" />
-    <ClCompile Include="nodes\IblIndexedMesh.cpp" />
-    <ClCompile Include="nodes\IblMesh.cpp" />
-    <ClCompile Include="nodes\IblNode.cpp" />
-    <ClCompile Include="nodes\IblProjectionProperty.cpp" />
-    <ClCompile Include="nodes\IblProperty.cpp" />
-    <ClCompile Include="nodes\IblRenderNode.cpp" />
-    <ClCompile Include="nodes\IblRenderTargetQuad.cpp" />
-    <ClCompile Include="nodes\IblRenderTextureProperty.cpp" />
-    <ClCompile Include="nodes\IblScene.cpp" />
-    <ClCompile Include="nodes\IblStreamedMesh.cpp" />
-    <ClCompile Include="nodes\IblTransformNode.cpp" />
-    <ClCompile Include="nodes\IblTransformProperty.cpp" />
-    <ClCompile Include="nodes\IblViewportProperty.cpp" />
-    <ClCompile Include="nodes\IblViewProperty.cpp" />
-    <ClCompile Include="renderAPI\IblAssetManager.cpp" />
-    <ClCompile Include="renderAPI\IblColorPass.cpp" />
-    <ClCompile Include="renderAPI\IblColorResolve.cpp" />
-    <ClCompile Include="renderAPI\IblDepthResolve.cpp" />
-    <ClCompile Include="renderAPI\IblFileChangeWatcher.cpp" />
-    <ClCompile Include="renderAPI\IblFilterCubemap.cpp" />
-    <ClCompile Include="renderAPI\IblFrameBuffer.cpp" />
-    <ClCompile Include="renderAPI\IblGpuConstantBuffer.cpp" />
-    <ClCompile Include="renderAPI\IblGpuTechnique.cpp" />
-    <ClCompile Include="renderAPI\IblGpuVariable.cpp" />
-    <ClCompile Include="renderAPI\IblHDRPresentationPolicy.cpp" />
-    <ClCompile Include="renderAPI\IblIBLProbe.cpp" />
-    <ClCompile Include="renderAPI\IblIBLRenderPass.cpp" />
-    <ClCompile Include="renderAPI\IblIComputeShader.cpp" />
-    <ClCompile Include="renderAPI\IblIDepthSurface.cpp" />
-    <ClCompile Include="renderAPI\IblIDevice.cpp" />
-    <ClCompile Include="renderAPI\IblIEffect.cpp" />
-    <ClCompile Include="renderAPI\IblIGpuBuffer.cpp" />
-    <ClCompile Include="renderAPI\IblIIndexBuffer.cpp" />
-    <ClCompile Include="renderAPI\IblIRenderResource.cpp" />
-    <ClCompile Include="renderAPI\IblIRenderResourceParameters.cpp" />
-    <ClCompile Include="renderAPI\IblIShader.cpp" />
-    <ClCompile Include="renderAPI\IblISurface.cpp" />
-    <ClCompile Include="renderAPI\IblITexture.cpp" />
-    <ClCompile Include="renderAPI\IblIVertexBuffer.cpp" />
-    <ClCompile Include="renderAPI\IblIVertexDeclaration.cpp" />
-    <ClCompile Include="renderAPI\IblMaterial.cpp" />
-    <ClCompile Include="renderAPI\IblPostEffect.cpp" />
-    <ClCompile Include="renderAPI\IblPostEffectsMgr.cpp" />
-    <ClCompile Include="renderAPI\IblPresentationPolicy.cpp" />
-    <ClCompile Include="renderAPI\IblRenderPass.cpp" />
-    <ClCompile Include="renderAPI\IblRenderRequest.cpp" />
-    <ClCompile Include="renderAPI\IblScreenOrientedQuad.cpp" />
-    <ClCompile Include="renderAPI\IblShaderMgr.cpp" />
-    <ClCompile Include="renderAPI\IblShaderParameterValue.cpp" />
-    <ClCompile Include="renderAPI\IblShaderParameterValueFactory.cpp" />
-    <ClCompile Include="renderAPI\IblTextureMgr.cpp" />
-    <ClCompile Include="renderAPI\IblVertexDeclarationMgr.cpp" />
-    <ClCompile Include="renderAPI\IblVertexElement.cpp" />
-    <ClCompile Include="renderAPI\IblVertexStream.cpp" />
-    <ClCompile Include="renderAPI\IblViewport.cpp" />
-    <ClCompile Include="rendererD3D11\effectsD3D11\d3dx11dbg.cpp" />
-    <ClCompile Include="rendererD3D11\effectsD3D11\d3dxGlobal.cpp" />
-    <ClCompile Include="rendererD3D11\effectsD3D11\EffectAPI.cpp" />
-    <ClCompile Include="rendererD3D11\effectsD3D11\EffectLoad.cpp" />
-    <ClCompile Include="rendererD3D11\effectsD3D11\EffectNonRuntime.cpp" />
-    <ClCompile Include="rendererD3D11\effectsD3D11\EffectReflection.cpp" />
-    <ClCompile Include="rendererD3D11\effectsD3D11\EffectRuntime.cpp" />
-    <ClCompile Include="rendererD3D11\IblBackbufferSurfaceD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblBufferD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblComputeShaderD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblDepthSurfaceD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblEffectD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblFormatConversionD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblGpuConstantBufferD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblGpuTechniqueD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblGpuVariableD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblIndexBufferD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblInputLayoutCacheD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblRenderDeviceD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblRenderTargetTextureD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblRenderWindow.cpp" />
-    <ClCompile Include="rendererD3D11\IblRenderWindowD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblShaderD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblSurfaceD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblTexture2DD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblTextureD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblVertexBufferD3D11.cpp" />
-    <ClCompile Include="rendererD3D11\IblVertexDeclarationD3D11.cpp" />
-    <ClCompile Include="ui\IblImageWidget.cpp" />
-    <ClCompile Include="ui\IblRenderHUD.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="application\IblApplication.h" />
-    <ClInclude Include="application\IblApplicationHUD.h" />
-    <ClInclude Include="application\IblHash.h" />
-    <ClInclude Include="application\IblLog.h" />
-    <ClInclude Include="application\IblMath.h" />
-    <ClInclude Include="application\IblNonCopyable.h" />
-    <ClInclude Include="application\IblPlatform.h" />
-    <ClInclude Include="application\IblTimer.h" />
-    <ClInclude Include="application\IblTitles.h" />
-    <ClInclude Include="application\IblWindow.h" />
-    <ClInclude Include="codecs\IblBitwise.h" />
-    <ClInclude Include="codecs\IblCodec.h" />
-    <ClInclude Include="codecs\IblColorValue.h" />
-    <ClInclude Include="codecs\IblDataStream.h" />
-    <ClInclude Include="codecs\IblDDSCodec.h" />
-    <ClInclude Include="codecs\IblFreeImageCodec.h" />
-    <ClInclude Include="codecs\IblImageCodec.h" />
-    <ClInclude Include="codecs\IblIteratorRange.h" />
-    <ClInclude Include="codecs\IblIteratorWrapper.h" />
-    <ClInclude Include="codecs\IblPixelConversions.h" />
-    <ClInclude Include="codecs\IblPixelFormat.h" />
-    <ClInclude Include="codecs\IblStringUtilities.h" />
-    <ClInclude Include="codecs\IblTextureImage.h" />
-    <ClInclude Include="dependencies\imgui\imconfig.h" />
-    <ClInclude Include="dependencies\imgui\imgui.h" />
-    <ClInclude Include="dependencies\imgui\stb_rect_pack.h" />
-    <ClInclude Include="dependencies\imgui\stb_textedit.h" />
-    <ClInclude Include="dependencies\imgui\stb_truetype.h" />
-    <ClInclude Include="dependencies\MurmerHash\MurmurHash.h" />
-    <ClInclude Include="dependencies\nanovg\fontstash.h" />
-    <ClInclude Include="dependencies\nanovg\fs_nanovg_fill.bin.h" />
-    <ClInclude Include="dependencies\nanovg\nanovg.h" />
-    <ClInclude Include="dependencies\pugixml\src\pugiconfig.hpp" />
-    <ClInclude Include="dependencies\pugixml\src\pugixml.hpp" />
-    <ClInclude Include="dependencies\tinyobjloader\tiny_obj_loader.h" />
-    <ClInclude Include="input\IblCameraManager.h" />
-    <ClInclude Include="input\IblDampenedInput.h" />
-    <ClInclude Include="input\IblFocusedInput.h" />
-    <ClInclude Include="input\IblFocusedMovement.h" />
-    <ClInclude Include="input\IblInput.h" />
-    <ClInclude Include="input\IblInputManager.h" />
-    <ClInclude Include="input\IblInputState.h" />
-    <ClInclude Include="input\IblX360Controller.h" />
-    <ClInclude Include="math\IblColor.h" />
-    <ClInclude Include="math\IblLimits.h" />
-    <ClInclude Include="math\IblMatrix44.h" />
-    <ClInclude Include="math\IblMatrixAlgo.h" />
-    <ClInclude Include="math\IblQuaternion.h" />
-    <ClInclude Include="math\IblRegion.h" />
-    <ClInclude Include="math\IblVector2.h" />
-    <ClInclude Include="math\IblVector3.h" />
-    <ClInclude Include="math\IblVector4.h" />
-    <ClInclude Include="newui\Iblimgui.h" />
-    <ClInclude Include="newui\IblUIRenderer.h" />
-    <ClInclude Include="newui\ocornut_imgui.h" />
-    <ClInclude Include="nodes\IblBrdf.h" />
-    <ClInclude Include="nodes\IblCamera.h" />
-    <ClInclude Include="nodes\IblEntity.h" />
-    <ClInclude Include="nodes\IblIndexedMesh.h" />
-    <ClInclude Include="nodes\IblMesh.h" />
-    <ClInclude Include="nodes\IblNode.h" />
-    <ClInclude Include="nodes\IblProjectionProperty.h" />
-    <ClInclude Include="nodes\IblProperty.h" />
-    <ClInclude Include="nodes\IblRenderNode.h" />
-    <ClInclude Include="nodes\IblRenderTargetQuad.h" />
-    <ClInclude Include="nodes\IblRenderTextureProperty.h" />
-    <ClInclude Include="nodes\IblScene.h" />
-    <ClInclude Include="nodes\IblStreamedMesh.h" />
-    <ClInclude Include="nodes\IblTransformNode.h" />
-    <ClInclude Include="nodes\IblTransformProperty.h" />
-    <ClInclude Include="nodes\IblTypedProperty.h" />
-    <ClInclude Include="nodes\IblViewportProperty.h" />
-    <ClInclude Include="nodes\IblViewProperty.h" />
-    <ClInclude Include="renderAPI\IblAssetManager.h" />
-    <ClInclude Include="renderAPI\IblColorPass.h" />
-    <ClInclude Include="renderAPI\IblColorResolve.h" />
-    <ClInclude Include="renderAPI\IblDepthResolve.h" />
-    <ClInclude Include="renderAPI\IblFileChangeWatcher.h" />
-    <ClInclude Include="renderAPI\IblFilterCubemap.h" />
-    <ClInclude Include="renderAPI\IblFrameBuffer.h" />
-    <ClInclude Include="renderAPI\IblGpuConstantBuffer.h" />
-    <ClInclude Include="renderAPI\IblGpuTechnique.h" />
-    <ClInclude Include="renderAPI\IblGpuVariable.h" />
-    <ClInclude Include="renderAPI\IblHDRPresentationPolicy.h" />
-    <ClInclude Include="renderAPI\IblIBLProbe.h" />
-    <ClInclude Include="renderAPI\IblIBLRenderPass.h" />
-    <ClInclude Include="renderAPI\IblIComputeShader.h" />
-    <ClInclude Include="renderAPI\IblIDepthSurface.h" />
-    <ClInclude Include="renderAPI\IblIDevice.h" />
-    <ClInclude Include="renderAPI\IblIEffect.h" />
-    <ClInclude Include="renderAPI\IblIGpuBuffer.h" />
-    <ClInclude Include="renderAPI\IblIIndexBuffer.h" />
-    <ClInclude Include="renderAPI\IblIRenderResource.h" />
-    <ClInclude Include="renderAPI\IblIRenderResourceParameters.h" />
-    <ClInclude Include="renderAPI\IblIShader.h" />
-    <ClInclude Include="renderAPI\IblISurface.h" />
-    <ClInclude Include="renderAPI\IblITexture.h" />
-    <ClInclude Include="renderAPI\IblIVertexBuffer.h" />
-    <ClInclude Include="renderAPI\IblIVertexDeclaration.h" />
-    <ClInclude Include="renderAPI\IblMaterial.h" />
-    <ClInclude Include="renderAPI\IblPostEffect.h" />
-    <ClInclude Include="renderAPI\IblPostEffectsMgr.h" />
-    <ClInclude Include="renderAPI\IblPresentationPolicy.h" />
-    <ClInclude Include="renderAPI\IblRenderEnums.h" />
-    <ClInclude Include="renderAPI\IblRenderPass.h" />
-    <ClInclude Include="renderAPI\IblRenderRequest.h" />
-    <ClInclude Include="renderAPI\IblScreenOrientedQuad.h" />
-    <ClInclude Include="renderAPI\IblShaderMgr.h" />
-    <ClInclude Include="renderAPI\IblShaderParameterValue.h" />
-    <ClInclude Include="renderAPI\IblShaderParameterValueFactory.h" />
-    <ClInclude Include="renderAPI\IblTextureMgr.h" />
-    <ClInclude Include="renderAPI\IblVertexDeclarationMgr.h" />
-    <ClInclude Include="renderAPI\IblVertexElement.h" />
-    <ClInclude Include="renderAPI\IblVertexStream.h" />
-    <ClInclude Include="renderAPI\IblViewport.h" />
-    <ClInclude Include="rendererD3D11\effectsD3D11\Binary\EffectBinaryFormat.h" />
-    <ClInclude Include="rendererD3D11\effectsD3D11\Binary\EffectStateBase11.h" />
-    <ClInclude Include="rendererD3D11\effectsD3D11\Binary\EffectStates11.h" />
-    <ClInclude Include="rendererD3D11\effectsD3D11\Binary\SOParser.h" />
-    <ClInclude Include="rendererD3D11\effectsD3D11\Effect.h" />
-    <ClInclude Include="rendererD3D11\effectsD3D11\EffectLoad.h" />
-    <ClInclude Include="rendererD3D11\effectsD3D11\Inc\d3dx11dbg.h" />
-    <ClInclude Include="rendererD3D11\effectsD3D11\Inc\d3dx11effect.h" />
-    <ClInclude Include="rendererD3D11\effectsD3D11\Inc\d3dxGlobal.h" />
-    <ClInclude Include="rendererD3D11\effectsD3D11\pchfx.h" />
-    <ClInclude Include="rendererD3D11\IblBackbufferSurfaceD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblBufferD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblComputeShaderD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblDepthSurfaceD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblEffectD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblFormatConversionD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblGpuConstantBufferD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblGpuTechniqueD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblGpuVariableD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblIndexBufferD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblInputLayoutCacheD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblRenderDeviceD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblRenderTargetTextureD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblRenderWindow.h" />
-    <ClInclude Include="rendererD3D11\IblRenderWindowD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblShaderD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblSurfaceD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblTexture2DD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblTextureD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblVertexBufferD3D11.h" />
-    <ClInclude Include="rendererD3D11\IblVertexDeclarationD3D11.h" />
+    <ClInclude Include="IblApplication.h" />
+    <ClInclude Include="IblApplicationHUD.h" />
     <ClInclude Include="resources\resource.h" />
-    <ClInclude Include="ui\IblImageWidget.h" />
-    <ClInclude Include="ui\IblRenderHUD.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE" />
     <None Include="..\README.md" />
-    <None Include="rendererD3D11\effectsD3D11\EffectVariable.inl" />
     <None Include="resources\small.ico" />
     <None Include="resources\windowIcon.ico" />
   </ItemGroup>
@@ -333,7 +66,7 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
     <OutDir>$(SolutionDir)\..\bin64\</OutDir>
-    <IntDir>$(SolutionDir)\..\build\$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)\..\build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -345,7 +78,7 @@
     <SourcePath>$(VC_SourcePath);</SourcePath>
     <ExcludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;$(MSBuildToolsPath32);$(VCInstallDir)atlmfc\lib;$(VCInstallDir)lib;</ExcludePath>
     <OutDir>..\bin64\</OutDir>
-    <IntDir>$(SolutionDir)\..\build\$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)\..\build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -354,14 +87,14 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>IBL_USE_ASS_IMP_AND_FREEIMAGE=1;DIRECTINPUT_VERSION=0x0800;_SCL_SECURE_NO_WARNINGS=1;_CRT_SECURE_NO_WARNINGS=1;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../dependencies\assimp\include\assimp;../dependencies\assimp\include\FreeImage\inc;newui;../newui;dependencies\imgui;dependencies\nanovg;dependencies\tinyobjloader;dependencies\assimp\include\assimp;../dependencies\assimp\include\assimp;../dependencies;../../dependencies;dependencies\MurmerHash;../../dependencies\MurmerHash;../dependencies\MurmerHash;../dependencies\pugixml\src;dependencies\pugixml\src;dependencies\ois\includes;rendererD3D11\errorD3D11;dependencies\FreeImage\inc;dependencies\AntTweakBar\include;../IBLBaker;../;../RenderAPI;RenderAPI;../Codecs;../math;math;../application;application;input;../input;Codecs/;RendererD3D11;../RendererD3D11;RendererD3D11/;rendererD3D11\effectsD3D11;rendererD3D11\effectsD3D11\inc;rendererD3D11\effectsD3D11\binary;../nodes;nodes;../ui;ui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\;..\src\;critter\swizzling;critter\dependencies\assimp\include\assimp;critter\dependencies\assimp\include\FreeImage\inc;critter\newui;../newui;critter\dependencies\imgui;critter\dependencies\nanovg;critter\dependencies\tinyobjloader;../dependencies\murmerhash;critter\dependencies\murmerhash;../dependencies\pugixml\src;critter\dependencies\pugixml\src;critter\dependencies\ois\includes;critter\rendererD3D11\errorD3D11;critter\dependencies\FreeImage\inc;critter\dependencies\AntTweakBar\include;../IBLBaker;../;../RenderAPI;critter\RenderAPI;../Codecs;../math;critter\math;../application;critter\application;critter\input;../input;critter\Codecs/;critter\RendererD3D11;../RendererD3D11;critter\RendererD3D11/;critter\rendererD3D11\effectsD3D11;critter\rendererD3D11\effectsD3D11\inc;critter\rendererD3D11\effectsD3D11\binary;../nodes;critter\nodes;../ui;critter\ui;critter;critter\platform</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>dependencies\assimp\lib64\assimpd.lib;dependencies\FreeImage\lib64\FreeImaged.lib;Comctl32.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dinput8.lib;dxgi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>critter\dependencies\libzip\lib64\zip_d.lib;../bin64/critter_d.lib;critter\dependencies\assimp\lib64\assimpd.lib;critter\dependencies\FreeImage\lib64\FreeImaged.lib;Comctl32.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dinput8.lib;dxgi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)../bin64/$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
@@ -374,7 +107,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>IBL_USE_ASS_IMP_AND_FREEIMAGE=1;DIRECTINPUT_VERSION=0x0800;_SCL_SECURE_NO_WARNINGS=1;_CRT_SECURE_NO_WARNINGS=1;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../dependencies\assimp\include\assimp;../dependencies\assimp\include\FreeImage\inc;newui;../newui;dependencies\imgui;dependencies\nanovg;dependencies\tinyobjloader;dependencies\assimp\include\assimp;../dependencies\murmerhash;;dependencies\murmerhash;../dependencies\murmerhash;dependencies\murmerhash;../dependencies\pugixml\src;dependencies\pugixml\src;dependencies\ois\includes;rendererD3D11\errorD3D11;dependencies\FreeImage\inc;dependencies\AntTweakBar\include;../IBLBaker;../;../RenderAPI;RenderAPI;../Codecs;../math;math;../application;application;input;../input;Codecs/;RendererD3D11;../RendererD3D11;RendererD3D11/;rendererD3D11\effectsD3D11;rendererD3D11\effectsD3D11\inc;rendererD3D11\effectsD3D11\binary;../nodes;nodes;../ui;ui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\;..\src\;critter\swizzling;critter\dependencies\assimp\include\assimp;critter\dependencies\assimp\include\FreeImage\inc;critter\newui;../newui;critter\dependencies\imgui;critter\dependencies\nanovg;critter\dependencies\tinyobjloader;../dependencies\murmerhash;critter\dependencies\murmerhash;../dependencies\pugixml\src;critter\dependencies\pugixml\src;critter\dependencies\ois\includes;critter\rendererD3D11\errorD3D11;critter\dependencies\FreeImage\inc;critter\dependencies\AntTweakBar\include;../IBLBaker;../;../RenderAPI;critter\RenderAPI;../Codecs;../math;critter\math;../application;critter\application;critter\input;../input;critter\Codecs/;critter\RendererD3D11;../RendererD3D11;critter\RendererD3D11/;critter\rendererD3D11\effectsD3D11;critter\rendererD3D11\effectsD3D11\inc;critter\rendererD3D11\effectsD3D11\binary;../nodes;critter\nodes;../ui;critter\ui;critter;critter\platform</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <OpenMPSupport>false</OpenMPSupport>
     </ClCompile>
@@ -383,7 +116,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>dependencies\assimp\lib64\assimp.lib;dependencies\FreeImage\lib64\FreeImage.lib;Comctl32.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dxgi.lib;dinput8.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>critter\dependencies\libzip\lib64\zip.lib;critter\dependencies\assimp\lib64\assimp.lib;critter\dependencies\FreeImage\lib64\FreeImage.lib;../bin64/critter.lib;Comctl32.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dxgi.lib;dinput8.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>../bin64/$(TargetName)$(TargetExt)</OutputFile>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>

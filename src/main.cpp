@@ -56,8 +56,8 @@ int main(int argc, char* argv[])
 #endif
 
     assert (applicationInstance);
-    std::unique_ptr<Ibl::Application> application;
-    application.reset(new Ibl::Application(applicationInstance));
+    std::unique_ptr<Ctr::IBLApplication> application;
+    application.reset(new Ctr::IBLApplication(applicationInstance));
     bool encounteredError = false;
 
     if (application)

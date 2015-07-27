@@ -1,0 +1,3 @@
+[submodule "src/critter"]
+	path = src/critter
+	url = https://github.com/derkreature/critter
