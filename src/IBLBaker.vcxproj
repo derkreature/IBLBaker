@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
@@ -41,13 +41,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -94,7 +94,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>critter\dependencies\libzip\lib64\zip_d.lib;../bin64/critter_d.lib;critter\dependencies\assimp\lib64\assimpd.lib;critter\dependencies\FreeImage\lib64\FreeImaged.lib;Comctl32.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dinput8.lib;dxgi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>critter\prebuilt\x64\debug\zlibstaticd.lib;critter\prebuilt\x64\debug\zipd.lib;../bin64/critter_d.lib;critter\prebuilt\x64\debug\assimp-vc140-mtd.lib;critter\prebuilt\x64\debug\FreeImageLibd.lib;Comctl32.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dinput8.lib;dxgi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)../bin64/$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
@@ -107,7 +107,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>IBL_USE_ASS_IMP_AND_FREEIMAGE=1;DIRECTINPUT_VERSION=0x0800;_SCL_SECURE_NO_WARNINGS=1;_CRT_SECURE_NO_WARNINGS=1;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\;..\;..\src\;critter\swizzling;critter\dependencies\assimp\include\assimp;critter\dependencies\assimp\include\FreeImage\inc;critter\newui;../newui;critter\dependencies\imgui;critter\dependencies\nanovg;critter\dependencies\tinyobjloader;../dependencies\murmerhash;critter\dependencies\murmerhash;../dependencies\pugixml\src;critter\dependencies\pugixml\src;critter\dependencies\ois\includes;critter\rendererD3D11\errorD3D11;critter\dependencies\FreeImage\inc;critter\dependencies\AntTweakBar\include;../IBLBaker;../;../RenderAPI;critter\RenderAPI;../Codecs;../math;critter\math;../application;critter\application;critter\input;../input;critter\Codecs/;critter\RendererD3D11;../RendererD3D11;critter\RendererD3D11/;critter\rendererD3D11\effectsD3D11;critter\rendererD3D11\effectsD3D11\inc;critter\rendererD3D11\effectsD3D11\binary;../nodes;critter\nodes;../ui;critter\ui;critter;critter\platform</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\;..\src\;critter\swizzling;critter\dependencies\assimp\include\assimp;critter\dependencies\assimp\include\FreeImage\source;critter\newui;../newui;critter\dependencies\imgui;critter\dependencies\nanovg;../dependencies\murmerhash;critter\dependencies\murmerhash;../dependencies\pugixml\src;critter\dependencies\pugixml\src;critter\dependencies\ois\includes;critter\rendererD3D11\errorD3D11;critter\dependencies\FreeImage\inc;critter\dependencies\AntTweakBar\include;../IBLBaker;../;../RenderAPI;critter\RenderAPI;../Codecs;../math;critter\math;../application;critter\application;critter\input;../input;critter\Codecs/;critter\RendererD3D11;../RendererD3D11;critter\RendererD3D11/;critter\rendererD3D11\effectsD3D11;critter\rendererD3D11\effectsD3D11\inc;critter\rendererD3D11\effectsD3D11\binary;../nodes;critter\nodes;../ui;critter\ui;critter;critter\platform</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <OpenMPSupport>false</OpenMPSupport>
     </ClCompile>
@@ -116,7 +116,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>critter\dependencies\libzip\lib64\zip.lib;critter\dependencies\assimp\lib64\assimp.lib;critter\dependencies\FreeImage\lib64\FreeImage.lib;../bin64/critter.lib;Comctl32.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dxgi.lib;dinput8.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>critter\prebuilt\x64\release\zlibstatic.lib;critter\prebuilt\x64\release\zip.lib;critter\prebuilt\x64\release\assimp-vc140-mt.lib;critter\prebuilt\x64\release\FreeImageLib.lib;../bin64/critter.lib;Comctl32.lib;winmm.lib;XInput9_1_0.lib;D3DCompiler.lib;d3D11.lib;dxguid.lib;dxgi.lib;dinput8.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>../bin64/$(TargetName)$(TargetExt)</OutputFile>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
