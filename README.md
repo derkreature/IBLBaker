@@ -1,6 +1,7 @@
 IBLBaker
 --------------
 
+
 ![IblBakerCover](https://github.com/derkreature/IBLBaker/blob/master/images/IBLBaker.jpg)
 
 ![IblBakerCover1](https://github.com/derkreature/IBLBaker/blob/master/images/CoverShaderBall.jpg)
@@ -20,6 +21,17 @@ http://www.derkreature.com/
 
 Quick download link:
 https://github.com/derkreature/IBLBaker/archive/master.zip
+
+Building 
+--------------
+    1.) Run "IblBaker.bat" in the source root directory. This will run CMake and automatically setup all dependencies.
+        IblBaker.bat automatically configures for Visual Studio 2015 x64 and builds with the community edition. 
+        You should not need to change any of the CMake config options.
+    2.) The output of IblBaker.bat is "Build64" in the root directory. 
+    3.) Open Build64/IblBaker.sln 
+    4.) Set startup project to IBLBaker. There is no elegant way to do this in CMake.
+    5.) Build and run.
+
 
 What on earth is this?
 --------------
@@ -91,37 +103,6 @@ Similar projects
 - [CmftStudio](https://github.com/dariomanesku/cmftStudio) - A similar open-source project.
 - [Marmoset Skyshop](http://www.marmoset.co/skyshop) - Commercial plugin for Unity3D Game engine.
 - [Knald Lys](https://www.knaldtech.com/lys-open-beta/) - Commercial tool from KnaldTech.
-
-Building with Prebuilt Dependencies:
---------------
-
-For the moment there is no build system setup for the dependencies.
-At some stage in the near future I will throw together a CMake system to complement the submodule setup that was recently added.
-
-    1.) Install Visual Studio 2015 Community for Windows Desktop.
-         The project builds fine under community if you don't have Visual Studio 2015 installed.
-            
-    2.) Open \\IblBaker\src\IblBaker.sln in Visual Studio 2015.
-    
-    3.) Select a configuration, build and run.
-    
-    4.) (Very optional) If you plan on setting high sample counts (4096 or greater) with large maps (1024 or greater) it may be useful to alter your TDR delay to a larger value than 2 seconds (depending on the number of samples and the size of the maps that you would like to test with). This is at your discretion. I take no responsibility for the consequences.
-    
-        KeyPath   : HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\GraphicsDrivers
-        KeyValue  : TdrDelay
-        ValueType : REG_DWORD
-        ValueData : Number of seconds to delay. 2 seconds is the default value.
-
-Building the Dependencies (CMake support in the works).
---------------
-
-    1.) Ensure that the dependency is building to MT (Release) or MTd (Debug).
-    2.) Ensure that the dependency is building as a static library.
-    3.) Build each library (FreeImage, AssImp, libzip, zlib).
-    4.) Place the resulting library in the prebuilt library for the built configuration.
-        IBLBaker/src/critter/prebuilts/x64/debug
-        or
-        IBLBaker/src/critter/prebuilts/x64/release
 
 Known Leaks:
 --------------
