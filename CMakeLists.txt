@@ -80,7 +80,7 @@ set_target_properties(LibTIFF4 PROPERTIES FOLDER "Dependencies")
 #Critter
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/critter ext_build/critter)
 
-set_target_properties(add_from_buffer add_from_filep example fopen_unchanged fread minigzip modify name_locate set_comment_all set_comment_localonly set_comment_removeglobal set_comment_revert set_compression stat_index tryopen uninstall zipcmp zipmerge ziptorrent zlib PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
+set_target_properties(add_from_buffer add_from_filep example fopen_unchanged assimp_cmd fread minigzip modify name_locate set_comment_all set_comment_localonly set_comment_removeglobal set_comment_revert set_compression stat_index tryopen uninstall zipcmp zipmerge ziptorrent zlib PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
 set_target_properties(add_from_buffer add_from_filep example fopen_unchanged fread minigzip modify name_locate set_comment_all set_comment_localonly set_comment_removeglobal set_comment_revert set_compression stat_index tryopen uninstall zipcmp zipmerge ziptorrent zlib  PROPERTIES FOLDER "Dependency Cruft")
 
 include_directories(
