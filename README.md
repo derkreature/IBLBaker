@@ -19,8 +19,9 @@ Feel free to contact me with questions, corrections or ideas.
 https://github.com/derkreature/
 http://www.derkreature.com/
 
-Quick download link:
-https://github.com/derkreature/IBLBaker/archive/master.zip
+This project makes heavy use of subprojects. 
+Downloading the .zip from github is an insufficient method for acquiring the source for all dependenencies.
+Please checkout the repository through git in order to acquire all required dependencies.
 
 Building 
 --------------
