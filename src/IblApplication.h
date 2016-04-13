@@ -120,6 +120,13 @@ class IBLApplication : public Ctr::Application
         UserModel = 0,
         ShaderBallModel = 1
     };
+
+    enum SourceInputMode
+    {
+        EquirectangularInput,
+        CubemapInput,
+        CubeFaceListInput
+    };
         
 
     void                       pause();
@@ -136,6 +143,8 @@ class IBLApplication : public Ctr::Application
 
     void                       setupModelVisibility(Ctr::Entity* entity, bool visibility);
     void                       syncVisualization();
+
+    //_inputMode;
 
   protected:
     void                       updateApplication();
@@ -188,6 +197,8 @@ class IBLApplication : public Ctr::Application
     FloatProperty*              _specularIntensityProperty;
     FloatProperty*              _roughnessScaleProperty;
     IntProperty*                _debugTermProperty;
+
+    SourceInputMode             _inputMode;
 };
 }
 

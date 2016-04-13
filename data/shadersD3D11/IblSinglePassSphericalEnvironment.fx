@@ -129,6 +129,7 @@ float4 texSpherical(float3 dir, float lod)
     float2 pos = float2( (n>0.0000001) ? dir.x / n : 0.0, dir.y);
     pos = acos(pos)*INV_PI;
     pos.x = (dir.z > 0.0) ? pos.x*0.5 : 1.0-(pos.x*0.5);
+    pos.x = 1.0-pos.x;
     return diffuseMap.SampleLevel(anisotropicSampler, pos, lod);
 }
 

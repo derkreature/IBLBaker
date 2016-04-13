@@ -50,7 +50,6 @@ float4x4 projectionMatrix : PROJECTION;
 float4x4 viewInverse : VIEWINVERSE;
 float4 eyeLocation : EYELOCATION;
 float4 materialDiffuse : MATERIALDIFFUSE;
-float4 specularFresnel : SPECULARFRESNEL;
 TextureCube diffuseMap : DIFFUSEMAP;
 float cameraZNear : CAMERAZNEAR;
 float cameraZFar : CAMERAZFAR;

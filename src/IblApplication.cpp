@@ -85,7 +85,6 @@ ImguiEnumVal ModelEnum[] =
 };
 static const EnumTweakType ModelEnumType(&ModelEnum[0], 2, "Model");
 
-// Half arsed for demo.
 ImguiEnumVal AppSpecularWorkflowEnum[] =
 {
     { RoughnessMetal, "Roughness/Metal" },
@@ -140,7 +139,8 @@ IBLApplication::IBLApplication(ApplicationHandle instance) :
     _roughnessScaleProperty(new FloatProperty(this, "Roughness Scale")),
     _debugTermProperty(new IntProperty(this, "Debug Visualization", new TweakFlags(&DebugAOVType, "Material"))),
     _defaultAsset("data\\meshes\\pistol\\pistol.obj"),
-    _runTitles(false)
+    _runTitles(false),
+    _inputMode(EquirectangularInput)
 {
     _modelVisualizationProperty->set(0);
     _visualizationSpaceProperty->set(Ctr::IBLApplication::HDR);
@@ -694,8 +694,7 @@ IBLApplication::saveImages(const std::string& filePathName, bool gameOnly)
         size_t extension = filePathName.rfind(".");
         if (extension == std::string::npos)
         {
-            LOG ("Failed to find file extension in " << filePathName);
-            return false;
+            extension = filePathName.length();
         }
 
         std::string pathName = filePathName.substr(0, pathEnd+1);
