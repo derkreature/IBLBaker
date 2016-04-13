@@ -20,7 +20,7 @@ https://github.com/derkreature/
 http://www.derkreature.com/
 
 This project makes heavy use of subprojects. 
-Downloading the .zip from github is an insufficient method for acquiring the source for all dependenencies.
+Downloading the .zip from github is an insufficient method for acquiring the source for all dependencies.
 Please checkout the repository through git in order to acquire all required dependencies.
 
 Building 
