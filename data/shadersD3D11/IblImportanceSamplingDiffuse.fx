@@ -205,6 +205,7 @@ float3 ImportanceSample (float3 N)
         float3 H = importanceSampleDiffuse( Xi, N);
         float3 L = normalize(2 * dot( V, H ) * H - V);
         float NoL = saturate(dot( N, L ));
+        if (NoL > 0.0)
         {
             // Compute Lod using inverse solid angle and pdf.
             // From Chapter 20.4 Mipmap filtered samples in GPU Gems 3.
