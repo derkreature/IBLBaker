@@ -42,7 +42,7 @@
 float ShaderName : SHADERNAME 
 <
     string ToString = "PBRDebug";
-> = 0.0;
+> = 0.0; 
 
 
 float3x3 invert_3x3( float3x3 M )
