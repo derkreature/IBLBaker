@@ -342,19 +342,14 @@ IBLApplication::setupModelVisibility(Ctr::Entity* entity, bool visibility)
 void
 IBLApplication::run()
 {
-    _timer.startTimer();
-
-    // [MattD][Thermal] Turn on to save your gpu some needless processing.
-    #define DO_NOT_FRY_GPU 1
-    #if DO_NOT_FRY_GPU
-        _timer.setLockFrameCounter(60);
-    #endif
+    _timer.reset();
 
     do
     {
-        _timer.update();
+        _timer.tick();
         _inputMgr->update();
         updateApplication();
+       _timer.waitUntilNextFrame();
 
     }
     while (!purgeMessages());
@@ -542,7 +537,7 @@ IBLApplication::saveParameters() const
 void
 IBLApplication::updateApplication()
 {
-    float elapsedTime = (float)(_timer.elapsedTime());
+    float elapsedTime = (float)(_timer.lastDeltaSeconds());
     _cameraManager->update(elapsedTime, true, true);
     _device->update();
     _scene->update();
